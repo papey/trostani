@@ -7,3 +7,9 @@ steps:
     commands:
       - yarn
       - yarn build
+
+  - name: tests
+    image: bearstech/node-dev:12
+    commands:
+      - yarn
+      - yarn test
