@@ -1,5 +1,7 @@
 # Trostani, The Discordant
 
+[![Build Status](https://drone.github.papey.fr/api/badges/papey/trostani/status.svg)](https://drone.github.papey.fr/papey/trostani)
+
 Trostani is a [TypeScript](http://www.typescriptlang.org/) Discord bot used
 to sync exported decklists from [Magic: The Gathering
 Arena](https://magic.wizards.com/fr/mtgarena) to an online deckbuilder of
