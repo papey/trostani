@@ -1,0 +1,9 @@
+kind: pipeline
+name: main
+
+steps:
+  - name: build
+    image: bearstech/node-dev:12
+    commands:
+      - yarn
+      - yarn build
