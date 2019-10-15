@@ -1,0 +1,15 @@
+settings:
+  translate: true
+  token: "TOKEN"
+  activity: "Brewing some MTG decks"
+  name: Trostani (Test)
+  prefix: "!"
+  builder:
+    kind: "manastack"
+    url: "https://manastack.com"
+    username: "example@example.com"
+    password: "p4ssw0rd"
+    profile: "example"
+  push:
+    channels:
+      - "628119686910967800"
