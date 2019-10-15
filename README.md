@@ -37,6 +37,10 @@ yarn build
 
 To build js files from ts files into `dist`
 
+##### From Docker Hub
+
+See [papey/trostani](https://hub.docker.com/r/papey/trostani) on Docker Hub
+
 ### Usage
 
 ```sh
