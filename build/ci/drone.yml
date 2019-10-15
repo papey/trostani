@@ -7,3 +7,22 @@ steps:
     commands:
       - yarn
       - yarn build
+
+  - name: tests
+    image: bearstech/node-dev:12
+    commands:
+      - yarn
+      - yarn test
+
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: papey/trostani
+      auto_tag: true
+      build_args:
+        - REVISION=$$CI_COMMIT
+        - RELEASE_TAG=$$CI_TAG
