@@ -38,12 +38,16 @@ RUN yarn build
 # Stage 2 : run !
 FROM bearstech/node:12
 
+RUN useradd -ms /bin/bash trostani
+
 RUN mkdir /opt/trostani
 
 WORKDIR /opt/trostani
 
 COPY --from=builder /opt/trostani/dist ./dist
 COPY --from=builder /opt/trostani/node_modules ./node_modules
+
+USER trostani
 
 # Go !
 ENTRYPOINT ["node", "/opt/trostani/dist/index.js"]
