@@ -187,6 +187,9 @@ export class Deck {
   // Methods (protected)
   // Parse main deck cards
   protected async parseMainDeck(m: string, translate: boolean = false) {
+    // Ensure we are in the deck part
+    let isDeck = false;
+
     // Array of cards in main deck
     this.main = [];
 
@@ -196,26 +199,36 @@ export class Deck {
     // Sumup, just to be sure
     let sum = 0;
 
-    // Start on the second line, skipping command and deck name
+    // Start on the third line, skipping command and deck name (line 0) and the `Deck` line (line 1)
     for (let i = 1; i < list.length; i++) {
       // If an empty line is found, main deck is over
-      if (list[i] == "") {
-        break;
+      if (list[i] == "Deck" && !isDeck) {
+        // This is the deck part
+        isDeck = true;
+        // Just and iterate over deck cards
+        continue;
       }
-      // Try to parse card line
-      let card = this.parseCard(list[i]);
-      // If ok, add to main deck
-      if (card != null) {
-        if (translate) {
-          await card.translate();
+
+      if (isDeck) {
+        // If empty line, deck part is over
+        if (list[i] == "") {
+          break;
         }
-        this.main.push(card);
-        try {
-          sum += parseInt(card.getTimes());
-        } catch (error) {
-          throw new DontMessWithMeError(
-            "Dont mess with we and verify your list"
-          );
+        // Try to parse card line
+        let card = this.parseCard(list[i]);
+        // If ok, add to main deck
+        if (card != null) {
+          if (translate) {
+            await card.translate();
+          }
+          this.main.push(card);
+          try {
+            sum += parseInt(card.getTimes());
+          } catch (error) {
+            throw new DontMessWithMeError(
+              "Dont mess with we and verify your list"
+            );
+          }
         }
       }
     }
@@ -241,14 +254,17 @@ export class Deck {
     // Sumup, just to be sure
     let sum = 0;
 
-    // Start on the second line, skipping command and deck name
+    // Start on the second line, command line does not need to be checked
     for (let i = 1; i < list.length; i++) {
-      // If an empty line is found, main deck is over
-      if (list[i] == "" && !isSide) {
+      // If keyword Sideboard or Réserve is found, this is the sideboard part
+      if ((list[i] == "Réserve" || list[i] == "Sideboard") && !isSide) {
+        // Activate side part
         isSide = true;
+        // Just iterate over sideboard cards
+        continue;
       }
 
-      // If where in she side and the line is not empty
+      // If we are in she side and the line is not empty
       if (isSide && list[i] != "") {
         // Try to parse card line
         let card = this.parseCard(list[i]);

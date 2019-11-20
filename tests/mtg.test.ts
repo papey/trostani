@@ -119,6 +119,7 @@ class MTGDeckTestSuite extends Deck {
 }
 
 let pushData = `!push Temur Elementals // standard // BO3 // Temur FTW ! :
+Deck
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
 4 Stomping Ground (RNA) 259
@@ -144,12 +145,14 @@ let pushData = `!push Temur Elementals // standard // BO3 // Temur FTW ! :
 1 Castle Vantress (ELD) 242
 3 Fabled Passage (ELD) 244
 
+Sideboard
 1 Jace, Wielder of Mysteries (WAR) 54
 3 Nissa, Who Shakes the World (WAR) 169
 1 Tamiyo, Collector of Tales (WAR) 220
 3 Chandra, Awakened Inferno (M20) 127`;
 
 let pushTranslateData = `!push Bant V6 // standard // BO3 // Bant ! :
+Deck
 3 Île (ELD) 257
 2 Téfeiri, effileur de temps (WAR) 221
 1 Plaine (ELD) 253
@@ -169,6 +172,7 @@ let pushTranslateData = `!push Bant V6 // standard // BO3 // Bant ! :
 3 Méchant loup (ELD) 181
 1 Pixie de Marafeuille (ELD) 196
 
+Réserve
 1 Cératops changeant (M20) 194
 2 Tolsimir, ami des loups (WAR) 224
 2 Décret fervent (M20) 13
