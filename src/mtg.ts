@@ -231,22 +231,8 @@ export class Deck {
         if (list[i] == "") {
           break;
         }
-        // Try to parse card line
-        let card = this.parseCard(list[i]);
-        // If ok, add to main deck
-        if (card != null) {
-          if (translate) {
-            await card.translate();
-          }
-          this.main.push(card);
-          try {
-            sum += parseInt(card.getTimes());
-          } catch (error) {
-            throw new DontMessWithMeError(
-              "Dont mess with we and verify your list"
-            );
-          }
-        }
+        // Try parsing and adding deck cards
+        await this.parseAddCardTo(list[i], this.main, translate);
       }
     }
 
@@ -284,20 +270,7 @@ export class Deck {
       // If we are in she side and the line is not empty
       if (isSide && list[i] != "") {
         // Try to parse card line
-        let card = this.parseCard(list[i]);
-        if (card != null) {
-          if (translate) {
-            await card.translate();
-          }
-          try {
-            sum += parseInt(card.getTimes());
-          } catch (error) {
-            throw new DontMessWithMeError(
-              "Dont mess with we and verify your list"
-            );
-          }
-          this.side.push(card);
-        }
+        await this.parseAddCardTo(list[i], this.side, translate);
       }
     }
 
