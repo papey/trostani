@@ -211,6 +211,16 @@ export class Deck {
         continue;
       }
 
+      // Is this deck a brawl deck ?
+      if ((list[i] == "Commandant" || list[i] == "Commander") && !isDeck) {
+        this.metadata.format = Formats["brawl"];
+        // Make index pointing to commander lne
+        i += 1;
+        // Try parse and adding commander card
+        await this.parseAddCardTo(list[i], this.main, translate);
+        continue;
+      }
+
       if (isDeck) {
         // If empty line, deck part is over
         if (list[i] == "") {
