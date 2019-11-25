@@ -116,6 +116,15 @@ class MTGDeckTestSuite extends Deck {
 
     assert.equal(deck.main[0].getName(), "Island");
   }
+
+  @test
+  async "[parseDeck+translate+brawl]: Sould parse a brawl deck, with translation"() {
+    let deck = new MTGDeckTestSuite();
+
+    await deck.parseDeck(brawlTranslateData, true);
+
+    assert.equal(deck.main[0].getName(), "Niv-Mizzet Reborn");
+  }
 }
 
 let pushData = `!push Temur Elementals // standard // BO3 // Temur FTW ! :
@@ -183,3 +192,68 @@ Réserve
 1 Adjointe aux détentions (RNA) 165
 1 Téfeiri, effileur de temps (WAR) 221
 1 Emprunteur intrépide (ELD) 39`;
+
+let brawlTranslateData = `!push Brawl test // brawl :
+Commandant
+1 Niv-Mizzet revenu à la vie (WAR) 208
+
+Deck
+1 Œuf d'or (ELD) 220
+1 Géode de mana (WAR) 241
+1 Lanterne chromatique (GRN) 233
+1 Temple du triomphe (M20) 257
+1 Temple de la révélation (M20) 253
+1 Champ des morts (M20) 247
+1 Globe de guilde (WAR) 239
+1 Cachet d'ésotérisme (ELD) 331
+1 Suppression d'étincelle (WAR) 190
+1 Plaine (ELD) 253
+1 Île (ELD) 254
+1 Voile de l'été (M20) 198
+1 Clairon assourdissant (GRN) 165
+1 Véto de Dovin (WAR) 193
+1 Tombe aquatique (GRN) 259
+1 Téfeiri, effileur de temps (WAR) 221
+1 Vraska, reine des Golgari (GRN) 213
+1 Mortification (RNA) 192
+1 Krasis hydroïde (RNA) 183
+1 Spirale de croissance (RNA) 178
+1 Mépris selon le Tyran (WAR) 225
+1 Porte de la guilde de Rakdos (RNA) 255
+1 Chemin sinueux (GRN) 125
+1 Golos, pèlerin infatigable (M20) 226
+1 Temple de la maladie (M20) 254
+1 Temple du mystère (M20) 255
+1 Temple du silence (M20) 256
+1 Tour de commandement (ELD) 333
+1 Reliquaire impie (RNA) 248
+1 Bassin d'élevage (RNA) 246
+1 Fontaine sacrée (RNA) 251
+1 Fonderie sacrée (GRN) 254
+1 Jardin du temple (GRN) 258
+1 Marais (M20) 271
+1 Conduits de vapeur (GRN) 257
+1 Crypte de sang (RNA) 245
+1 Terrain de prédilection (RNA) 259
+1 Tombeau luxuriant (GRN) 253
+1 Affres (RNA) 157
+1 Désinfection temporelle (WAR) 223
+1 Décèlement // Dessein (GRN) 225
+1 Sauvagerie d'Angrath (WAR) 185
+1 Effacement des pensées (GRN) 206
+1 Ionisation (GRN) 179
+1 Victimes de la guerre (WAR) 187
+1 Forêt (ELD) 269
+1 Passage merveilleux (ELD) 244
+1 Porte de la guilde de Selesnya (GRN) 256
+1 Montagne (ELD) 262
+1 Porte de la guilde de Dimir (GRN) 245
+1 Druidesse de paradis (WAR) 171
+1 Adjointe aux détentions (RNA) 165
+1 Tamiyo, collectionneuse de récits (WAR) 220
+1 Tolsimir, ami des loups (WAR) 224
+1 Domri, anarchiste de Bolas (WAR) 191
+1 Royaume carcéral (WAR) 26
+1 Fin du conte (M20) 77
+1 Bourgeonnement de mort (WAR) 189
+1 Colère de Kaya (RNA) 187`;
