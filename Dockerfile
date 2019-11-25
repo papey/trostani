@@ -7,16 +7,6 @@ ARG REVISION
 ARG RELEASE_TAG
 ENV YARN_VERSION=1.19.0
 
-# image-spec annotations using labels
-# https://github.com/opencontainers/image-spec/blob/master/annotations.md
-LABEL org.opencontainers.image.source="https://github.com/papey/trostani"
-LABEL org.opencontainers.image.revision=${GIT_COMMIT_SHA}
-LABEL org.opencontainers.image.version=${RELEASE_TAG}
-LABEL org.opencontainers.image.authors="Wilfried OLLIVIER"
-LABEL org.opencontainers.image.title="trostani"
-LABEL org.opencontainers.image.description="trostani runtime"
-LABEL org.opencontainers.image.licences="Unlicense"
-
 # Create src dir
 RUN mkdir /opt/trostani
 
@@ -37,6 +27,16 @@ RUN yarn build
 
 # Stage 2 : run !
 FROM bearstech/node:12
+
+# image-spec annotations using labels
+# https://github.com/opencontainers/image-spec/blob/master/annotations.md
+LABEL org.opencontainers.image.source="https://github.com/papey/trostani"
+LABEL org.opencontainers.image.revision=${GIT_COMMIT_SHA}
+LABEL org.opencontainers.image.version=${RELEASE_TAG}
+LABEL org.opencontainers.image.authors="Wilfried OLLIVIER"
+LABEL org.opencontainers.image.title="trostani"
+LABEL org.opencontainers.image.description="trostani runtime"
+LABEL org.opencontainers.image.licences="Unlicense"
 
 RUN useradd -ms /bin/bash trostani
 
