@@ -185,6 +185,23 @@ export class Deck {
   }
 
   // Methods (protected)
+  // Parse and add card to array
+  protected async parseAddCardTo(
+    line: string,
+    part: Array<Card>,
+    translate: boolean = false
+  ) {
+    // Try to parse card line
+    let card = this.parseCard(line);
+    // If ok, add to main deck
+    if (card != null) {
+      if (translate) {
+        await card.translate();
+      }
+      part.push(card);
+    }
+  }
+
   // Parse main deck cards
   protected async parseMainDeck(m: string, translate: boolean = false) {
     // Ensure we are in the deck part
