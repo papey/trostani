@@ -213,9 +213,6 @@ export class Deck {
     // Split on carriage return
     let list = m.split("\n");
 
-    // Sumup, just to be sure
-    let sum = 0;
-
     // Start on the third line, skipping command and deck name (line 0) and the `Deck` line (line 1)
     for (let i = 1; i < list.length; i++) {
       // If an empty line is found, main deck is over
@@ -236,7 +233,7 @@ export class Deck {
       }
     }
 
-    if (sum < 60) {
+    if (!this.checkCardsSum(60, this.main, ">=")) {
       throw new DeckBuildingError(
         "Error building deck, main part needs 60 cards, at least"
       );
@@ -253,9 +250,6 @@ export class Deck {
 
     // Split on carriage return
     let list = m.split("\n");
-
-    // Sumup, just to be sure
-    let sum = 0;
 
     // Start on the second line, command line does not need to be checked
     for (let i = 1; i < list.length; i++) {
@@ -274,7 +268,7 @@ export class Deck {
       }
     }
 
-    if (sum > 15) {
+    if (!this.checkCardsSum(15, this.side, "<=")) {
       throw new DeckBuildingError(
         "Error building deck, side part is limited to a maximum of 15 cards"
       );
