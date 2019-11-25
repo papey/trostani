@@ -153,31 +153,19 @@ export class Deck {
 
     // Check main length, needs to be a least > 0
     if (this.main.length > 0) {
-      if (this.checkCardsSum(60, this.main, ">=")) {
-        this.main.forEach(card => {
-          let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
-          decklist += line;
-        });
-      } else {
-        throw new DeckBuildingError(
-          "Error building deck, main part needs 60 cards, at least"
-        );
-      }
+      this.main.forEach(card => {
+        let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
+        decklist += line;
+      });
     }
 
     // Check side board, add something only is something was found in sideboard
     if (this.side.length > 0) {
-      if (this.checkCardsSum(15, this.side, "<=")) {
-        decklist += "Sideboard: \n";
-        this.side.forEach(card => {
-          let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
-          decklist += line;
-        });
-      } else {
-        throw new DeckBuildingError(
-          "Error building deck, side part is limited to a maximum of 15 cards"
-        );
-      }
+      decklist += "Sideboard: \n";
+      this.side.forEach(card => {
+        let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
+        decklist += line;
+      });
     }
 
     // Return decklist
