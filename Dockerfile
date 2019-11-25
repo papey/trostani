@@ -5,7 +5,7 @@ FROM bearstech/node-dev:12 as builder
 # Declare args
 ARG REVISION
 ARG RELEASE_TAG
-ENV YARN_VERSION=1.19.0
+ENV YARN_VERSION=1.19.1
 
 # Create src dir
 RUN mkdir /opt/trostani
