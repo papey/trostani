@@ -153,31 +153,19 @@ export class Deck {
 
     // Check main length, needs to be a least > 0
     if (this.main.length > 0) {
-      if (this.checkCardsSum(60, this.main, ">=")) {
-        this.main.forEach(card => {
-          let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
-          decklist += line;
-        });
-      } else {
-        throw new DeckBuildingError(
-          "Error building deck, main part needs 60 cards, at least"
-        );
-      }
+      this.main.forEach(card => {
+        let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
+        decklist += line;
+      });
     }
 
     // Check side board, add something only is something was found in sideboard
     if (this.side.length > 0) {
-      if (this.checkCardsSum(15, this.side, "<=")) {
-        decklist += "Sideboard: \n";
-        this.side.forEach(card => {
-          let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
-          decklist += line;
-        });
-      } else {
-        throw new DeckBuildingError(
-          "Error building deck, side part is limited to a maximum of 15 cards"
-        );
-      }
+      decklist += "Sideboard: \n";
+      this.side.forEach(card => {
+        let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
+        decklist += line;
+      });
     }
 
     // Return decklist
@@ -185,6 +173,23 @@ export class Deck {
   }
 
   // Methods (protected)
+  // Parse and add card to array
+  protected async parseAddCardTo(
+    line: string,
+    part: Array<Card>,
+    translate: boolean = false
+  ) {
+    // Try to parse card line
+    let card = this.parseCard(line);
+    // If ok, add to main deck
+    if (card != null) {
+      if (translate) {
+        await card.translate();
+      }
+      part.push(card);
+    }
+  }
+
   // Parse main deck cards
   protected async parseMainDeck(m: string, translate: boolean = false) {
     // Ensure we are in the deck part
@@ -196,9 +201,6 @@ export class Deck {
     // Split on carriage return
     let list = m.split("\n");
 
-    // Sumup, just to be sure
-    let sum = 0;
-
     // Start on the third line, skipping command and deck name (line 0) and the `Deck` line (line 1)
     for (let i = 1; i < list.length; i++) {
       // If an empty line is found, main deck is over
@@ -209,31 +211,27 @@ export class Deck {
         continue;
       }
 
+      // Is this deck a brawl deck ?
+      if ((list[i] == "Commandant" || list[i] == "Commander") && !isDeck) {
+        this.metadata.format = Formats["brawl"];
+        // Make index pointing to commander lne
+        i += 1;
+        // Try parse and adding commander card
+        await this.parseAddCardTo(list[i], this.main, translate);
+        continue;
+      }
+
       if (isDeck) {
         // If empty line, deck part is over
         if (list[i] == "") {
           break;
         }
-        // Try to parse card line
-        let card = this.parseCard(list[i]);
-        // If ok, add to main deck
-        if (card != null) {
-          if (translate) {
-            await card.translate();
-          }
-          this.main.push(card);
-          try {
-            sum += parseInt(card.getTimes());
-          } catch (error) {
-            throw new DontMessWithMeError(
-              "Dont mess with we and verify your list"
-            );
-          }
-        }
+        // Try parsing and adding deck cards
+        await this.parseAddCardTo(list[i], this.main, translate);
       }
     }
 
-    if (sum < 60) {
+    if (!this.checkCardsSum(60, this.main, ">=")) {
       throw new DeckBuildingError(
         "Error building deck, main part needs 60 cards, at least"
       );
@@ -251,9 +249,6 @@ export class Deck {
     // Split on carriage return
     let list = m.split("\n");
 
-    // Sumup, just to be sure
-    let sum = 0;
-
     // Start on the second line, command line does not need to be checked
     for (let i = 1; i < list.length; i++) {
       // If keyword Sideboard or Réserve is found, this is the sideboard part
@@ -267,24 +262,11 @@ export class Deck {
       // If we are in she side and the line is not empty
       if (isSide && list[i] != "") {
         // Try to parse card line
-        let card = this.parseCard(list[i]);
-        if (card != null) {
-          if (translate) {
-            await card.translate();
-          }
-          try {
-            sum += parseInt(card.getTimes());
-          } catch (error) {
-            throw new DontMessWithMeError(
-              "Dont mess with we and verify your list"
-            );
-          }
-          this.side.push(card);
-        }
+        await this.parseAddCardTo(list[i], this.side, translate);
       }
     }
 
-    if (sum > 15) {
+    if (!this.checkCardsSum(15, this.side, "<=")) {
       throw new DeckBuildingError(
         "Error building deck, side part is limited to a maximum of 15 cards"
       );
