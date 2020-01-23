@@ -1,4 +1,4 @@
-// index.ts, file containing main logic
+// main.ts, file containing main logic
 
 // Imports
 // Main bot class
