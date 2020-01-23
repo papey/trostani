@@ -179,9 +179,7 @@ export class Manastack {
   private async refresh() {
     // Regex data example :
     // 'PHPSESSID=jhe7o5b5pi2d1dh211714sbrk6; expires=Mon, 14-Oct-2019 16:30:18 GMT; Max-Age=604800; path=/'
-    let regex = new RegExp(
-      "PHPSESSID=(\\w+); expires=(.*); Max-Age=(\\d+); path=(.*)"
-    );
+    let regex = new RegExp("PHPSESSID=(\\w+); path=(.*)");
 
     await request
       .post({
