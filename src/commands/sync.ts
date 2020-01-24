@@ -102,7 +102,7 @@ async function handlePush(
     // push deck and five back url to channel
     let meta = await push(cmd, origin, translate, builder);
     origin.channel.send(
-      `A new deck **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
+      `A new deck named **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
     );
   } else {
     throw new SyncError(
@@ -201,8 +201,8 @@ export class SyncError extends Error {
     this.message = message;
   }
 }
-
-// Push command example
+// Examples used in help command
+// push command example
 let pushExample: string = `Temur Elementals :
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
@@ -235,5 +235,5 @@ let pushExample: string = `Temur Elementals :
 3 Chandra, Awakened Inferno (M20) 127
 `;
 
-// Search command example
+// search command example
 let searchExample: string = `temur aggro`;
