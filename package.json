@@ -7,8 +7,8 @@
   "license": "Unlicense",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "mocha --timeout 105000 -R spec -r ts-node/register tests/*.ts"
+    "start": "node dist/main.js",
+    "test": "mocha --recursive --extension ts --timeout 105000 -R spec -r ts-node/register tests"
   },
   "dependencies": {
     "discord.js": "^11.5.1",

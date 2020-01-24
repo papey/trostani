@@ -2,7 +2,7 @@
 
 // Imports
 import request = require("request-promise");
-import { NoSetCookie, RegexCookieError, ManaStackDeckError } from "./errors";
+import { BuilderDeckMetadata } from "./utils";
 
 // Classes
 // Cookie class used in ManaStack
@@ -32,10 +32,12 @@ export class Cookie {
 class Deck {
   // Deck ID, on ManaStack
   id: string;
+  name: string;
 
   // Constructor
-  constructor(id: string) {
+  constructor(id: string, name: string) {
     this.id = id;
+    this.name = name;
   }
 }
 
@@ -58,6 +60,7 @@ export class Manastack {
     deck_import: "api/deck/import",
     decks_list: "api/decks/my_decks",
     deck_get: "api/deck?slug=new-deck-",
+    preview: "deck/preview",
     profile: "user"
   };
 
@@ -80,40 +83,35 @@ export class Manastack {
   // Methods (public)
   // Get profile url
   public getProfile() {
-    return `Profile : ${this.url}/${this.routes["profile"]}/${this.profile}`;
+    return `${this.url}/${this.routes["profile"]}/${this.profile}`;
   }
 
   // Create a new deck on ManaStack
   public async newDeck(
     name: string,
-    bo: string,
     description: string,
     format: number,
     list: string
-  ): Promise<string> {
-    var message = "";
+  ): Promise<BuilderDeckMetadata> {
+    // pass error to caller is somethings goes wrong
+    try {
+      // Ensure a vlid token
+      await this.initialize();
+      // Create an empty deck
+      let deck = await this.createDeck(name);
+      // Add metadata to new deck
+      await this.editMetadata(deck.id, name, description, format);
+      // Import list
+      await this.importDeck(deck.id, list);
 
-    // Ensure a vlid token
-    await this.initialize();
-    // Create an empty deck
-    let deck = await this.createDeck();
-    // Add metadata to new deck
-    await this.editMetadata(deck.id, name, bo, description, format);
-    // Import list
-    await this.importDeck(deck.id, list)
-      .then(() => {
-        message = `Decklist : ${name} created ! Go check it at ${this.url}/deck/new-deck-${deck.id}`;
-      })
-      .catch(error => {
-        console.log(error);
-        message = error.message;
-      });
-
-    // Log success or failure
-    console.info(message);
-
-    // Return message, then send it with Discord client
-    return message;
+      // return deck url
+      return new BuilderDeckMetadata(
+        `${this.url}/${this.routes["preview"]}/${deck.id}`,
+        deck.name
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Getter for token
@@ -122,9 +120,9 @@ export class Manastack {
   }
 
   // Get decks, filter with keywords
-  public async formatSearch(keywords: string): Promise<string> {
+  public async formatSearch(keywords: string): Promise<string[]> {
     // Final message containing search result
-    let message = "";
+    let results: string[] = [];
 
     // Counter of number of items found
     let found = 0;
@@ -138,40 +136,28 @@ export class Manastack {
     // Extract json returned by ManaStack
     let parsed = JSON.parse(resp.body)[0];
 
-    // If no deck is found
-    if (parsed.decks.length <= 0) {
-      message = "**No deck found**";
-    } else {
-      // If decks found
-      parsed.decks.forEach((e: any) => {
-        // Check for keywords absence or presence
-        if (
-          keywords == "" ||
-          e.name.toLowerCase().includes(keywords.toLowerCase()) ||
-          e.description.toLowerCase().includes(keywords.toLowerCase())
-        ) {
-          // Append message if deck pass filters
-          message += `**${e.name}** - _${e.owner.username}_ - ${this.url}/deck/${e.slug}\n`;
-          found += 1;
-        }
-      });
-
-      // If no decks found using keywords
-      if (found <= 0) {
-        message = `No deck found for keyword(s): _${keywords}_`;
-      } else {
-        // Else, prepend message with total results
-        message = `Found ${found} deck(s):\n` + message;
+    // If decks found
+    parsed.decks.forEach((e: any) => {
+      // Check for keywords absence or presence
+      if (
+        keywords == "" ||
+        e.name.toLowerCase().includes(keywords.toLowerCase()) ||
+        e.description.toLowerCase().includes(keywords.toLowerCase())
+      ) {
+        // Append message if deck pass filters
+        results.push(
+          `**${e.name}** - _${e.owner.username}_ - ${this.url}/deck/${e.slug}`
+        );
       }
-    }
+    });
 
     // Log some info
     console.info(
-      `A search for "${keywords}" (empty for no keywords) was requested, found ${found} deck(s)`
+      `A search for "${keywords}" (empty for no keywords) was requested, found ${results.length} deck(s)`
     );
 
-    // Return the formated message
-    return message;
+    // Return all the results
+    return results;
   }
 
   // Methods (private)
@@ -197,13 +183,13 @@ export class Manastack {
             this.Cookie = new Cookie(result[1], result[2]);
           } catch (_) {
             // Throw an error if null
-            throw new RegexCookieError(
+            throw new ManastackError(
               "No PHPSESSID found in set-cookie directive"
             );
           }
         } else {
           // Throw an error is a problem occurs when trying to retrive the token
-          throw new NoSetCookie("Error getting set-cookie from login");
+          throw new ManastackError("Error getting set-cookie from login");
         }
       })
       .catch(error => {
@@ -223,7 +209,7 @@ export class Manastack {
   }
 
   // Call to new deck creation on ManaStack
-  private async createDeck(): Promise<Deck> {
+  private async createDeck(name: string): Promise<Deck> {
     var deck!: Deck;
 
     await request
@@ -234,14 +220,16 @@ export class Manastack {
       })
       .then(response => {
         let obj = JSON.parse(response.body);
-        deck = new Deck(obj["id"]);
+        deck = new Deck(obj["id"], name);
       })
       .catch(error => {
-        throw new ManaStackDeckError("Error creating deck on ManaStack");
+        throw new ManastackError("Error creating deck on ManaStack");
       });
 
     if (deck === undefined) {
-      throw new ManaStackDeckError("Error creating deck on ManaStack");
+      throw new ManastackError(
+        "Error creating deck on ManaStack, deck is undefined"
+      );
     } else {
       return deck;
     }
@@ -251,7 +239,6 @@ export class Manastack {
   private async editMetadata(
     id: string,
     name: string,
-    bo: string,
     desc: string,
     format: number
   ) {
@@ -273,9 +260,7 @@ export class Manastack {
         })
       })
       .catch(() => {
-        throw new ManaStackDeckError(
-          "Error updating deck metadata on ManaStack"
-        );
+        throw new ManastackError("Error updating deck metadata on ManaStack");
       });
   }
 
@@ -295,7 +280,7 @@ export class Manastack {
         })
       })
       .catch(() => {
-        throw new ManaStackDeckError("Error importing decklist on ManaStack");
+        throw new ManastackError("Error importing decklist on ManaStack");
       });
   }
 
@@ -313,9 +298,18 @@ export class Manastack {
         resolveWithFullResponse: true
       })
       .catch(() => {
-        throw new ManaStackDeckError("Error getting decklists on ManaStack");
+        throw new ManastackError("Error getting decklists on ManaStack");
       });
 
     return res;
+  }
+}
+
+// ManaStack specific error
+class ManastackError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Error when interacting with Manastack";
+    this.message = message;
   }
 }

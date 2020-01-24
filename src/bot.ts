@@ -2,9 +2,10 @@
 
 // Imports
 import { Client, Message } from "discord.js";
-import { Deck } from "./mtg";
-import { Manastack } from "./manastack";
-import { pushExample, searchExample } from "./examples";
+import { Command, handleNotSupported } from "./commands/utils";
+import { handleProfile } from "./commands/profile";
+import { handleHelp } from "./commands/help";
+import { handleSync } from "./commands/sync";
 // Use to read yaml file
 import * as YAML from "yamljs";
 
@@ -48,28 +49,6 @@ export class Trostani {
     this.client.login(this.config.settings.token);
   }
 
-  // Methods (protected)
-  // Ensure push is authorized on this channel
-  protected isPushAuthorized(id: string): boolean {
-    if (this.config.settings.push.channels) {
-      if (this.config.settings.push.channels.includes(id)) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
-
-  // Get command from message
-  protected extractCommand(m: string): string {
-    // Split message
-    var res = m.split(" ");
-    // remove the prefix
-    return res[0].replace(this.config.settings.prefix, "");
-  }
-
   // Methods (private)
   // Setup routes to commands
   private routes() {
@@ -82,47 +61,22 @@ export class Trostani {
         message.content.startsWith(this.config.settings.prefix)
       ) {
         // Extract command
-        let command = this.extractCommand(message.content);
+        let command = new Command(message.content, this.config.settings.prefix);
         // Execute extracted command
-        switch (command) {
-          case "push":
-            // Check if channel is authorized
-            if (this.isPushAuthorized(message.channel.id)) {
-              // Try pushing deck
-              this.push(message).catch(error => {
-                this.logErrToDiscord(error, message);
-              });
-            }
-            break;
-          case "search":
-            // Check if it's a DM
-            if (message.channel.type == "dm") {
-              this.search(message).catch(error => {
-                this.logErrToDiscord(error, message);
-              });
-            } else {
-              // If not, tell the original author
-              message.author.send(
-                "Sorry but `search` command is not available on public channels"
-              );
-            }
+        switch (command.main) {
+          case "sync":
+            handleSync(command, message, this.config).catch(error => {
+              this.logErrToDiscord(error, message);
+            });
             break;
           case "profile":
-            // Check if it's a DM
-            if (message.channel.type == "dm") {
-              message.channel.send(this.profile());
-            } else {
-              // If not, tell the original author
-              message.author.send(
-                "Sorry but `profile` command is not available on public channels"
-              );
-            }
+            handleProfile(this.config, message);
             break;
           case "help":
-            this.help(message);
+            handleHelp(command, message, this.config);
             break;
           default:
-            this.notSupported(message, command);
+            handleNotSupported(command, message);
             break;
         }
       }
@@ -187,137 +141,5 @@ export class Trostani {
         );
       }
     }
-  }
-
-  // Send help text to message author when requested
-  private help(m: Message) {
-    let cmd = this.extractArgs(m.content, "help");
-
-    let message = `Using prefix **${this.config.settings.prefix}**, available commands are :
-      - **push**: to push a decklist to the remote builder (on authorized channels)
-      - **search**: to search for a decklist posted to the remote builder (private discussion only)
-      - **profile**: to get user profile on remote builder (private discussion only)
-      - **help**: to get this help message`;
-
-    switch (cmd) {
-      case "push":
-        message = `Here is an example of \`push\` command :
-\`\`\`${this.config.settings.prefix}push ${pushExample}\`\`\`
-`;
-        break;
-      case "search":
-        message = `Here is an example of \`search\` command :
-\`\`\`${this.config.settings.prefix}search ${searchExample}\`\`\`
-`;
-    }
-
-    m.author.send(message);
-  }
-
-  // Send command not supported message to author
-  private notSupported(m: Message, c: string) {
-    let message = `Command : _${this.config.settings.prefix}${c}_ not supported`;
-    m.author.send(message);
-    this.help(m);
-  }
-
-  // Push deck to remote builder
-  private async push(m: Message) {
-    // Send a nice message
-    m.channel.send("_Analysing and publishing decklist_");
-    try {
-      // Try building the deck
-      let deck = new Deck(m.content, this.config.settings.prefix);
-
-      // Parse it
-      await deck.parseDeck(m.content, this.config.settings.translate);
-
-      // If ManaStack is used
-      if (
-        this.config.settings.builder.kind &&
-        this.config.settings.builder.kind == "manastack"
-      ) {
-        let ms = new Manastack(
-          this.config.settings.builder.username,
-          this.config.settings.builder.password,
-          this.config.settings.builder.url,
-          this.config.settings.builder.profile
-        );
-
-        // Try formating the deck to ManaStack format
-        let formated = deck.exportToManaStack();
-
-        // Try creating the deck on ManaStack
-        let message = await ms.newDeck(
-          deck.metadata.name,
-          deck.metadata.bo,
-          deck.metadata.description,
-          deck.metadata.format,
-          formated
-        );
-
-        // Send message with error or succes
-        m.channel.send(message);
-      }
-    } catch (error) {
-      // If error, throw it
-      throw error;
-    }
-  }
-
-  // Search for a deck by it's name
-  private async search(m: Message) {
-    // If ManaStack is used
-    if (
-      this.config.settings.builder.kind &&
-      this.config.settings.builder.kind == "manastack"
-    ) {
-      let ms = new Manastack(
-        this.config.settings.builder.username,
-        this.config.settings.builder.password,
-        this.config.settings.builder.url,
-        this.config.settings.builder.profile
-      );
-
-      // Forge response for Discord
-      let response = await ms.formatSearch(
-        this.extractArgs(m.content, "search")
-      );
-
-      // Send message including lists of decks or an error message
-      m.channel.send(response);
-    }
-  }
-
-  // Extract keywords from search command
-  private extractArgs(c: string, cmd: string): string {
-    // remove prefix
-    // remove search command
-    // trim
-    // return
-    return c
-      .replace(this.config.settings.prefix, "")
-      .replace(cmd, "")
-      .trim();
-  }
-
-  // Respond with user profile of selected builder
-  private profile(): string {
-    // If ManaStack is used
-    if (
-      this.config.settings.builder.kind &&
-      this.config.settings.builder.kind == "manastack"
-    ) {
-      let ms = new Manastack(
-        this.config.settings.builder.username,
-        this.config.settings.builder.password,
-        this.config.settings.builder.url,
-        this.config.settings.builder.profile
-      );
-
-      return ms.getProfile();
-    }
-
-    return "No profile found";
   }
 }

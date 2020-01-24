@@ -44,7 +44,7 @@ See [papey/trostani](https://hub.docker.com/r/papey/trostani) on Docker Hub
 ### Usage
 
 ```sh
-./dist/index.js --help
+./dist/main.js --help
 ```
 
 Trostani uses config files in .yaml format, see `settings.yml` file inside
