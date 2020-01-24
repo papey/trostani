@@ -266,7 +266,7 @@ export class Deck {
     }
   }
 
-  // Check is a number of card is valid in a set of caards (main and side checks)
+  // Check if a number of card is valid in a set of cards (main and side checks)
   protected checkCardsSum(limit: Number, cards: Card[], cmp: string): boolean {
     // Sum counter
     let sum = 0;
