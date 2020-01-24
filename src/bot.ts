@@ -216,9 +216,8 @@ export class Trostani {
 
   // Send command not supported message to author
   private notSupported(m: Message, c: string) {
-    let message = `Command : _${this.config.settings.prefix}${c}_ not supported`;
+    let message = `Command : \`${this.config.settings.prefix}${c}\` not supported (if you need help try \`${this.config.settings.prefix}help\`)`;
     m.author.send(message);
-    this.help(m);
   }
 
   // Push deck to remote builder
