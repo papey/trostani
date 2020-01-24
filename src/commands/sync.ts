@@ -41,8 +41,8 @@ export async function handleSync(cmd: Command, origin: Message, config: any) {
 // syncHelpMessage is used to generated a specific help message when asksing for a sync command
 export function syncHelpMessage(cmd: Command) {
   let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
-  - \`search\`
-  - \`push\``;
+  - \`search <keywords>\` : to search for deck containing <keywords> in their name
+  - \`push <name> // <format> (optional) // <description> (optional) : [...decklist...]\` : to push the decklist formated as MTGA export`;
 
   if (cmd.args.includes("search")) {
     message = `Here is an example of the \`search\` subcommand of the \`sync\` command :
