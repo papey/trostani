@@ -1,7 +1,7 @@
 // bot.ts testing file
 
 // Imports
-import { Cookie } from "../src/builders/manastack";
+import { Cookie } from "../../src/builders/manastack";
 import { suite, test } from "mocha-typescript";
 import { assert } from "chai";
 
