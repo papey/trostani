@@ -21,9 +21,4 @@ class TrostaniTestSuite extends Trostani {
   "[isPushAuthorized]: Should return false, since this not an authorized channel"() {
     assert.equal(this.isPushAuthorized("NOP"), false);
   }
-
-  @test
-  "[extractCommand]: Sould return `push`"() {
-    assert.equal(this.extractCommand("!push Deckname"), "push");
-  }
 }

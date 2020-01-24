@@ -2,6 +2,7 @@
 
 // Imports
 import { Client, Message } from "discord.js";
+import { Command } from "./commands/utils";
 import { Deck } from "./mtg";
 import { Manastack } from "./manastack";
 import { pushExample, searchExample } from "./examples";
@@ -62,14 +63,6 @@ export class Trostani {
     }
   }
 
-  // Get command from message
-  protected extractCommand(m: string): string {
-    // Split message
-    var res = m.split(" ");
-    // remove the prefix
-    return res[0].replace(this.config.settings.prefix, "");
-  }
-
   // Methods (private)
   // Setup routes to commands
   private routes() {
@@ -82,9 +75,9 @@ export class Trostani {
         message.content.startsWith(this.config.settings.prefix)
       ) {
         // Extract command
-        let command = this.extractCommand(message.content);
+        let command = new Command(message.content, this.config.settings.prefix);
         // Execute extracted command
-        switch (command) {
+        switch (command.main) {
           case "push":
             // Check if channel is authorized
             if (this.isPushAuthorized(message.channel.id)) {
@@ -97,7 +90,7 @@ export class Trostani {
           case "search":
             // Check if it's a DM
             if (message.channel.type == "dm") {
-              this.search(message).catch(error => {
+              this.search(command, message).catch(error => {
                 this.logErrToDiscord(error, message);
               });
             } else {
@@ -119,10 +112,10 @@ export class Trostani {
             }
             break;
           case "help":
-            this.help(message);
+            this.help(command, message);
             break;
           default:
-            this.notSupported(message, command);
+            this.notSupported(message, command.main);
             break;
         }
       }
@@ -190,16 +183,14 @@ export class Trostani {
   }
 
   // Send help text to message author when requested
-  private help(m: Message) {
-    let cmd = this.extractArgs(m.content, "help");
-
+  private help(cmd: Command, origin: Message) {
     let message = `Using prefix **${this.config.settings.prefix}**, available commands are :
       - **push**: to push a decklist to the remote builder (on authorized channels)
       - **search**: to search for a decklist posted to the remote builder (private discussion only)
       - **profile**: to get user profile on remote builder (private discussion only)
       - **help**: to get this help message`;
 
-    switch (cmd) {
+    switch (cmd.sub) {
       case "push":
         message = `Here is an example of \`push\` command :
 \`\`\`${this.config.settings.prefix}push ${pushExample}\`\`\`
@@ -211,7 +202,7 @@ export class Trostani {
 `;
     }
 
-    m.author.send(message);
+    origin.author.send(message);
   }
 
   // Send command not supported message to author
@@ -265,7 +256,7 @@ export class Trostani {
   }
 
   // Search for a deck by it's name
-  private async search(m: Message) {
+  private async search(cmd: Command, sender: Message) {
     // If ManaStack is used
     if (
       this.config.settings.builder.kind &&
@@ -279,25 +270,11 @@ export class Trostani {
       );
 
       // Forge response for Discord
-      let response = await ms.formatSearch(
-        this.extractArgs(m.content, "search")
-      );
+      let response = await ms.formatSearch(cmd.args);
 
       // Send message including lists of decks or an error message
-      m.channel.send(response);
+      sender.channel.send(response);
     }
-  }
-
-  // Extract keywords from search command
-  private extractArgs(c: string, cmd: string): string {
-    // remove prefix
-    // remove search command
-    // trim
-    // return
-    return c
-      .replace(this.config.settings.prefix, "")
-      .replace(cmd, "")
-      .trim();
   }
 
   // Respond with user profile of selected builder
