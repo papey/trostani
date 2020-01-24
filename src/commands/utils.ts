@@ -1,5 +1,8 @@
 // utils.ts contains class and functions helpers related to bot commands
 
+// Imports
+import { Message } from "discord.js";
+
 // Command class containing all parts of a command
 export class Command {
   // main command
@@ -41,4 +44,14 @@ export class Command {
       this.args = args.join(" ");
     }
   }
+}
+
+// handle cases where user asks for an unsupported function
+export function handleNotSupported(
+  cmd: Command,
+  origin: Message,
+  prefix: string
+) {
+  let message = `Command, \`${prefix}${cmd.main}\`, not supported (if you need help try \`${prefix}help\`)`;
+  origin.author.send(message);
 }

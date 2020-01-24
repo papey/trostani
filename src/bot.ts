@@ -2,7 +2,7 @@
 
 // Imports
 import { Client, Message } from "discord.js";
-import { Command } from "./commands/utils";
+import { Command, handleNotSupported } from "./commands/utils";
 import { Deck } from "./mtg";
 import { Manastack } from "./manastack";
 import { pushExample, searchExample } from "./examples";
@@ -115,7 +115,7 @@ export class Trostani {
             this.help(command, message);
             break;
           default:
-            this.notSupported(message, command.main);
+            handleNotSupported(command, message, this.config.settings.prefix);
             break;
         }
       }
@@ -205,13 +205,6 @@ export class Trostani {
     origin.author.send(message);
   }
 
-  // Send command not supported message to author
-  private notSupported(m: Message, c: string) {
-    let message = `Command : \`${this.config.settings.prefix}${c}\` not supported (if you need help try \`${this.config.settings.prefix}help\`)`;
-    m.author.send(message);
-  }
-
-  // Push deck to remote builder
   private async push(m: Message) {
     // Send a nice message
     m.channel.send("_Analysing and publishing decklist_");
