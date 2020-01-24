@@ -7,7 +7,7 @@
   "license": "Unlicense",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/main.js",
     "test": "mocha --timeout 105000 -R spec -r ts-node/register tests/*.ts"
   },
   "dependencies": {
