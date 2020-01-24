@@ -22,39 +22,11 @@ class MTGCardTestSuite extends Card {
   }
 }
 
-// MTG, Metadata class test suite
-@suite("MTG, Metadata Test Suite")
-class MTGMetadataTestSuite extends Metadata {
-  constructor() {
-    super("!push Temur Elementals // standard // BO1 // Temur FTW !", "!");
-  }
-
-  @test "[parseDeckMetadata]: Should return full deck metadata"() {
-    let res = this.parseDeckMetadata(
-      "!push Temur Elementals // standard // BO1 // Temur FTW !",
-      "!"
-    );
-
-    assert.equal(res[0], "Temur Elementals");
-    assert.equal(res[1], "standard");
-    assert.equal(res[2], "BO1");
-    assert.equal(res[3], "Temur FTW !");
-  }
-
-  @test "[parseDeckMetadata]: Should return partial deck metadata"() {
-    let res = this.parseDeckMetadata("!push Temur Elementals // standard", "!");
-
-    assert.equal(res[0], "Temur Elementals");
-    assert.equal(res[1], "standard");
-    assert.equal(res[2], undefined);
-  }
-}
-
 // MTG, Deck test suite
 @suite("MTG, Deck Test Suite")
 class MTGDeckTestSuite extends Deck {
   constructor(data: string = pushData) {
-    super(data, "!");
+    super(["Test"]);
   }
 
   @test

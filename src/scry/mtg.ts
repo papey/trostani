@@ -65,62 +65,30 @@ export class Metadata {
   // Name of the deck
   public name: string;
   // Format (standard, modern, casual)
-  public format: number;
-  // BO1 or BO3 ?
-  public bo: string;
+  public format: number = Formats["casual"];
   // Description of the deck
-  public description: string;
+  public description: string = "";
 
   // Constructor
-  constructor(message: string, prefix: string) {
+  constructor(metadatas: string[]) {
     // get all metadatas
-    var meta = this.parseDeckMetadata(message, prefix);
-    if (meta.length < 1) {
+    if (metadatas.length < 1) {
       throw new DeckBuildingError("Deck name is missing from metadata");
     }
 
     // meta[0] == Name,
-    this.name = meta[0];
+    this.name = metadatas[0];
 
     // meta[1] == Format
     // If defined
-    if (Formats[meta[1]] != undefined) {
+    if (Formats[metadatas[1]] != undefined) {
       // Go for it
-      this.format = Formats[meta[1]];
-    } else {
-      // If not defined, just use casual as default
-      this.format = Formats["casual"];
+      this.format = Formats[metadatas[1]];
     }
 
-    // meta[2] == BO1 or BO3
-    // Use it if defined, if not leave empty
-    this.bo = meta[2] ? meta[2] : "";
     // meta[3] == small text description
     // Use it if defined, if not leavy empty
-    this.description = meta[3] ? meta[3] : "";
-  }
-
-  // Methods (protected)
-  // From command passed in Discord message, get metadata
-  protected parseDeckMetadata(m: string, p: string): string[] {
-    // Remove command
-    let list = m.replace(`${p}push`, "");
-
-    // Get metadata from the first line
-    let metas = list
-      .split("\n")[0]
-      .replace(":", "")
-      .trim();
-
-    // Metadata fields are separated using //
-    let data = metas.split("//");
-
-    for (let i = 0; i < data.length; i++) {
-      data[i] = data[i].trimLeft().trimRight();
-    }
-
-    // Return it
-    return data;
+    this.description = metadatas[2] ? metadatas[2] : "";
   }
 }
 
@@ -135,8 +103,8 @@ export class Deck {
   protected side: Card[] = [];
 
   // Construction of a deck from a Discord message
-  constructor(message: string, prefix: string) {
-    this.metadata = new Metadata(message, prefix);
+  constructor(metadata: string[]) {
+    this.metadata = new Metadata(metadata);
   }
 
   // Methods (public)
@@ -355,7 +323,7 @@ class ParsingError extends Error {
 class DeckBuildingError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "Error creating deck on ManaStack";
+    this.name = "Error building deck";
     this.message = message;
   }
 }

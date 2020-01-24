@@ -2,6 +2,7 @@
 
 // Imports
 import request = require("request-promise");
+import { BuilderDeckMetadata } from "./utils";
 
 // Classes
 // Cookie class used in ManaStack
@@ -31,10 +32,12 @@ export class Cookie {
 class Deck {
   // Deck ID, on ManaStack
   id: string;
+  name: string;
 
   // Constructor
-  constructor(id: string) {
+  constructor(id: string, name: string) {
     this.id = id;
+    this.name = name;
   }
 }
 
@@ -57,6 +60,7 @@ export class Manastack {
     deck_import: "api/deck/import",
     decks_list: "api/decks/my_decks",
     deck_get: "api/deck?slug=new-deck-",
+    preview: "deck/preview",
     profile: "user"
   };
 
@@ -85,34 +89,29 @@ export class Manastack {
   // Create a new deck on ManaStack
   public async newDeck(
     name: string,
-    bo: string,
     description: string,
     format: number,
     list: string
-  ): Promise<string> {
-    var message = "";
+  ): Promise<BuilderDeckMetadata> {
+    // pass error to caller is somethings goes wrong
+    try {
+      // Ensure a vlid token
+      await this.initialize();
+      // Create an empty deck
+      let deck = await this.createDeck(name);
+      // Add metadata to new deck
+      await this.editMetadata(deck.id, name, description, format);
+      // Import list
+      await this.importDeck(deck.id, list);
 
-    // Ensure a vlid token
-    await this.initialize();
-    // Create an empty deck
-    let deck = await this.createDeck();
-    // Add metadata to new deck
-    await this.editMetadata(deck.id, name, bo, description, format);
-    // Import list
-    await this.importDeck(deck.id, list)
-      .then(() => {
-        message = `Decklist : ${name} created ! Go check it at ${this.url}/deck/new-deck-${deck.id}`;
-      })
-      .catch(error => {
-        console.log(error);
-        message = error.message;
-      });
-
-    // Log success or failure
-    console.info(message);
-
-    // Return message, then send it with Discord client
-    return message;
+      // return deck url
+      return new BuilderDeckMetadata(
+        `${this.url}/${this.routes["preview"]}/${deck.id}`,
+        deck.name
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Getter for token
@@ -222,7 +221,7 @@ export class Manastack {
   }
 
   // Call to new deck creation on ManaStack
-  private async createDeck(): Promise<Deck> {
+  private async createDeck(name: string): Promise<Deck> {
     var deck!: Deck;
 
     await request
@@ -233,7 +232,7 @@ export class Manastack {
       })
       .then(response => {
         let obj = JSON.parse(response.body);
-        deck = new Deck(obj["id"]);
+        deck = new Deck(obj["id"], name);
       })
       .catch(error => {
         throw new ManastackError("Error creating deck on ManaStack");
@@ -252,7 +251,6 @@ export class Manastack {
   private async editMetadata(
     id: string,
     name: string,
-    bo: string,
     desc: string,
     format: number
   ) {

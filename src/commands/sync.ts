@@ -5,6 +5,7 @@ import { Message } from "discord.js";
 import { Command } from "./utils";
 import { Deck } from "../scry/mtg";
 import { Manastack } from "../builders/manastack";
+import { BuilderDeckMetadata } from "../builders/utils";
 
 // handleSync is triggered when a user asks for a sync sub command
 export async function handleSync(cmd: Command, origin: Message, config: any) {
@@ -82,8 +83,11 @@ async function handlePush(
 ) {
   // check if the message is comming from an authorized channel
   if (isAuthorized(origin.channel.id, channels)) {
-    // push
-    await push(cmd, origin, translate, builder);
+    // push deck and five back url to channel
+    let meta = await push(cmd, origin, translate, builder);
+    origin.channel.send(
+      `A new deck **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
+    );
   } else {
     throw new SyncError(
       "`push` subcommand of command `sync` is not authorized on this channel"
@@ -100,19 +104,44 @@ function isAuthorized(oid: string, aids: string[]): boolean {
   });
 }
 
+// extract deck metadata from command args
+function parseDeckMetadata(cmd: Command): string[] {
+  // Get metadata from the first line
+  let metas = cmd.args
+    .split("\n")[0]
+    .replace(":", "")
+    .trim();
+
+  // Metadata fields are separated using //
+  let data = metas.split("//");
+
+  for (let i = 0; i < data.length; i++) {
+    data[i] = data[i].trimLeft().trimRight();
+  }
+
+  // Return it
+  return data;
+}
+
 // push called when a users asks for the push subcommand of the sync command
 async function push(
   cmd: Command,
   origin: Message,
   translate: boolean,
   builder: any
-) {
+): Promise<BuilderDeckMetadata> {
   // Send a nice message
   origin.channel.send("_Analysing and publishing decklist_");
 
   try {
+    let meta = parseDeckMetadata(cmd);
+
+    if (meta[0] == "") {
+      throw new SyncError("Error, this deck needs at least a name");
+    }
+
     // Try building the deck
-    let deck = new Deck(origin.content, cmd.prefix);
+    let deck = new Deck(meta);
 
     // Parse it
     await deck.parseDeck(origin.content, translate);
@@ -130,21 +159,22 @@ async function push(
       let formated = deck.exportToManaStack();
 
       // Try creating the deck on ManaStack
-      let message = await ms.newDeck(
+      let meta = await ms.newDeck(
         deck.metadata.name,
-        deck.metadata.bo,
         deck.metadata.description,
         deck.metadata.format,
         formated
       );
 
-      // Send message with error or succes
-      origin.channel.send(message);
+      // return deck url
+      return meta;
     }
   } catch (error) {
     // If error, throw it
     throw error;
   }
+
+  return Promise.reject("Error when pushing deck");
 }
 
 // Sync Command Error
