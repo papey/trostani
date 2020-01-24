@@ -3,6 +3,7 @@
 // Imports
 import { Client, Message } from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
+import { handleProfile } from "./commands/profile";
 import { Deck } from "./mtg";
 import { Manastack } from "./manastack";
 import { pushExample, searchExample } from "./examples";
@@ -101,15 +102,7 @@ export class Trostani {
             }
             break;
           case "profile":
-            // Check if it's a DM
-            if (message.channel.type == "dm") {
-              message.channel.send(this.profile());
-            } else {
-              // If not, tell the original author
-              message.author.send(
-                "Sorry but `profile` command is not available on public channels"
-              );
-            }
+            handleProfile(this.config, message);
             break;
           case "help":
             this.help(command, message);
@@ -268,25 +261,5 @@ export class Trostani {
       // Send message including lists of decks or an error message
       sender.channel.send(response);
     }
-  }
-
-  // Respond with user profile of selected builder
-  private profile(): string {
-    // If ManaStack is used
-    if (
-      this.config.settings.builder.kind &&
-      this.config.settings.builder.kind == "manastack"
-    ) {
-      let ms = new Manastack(
-        this.config.settings.builder.username,
-        this.config.settings.builder.password,
-        this.config.settings.builder.url,
-        this.config.settings.builder.profile
-      );
-
-      return ms.getProfile();
-    }
-
-    return "No profile found";
   }
 }
