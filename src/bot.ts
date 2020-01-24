@@ -73,7 +73,7 @@ export class Trostani {
             handleProfile(this.config, message);
             break;
           case "help":
-            handleHelp(command, message);
+            handleHelp(command, message, this.config);
             break;
           default:
             handleNotSupported(command, message);
