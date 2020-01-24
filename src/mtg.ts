@@ -1,12 +1,6 @@
 // mtg.ts file, containing all stuff to represent cards ands decks
 
 // Imports
-import {
-  ParsingError,
-  DeckBuildingError,
-  DontMessWithMeError,
-  TranslateError
-} from "./errors";
 import { Cards as ScryCards } from "scryfall-sdk";
 
 // Classes
@@ -347,3 +341,30 @@ export let Formats: { [f: string]: number } = {
   casual: 9,
   brawl: 10
 };
+
+// Parsing Error
+class ParsingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Parsing Error";
+    this.message = message;
+  }
+}
+
+// Error building deck
+class DeckBuildingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Error creating deck on ManaStack";
+    this.message = message;
+  }
+}
+
+// Error translating card
+class TranslateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Error translating card on Scryfall";
+    this.message = message;
+  }
+}

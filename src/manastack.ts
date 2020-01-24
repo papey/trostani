@@ -2,7 +2,6 @@
 
 // Imports
 import request = require("request-promise");
-import { NoSetCookie, RegexCookieError, ManaStackDeckError } from "./errors";
 
 // Classes
 // Cookie class used in ManaStack
@@ -197,13 +196,13 @@ export class Manastack {
             this.Cookie = new Cookie(result[1], result[2]);
           } catch (_) {
             // Throw an error if null
-            throw new RegexCookieError(
+            throw new ManastackError(
               "No PHPSESSID found in set-cookie directive"
             );
           }
         } else {
           // Throw an error is a problem occurs when trying to retrive the token
-          throw new NoSetCookie("Error getting set-cookie from login");
+          throw new ManastackError("Error getting set-cookie from login");
         }
       })
       .catch(error => {
@@ -237,11 +236,13 @@ export class Manastack {
         deck = new Deck(obj["id"]);
       })
       .catch(error => {
-        throw new ManaStackDeckError("Error creating deck on ManaStack");
+        throw new ManastackError("Error creating deck on ManaStack");
       });
 
     if (deck === undefined) {
-      throw new ManaStackDeckError("Error creating deck on ManaStack");
+      throw new ManastackError(
+        "Error creating deck on ManaStack, deck is undefined"
+      );
     } else {
       return deck;
     }
@@ -273,9 +274,7 @@ export class Manastack {
         })
       })
       .catch(() => {
-        throw new ManaStackDeckError(
-          "Error updating deck metadata on ManaStack"
-        );
+        throw new ManastackError("Error updating deck metadata on ManaStack");
       });
   }
 
@@ -295,7 +294,7 @@ export class Manastack {
         })
       })
       .catch(() => {
-        throw new ManaStackDeckError("Error importing decklist on ManaStack");
+        throw new ManastackError("Error importing decklist on ManaStack");
       });
   }
 
@@ -313,9 +312,18 @@ export class Manastack {
         resolveWithFullResponse: true
       })
       .catch(() => {
-        throw new ManaStackDeckError("Error getting decklists on ManaStack");
+        throw new ManastackError("Error getting decklists on ManaStack");
       });
 
     return res;
+  }
+}
+
+// ManaStack specific error
+class ManastackError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Error when interacting with Manastack";
+    this.message = message;
   }
 }
