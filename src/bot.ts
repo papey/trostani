@@ -5,8 +5,7 @@ import { Client, Message } from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
-import { Deck } from "./mtg";
-import { Manastack } from "./manastack";
+import { handleSync } from "./commands/sync";
 // Use to read yaml file
 import * as YAML from "yamljs";
 
@@ -50,20 +49,6 @@ export class Trostani {
     this.client.login(this.config.settings.token);
   }
 
-  // Methods (protected)
-  // Ensure push is authorized on this channel
-  protected isPushAuthorized(id: string): boolean {
-    if (this.config.settings.push.channels) {
-      if (this.config.settings.push.channels.includes(id)) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
-
   // Methods (private)
   // Setup routes to commands
   private routes() {
@@ -79,27 +64,10 @@ export class Trostani {
         let command = new Command(message.content, this.config.settings.prefix);
         // Execute extracted command
         switch (command.main) {
-          case "push":
-            // Check if channel is authorized
-            if (this.isPushAuthorized(message.channel.id)) {
-              // Try pushing deck
-              this.push(message).catch(error => {
-                this.logErrToDiscord(error, message);
-              });
-            }
-            break;
-          case "search":
-            // Check if it's a DM
-            if (message.channel.type == "dm") {
-              this.search(command, message).catch(error => {
-                this.logErrToDiscord(error, message);
-              });
-            } else {
-              // If not, tell the original author
-              message.author.send(
-                "Sorry but `search` command is not available on public channels"
-              );
-            }
+          case "sync":
+            handleSync(command, message, this.config).catch(error => {
+              this.logErrToDiscord(error, message);
+            });
             break;
           case "profile":
             handleProfile(this.config, message);
@@ -172,71 +140,6 @@ export class Trostani {
           "Translate function not found or not set to `True` or `False`, defaulted to `False`"
         );
       }
-    }
-  }
-
-  private async push(m: Message) {
-    // Send a nice message
-    m.channel.send("_Analysing and publishing decklist_");
-    try {
-      // Try building the deck
-      let deck = new Deck(m.content, this.config.settings.prefix);
-
-      // Parse it
-      await deck.parseDeck(m.content, this.config.settings.translate);
-
-      // If ManaStack is used
-      if (
-        this.config.settings.builder.kind &&
-        this.config.settings.builder.kind == "manastack"
-      ) {
-        let ms = new Manastack(
-          this.config.settings.builder.username,
-          this.config.settings.builder.password,
-          this.config.settings.builder.url,
-          this.config.settings.builder.profile
-        );
-
-        // Try formating the deck to ManaStack format
-        let formated = deck.exportToManaStack();
-
-        // Try creating the deck on ManaStack
-        let message = await ms.newDeck(
-          deck.metadata.name,
-          deck.metadata.bo,
-          deck.metadata.description,
-          deck.metadata.format,
-          formated
-        );
-
-        // Send message with error or succes
-        m.channel.send(message);
-      }
-    } catch (error) {
-      // If error, throw it
-      throw error;
-    }
-  }
-
-  // Search for a deck by it's name
-  private async search(cmd: Command, sender: Message) {
-    // If ManaStack is used
-    if (
-      this.config.settings.builder.kind &&
-      this.config.settings.builder.kind == "manastack"
-    ) {
-      let ms = new Manastack(
-        this.config.settings.builder.username,
-        this.config.settings.builder.password,
-        this.config.settings.builder.url,
-        this.config.settings.builder.profile
-      );
-
-      // Forge response for Discord
-      let response = await ms.formatSearch(cmd.args);
-
-      // Send message including lists of decks or an error message
-      sender.channel.send(response);
     }
   }
 }
