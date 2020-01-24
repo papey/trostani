@@ -80,7 +80,7 @@ export class Manastack {
   // Methods (public)
   // Get profile url
   public getProfile() {
-    return `Profile : ${this.url}/${this.routes["profile"]}/${this.profile}`;
+    return `${this.url}/${this.routes["profile"]}/${this.profile}`;
   }
 
   // Create a new deck on ManaStack
