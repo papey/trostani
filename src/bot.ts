@@ -4,9 +4,9 @@
 import { Client, Message } from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
+import { handleHelp } from "./commands/help";
 import { Deck } from "./mtg";
 import { Manastack } from "./manastack";
-import { pushExample, searchExample } from "./examples";
 // Use to read yaml file
 import * as YAML from "yamljs";
 
@@ -105,7 +105,7 @@ export class Trostani {
             handleProfile(this.config, message);
             break;
           case "help":
-            this.help(command, message);
+            handleHelp(command, message, this.config.settings.prefix);
             break;
           default:
             handleNotSupported(command, message, this.config.settings.prefix);
@@ -173,29 +173,6 @@ export class Trostani {
         );
       }
     }
-  }
-
-  // Send help text to message author when requested
-  private help(cmd: Command, origin: Message) {
-    let message = `Using prefix **${this.config.settings.prefix}**, available commands are :
-      - **push**: to push a decklist to the remote builder (on authorized channels)
-      - **search**: to search for a decklist posted to the remote builder (private discussion only)
-      - **profile**: to get user profile on remote builder (private discussion only)
-      - **help**: to get this help message`;
-
-    switch (cmd.sub) {
-      case "push":
-        message = `Here is an example of \`push\` command :
-\`\`\`${this.config.settings.prefix}push ${pushExample}\`\`\`
-`;
-        break;
-      case "search":
-        message = `Here is an example of \`search\` command :
-\`\`\`${this.config.settings.prefix}search ${searchExample}\`\`\`
-`;
-    }
-
-    origin.author.send(message);
   }
 
   private async push(m: Message) {
