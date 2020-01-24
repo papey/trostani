@@ -3,8 +3,8 @@
 // Imports
 import { Message } from "discord.js";
 import { Command } from "./utils";
-import { Deck } from "../mtg";
-import { Manastack } from "../manastack";
+import { Deck } from "../scry/mtg";
+import { Manastack } from "../builders/manastack";
 
 // handleSync is triggered when a user asks for a sync sub command
 export async function handleSync(cmd: Command, origin: Message, config: any) {

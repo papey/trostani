@@ -2,7 +2,7 @@
 
 // Imports
 import { Message } from "discord.js";
-import { Manastack } from "../manastack";
+import { Manastack } from "../builders/manastack";
 
 // handleProfile is triggered when a used enter the profile command
 export function handleProfile(config: any, origin: Message) {

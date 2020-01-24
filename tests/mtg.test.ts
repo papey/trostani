@@ -1,7 +1,7 @@
 // mtg.ts testing file
 
 // Imports
-import { Deck, Metadata, Card } from "../src/mtg";
+import { Deck, Metadata, Card } from "../src/scry/mtg";
 import { suite, test } from "mocha-typescript";
 import { assert } from "chai";
 
