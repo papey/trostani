@@ -1,5 +1,7 @@
 // utils.ts file contains generic code used by all builders
 
+// Classes
+// Used as a generic wrapper arround builders
 export class BuilderDeckMetadata {
   // url of the deck
   private url: string;

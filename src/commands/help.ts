@@ -5,6 +5,7 @@ import { Message } from "discord.js";
 import { Command } from "./utils";
 import { syncHelpMessage } from "./sync";
 
+// Functions
 // handleHelp is triggered when a used asks for the help command
 export function handleHelp(cmd: Command, origin: Message, config: any) {
   let message = `Using prefix **${cmd.prefix}**, available commands are :
