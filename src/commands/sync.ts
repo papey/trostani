@@ -66,10 +66,25 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
     );
 
     // Forge response for Discord
-    let response = await ms.formatSearch(cmd.args);
+    let results = await ms.formatSearch(cmd.args);
+
+    // format search message
+    let message = "";
+
+    // Append each result
+    results.forEach(e => {
+      message += e + `\n`;
+    });
+
+    // Final word, with result sumary
+    if (cmd.args != "") {
+      message += `Found ${results.length} deck(s) associated with keyword(s) _${cmd.args}_`;
+    } else {
+      message += `Found ${results.length} deck(s)`;
+    }
 
     // Send message including lists of decks or an error message
-    origin.channel.send(response);
+    origin.channel.send(message);
   }
 }
 

@@ -120,9 +120,9 @@ export class Manastack {
   }
 
   // Get decks, filter with keywords
-  public async formatSearch(keywords: string): Promise<string> {
+  public async formatSearch(keywords: string): Promise<string[]> {
     // Final message containing search result
-    let message = "";
+    let results: string[] = [];
 
     // Counter of number of items found
     let found = 0;
@@ -136,40 +136,28 @@ export class Manastack {
     // Extract json returned by ManaStack
     let parsed = JSON.parse(resp.body)[0];
 
-    // If no deck is found
-    if (parsed.decks.length <= 0) {
-      message = "**No deck found**";
-    } else {
-      // If decks found
-      parsed.decks.forEach((e: any) => {
-        // Check for keywords absence or presence
-        if (
-          keywords == "" ||
-          e.name.toLowerCase().includes(keywords.toLowerCase()) ||
-          e.description.toLowerCase().includes(keywords.toLowerCase())
-        ) {
-          // Append message if deck pass filters
-          message += `**${e.name}** - _${e.owner.username}_ - ${this.url}/deck/${e.slug}\n`;
-          found += 1;
-        }
-      });
-
-      // If no decks found using keywords
-      if (found <= 0) {
-        message = `No deck found for keyword(s): _${keywords}_`;
-      } else {
-        // Else, prepend message with total results
-        message = `Found ${found} deck(s):\n` + message;
+    // If decks found
+    parsed.decks.forEach((e: any) => {
+      // Check for keywords absence or presence
+      if (
+        keywords == "" ||
+        e.name.toLowerCase().includes(keywords.toLowerCase()) ||
+        e.description.toLowerCase().includes(keywords.toLowerCase())
+      ) {
+        // Append message if deck pass filters
+        results.push(
+          `**${e.name}** - _${e.owner.username}_ - ${this.url}/deck/${e.slug}`
+        );
       }
-    }
+    });
 
     // Log some info
     console.info(
-      `A search for "${keywords}" (empty for no keywords) was requested, found ${found} deck(s)`
+      `A search for "${keywords}" (empty for no keywords) was requested, found ${results.length} deck(s)`
     );
 
-    // Return the formated message
-    return message;
+    // Return all the results
+    return results;
   }
 
   // Methods (private)
