@@ -105,10 +105,10 @@ export class Trostani {
             handleProfile(this.config, message);
             break;
           case "help":
-            handleHelp(command, message, this.config.settings.prefix);
+            handleHelp(command, message);
             break;
           default:
-            handleNotSupported(command, message, this.config.settings.prefix);
+            handleNotSupported(command, message);
             break;
         }
       }

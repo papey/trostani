@@ -13,8 +13,13 @@ export class Command {
   public args: string = "";
   // extra is remaining arg after carriage return
   public extra: string = "";
+  // prefix used
+  public prefix: string = "";
 
   constructor(command: string, prefix: string) {
+    // get prefix
+    this.prefix = prefix;
+
     // split on line
     let lines = command.split("\n");
 
@@ -47,11 +52,7 @@ export class Command {
 }
 
 // handle cases where user asks for an unsupported function
-export function handleNotSupported(
-  cmd: Command,
-  origin: Message,
-  prefix: string
-) {
-  let message = `Command, \`${prefix}${cmd.main}\`, not supported (if you need help try \`${prefix}help\`)`;
+export function handleNotSupported(cmd: Command, origin: Message) {
+  let message = `Command, \`${cmd.prefix}${cmd.main}\`, not supported (if you need help try \`${cmd.prefix}help\`)`;
   origin.author.send(message);
 }
