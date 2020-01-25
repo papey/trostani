@@ -201,6 +201,7 @@ export class SyncError extends Error {
     this.message = message;
   }
 }
+
 // Examples used in help command
 // push command example
 let pushExample: string = `Temur Elementals :
