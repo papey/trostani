@@ -17,7 +17,7 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
 
   You can also type \`${
     cmd.prefix
-  }help <subcommand> to get specific subcommand instructions\``;
+  }help <subcommand>\` to get specific subcommand instructions`;
 
   switch (cmd.sub) {
     case "sync":
