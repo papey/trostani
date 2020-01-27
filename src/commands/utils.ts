@@ -33,12 +33,12 @@ export class Command {
     let split = lines[0].split(" ");
 
     // main command is the firt element of the first line
-    this.main = split[0].replace(prefix, "");
+    this.main = split[0].replace(prefix, "").toLocaleLowerCase();
 
     // ensure there is a subcommand
     if (split.length > 1) {
       // sub command is the second element of the first line
-      this.sub = split[1].trim();
+      this.sub = split[1].trim().toLocaleLowerCase();
     }
 
     // ensure there args attached to this command
