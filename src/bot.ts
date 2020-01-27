@@ -6,6 +6,7 @@ import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
 import { handleSync } from "./commands/sync";
+import { handleTnmt } from "./commands/tnmt";
 // Use to read yaml file
 import * as YAML from "yamljs";
 
@@ -64,6 +65,11 @@ export class Trostani {
         let command = new Command(message.content, this.config.settings.prefix);
         // Execute extracted command
         switch (command.main) {
+          case "tnmt":
+            handleTnmt(command, message, this.config).catch(error => {
+              this.logErrToDiscord(error, message);
+            });
+            break;
           case "sync":
             handleSync(command, message, this.config).catch(error => {
               this.logErrToDiscord(error, message);

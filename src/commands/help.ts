@@ -4,6 +4,7 @@
 import { Message } from "discord.js";
 import { Command } from "./utils";
 import { syncHelpMessage } from "./sync";
+import { tnmtHelpMessage } from "./tnmt";
 
 // Functions
 // handleHelp is triggered when a used asks for the help command
@@ -11,6 +12,9 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
   let message = `Using prefix **${cmd.prefix}**, available commands are :
   - \`sync\` (subcommand): to iteract with the remote builder (enabled : ${
     config.settings.push ? "yes" : "no"
+  })
+  - \`tnmt\` (subcommand): to iteract with Challonge and organize tournaments (enabled : ${
+    config.settings.challonge.token ? "yes" : "no"
   })
   - \`profile\`: to get user profile on remote builder
   - \`help\`: to get this help message
@@ -23,6 +27,8 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
     case "sync":
       message = syncHelpMessage(cmd);
       break;
+    case "tnmt":
+      message = tnmtHelpMessage(cmd);
   }
 
   origin.author.send(message);
