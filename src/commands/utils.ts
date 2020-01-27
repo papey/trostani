@@ -100,3 +100,8 @@ export function parseArgs(args: string, toLower: boolean = false): string[] {
   // Return it
   return sanitize;
 }
+
+// generateArgsErrorMsg is used to generate an argument error message
+export function generateArgsErrorMsg(na: number, prefix: string) {
+  return `This command requires at least ${na} argument(s) (if you need help try \`${prefix}help\`)`;
+}
