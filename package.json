@@ -11,7 +11,9 @@
     "test": "mocha --recursive --extension ts --timeout 105000 -R spec -r ts-node/register tests"
   },
   "dependencies": {
+    "@types/crypto-js": "^3.1.43",
     "challonge-ts": "^0.0.1",
+    "crypto-js": "^3.1.9-1",
     "discord.js": "^11.5.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
