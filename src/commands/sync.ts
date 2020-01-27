@@ -2,7 +2,7 @@
 
 // Imports
 import { Message } from "discord.js";
-import { Command } from "./utils";
+import { Command, parseArgs, isAuthorized } from "./utils";
 import { Deck } from "../scry/mtg";
 import { Manastack } from "../builders/manastack";
 import { BuilderDeckMetadata } from "../builders/utils";
@@ -111,34 +111,6 @@ async function handlePush(
   }
 }
 
-// isAuthorized ensures that push command is comming from an authorized channel
-function isAuthorized(oid: string, aids: string[]): boolean {
-  // loop over the array and check if id of the channel of the original message match configured channel
-  // return true or false
-  return aids.some(e => {
-    return e === oid;
-  });
-}
-
-// extract deck metadata from command args
-function parseDeckMetadata(cmd: Command): string[] {
-  // Get metadata from the first line
-  let metas = cmd.args
-    .split("\n")[0]
-    .replace(":", "")
-    .trim();
-
-  // Metadata fields are separated using //
-  let data = metas.split("//");
-
-  for (let i = 0; i < data.length; i++) {
-    data[i] = data[i].trimLeft().trimRight();
-  }
-
-  // Return it
-  return data;
-}
-
 // push called when a users asks for the push subcommand of the sync command
 async function push(
   cmd: Command,
@@ -150,7 +122,7 @@ async function push(
   origin.channel.send("_Analysing and publishing decklist_");
 
   try {
-    let meta = parseDeckMetadata(cmd);
+    let meta = parseArgs(cmd.args);
 
     if (meta[0] == "") {
       throw new SyncError("Error, this deck needs at least a name");
