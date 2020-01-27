@@ -6,8 +6,24 @@ import { Command, parseArgs, isAuthorized } from "./utils";
 import { Deck } from "../scry/mtg";
 import { Manastack } from "../builders/manastack";
 import { BuilderDeckMetadata } from "../builders/utils";
+import { generateSubcommandExample } from "./help";
 
 // Functions
+// syncHelpMessage is used to generated a specific help message when asksing for a sync command
+export function syncHelpMessage(cmd: Command) {
+  let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
+  - \`search <keywords>\` : to search for deck containing <keywords> in their name
+  - \`push <name> // <format> (optional) // <description> (optional) : [...decklist...(on a new line)]\` : to push the decklist formated as MTGA export`;
+
+  if (cmd.args.includes("search")) {
+    return generateSubcommandExample(cmd, "sync", "search", searchExample);
+  } else if (cmd.args.includes("push")) {
+    return generateSubcommandExample(cmd, "sync", "push", pushExample);
+  }
+
+  return message;
+}
+
 // handleSync is triggered when a user asks for a sync sub command
 export async function handleSync(cmd: Command, origin: Message, config: any) {
   switch (cmd.sub) {
@@ -36,23 +52,6 @@ export async function handleSync(cmd: Command, origin: Message, config: any) {
         `\`${cmd.sub}\` is not a valid subcommand of the \`sync\` command (if you need help try \`${cmd.prefix}help\`)`
       );
   }
-}
-
-// syncHelpMessage is used to generated a specific help message when asksing for a sync command
-export function syncHelpMessage(cmd: Command) {
-  let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
-  - \`search <keywords>\` : to search for deck containing <keywords> in their name
-  - \`push <name> // <format> (optional) // <description> (optional) : [...decklist...]\` : to push the decklist formated as MTGA export`;
-
-  if (cmd.args.includes("search")) {
-    message = `Here is an example of the \`search\` subcommand of the \`sync\` command :
-    \`\`\`${cmd.prefix}sync search ${searchExample}\`\`\``;
-  } else if (cmd.args.includes("push")) {
-    message = `Here is an example of the \`push\` subcommand of the \`sync\` command :
-    \`\`\`${cmd.prefix}sync push ${pushExample}\`\`\``;
-  }
-
-  return message;
 }
 
 // handleSearch handles the subcommand search of the sync command
