@@ -16,8 +16,7 @@ import { generateSubcommandExample } from "./help";
 // Functions
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
 export function tnmtHelpMessage(cmd: Command): string {
-  let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
-  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH-MM) \` : to search for deck containing <keywords> in their name`;
+  let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
 
   if (cmd.args.includes("create")) {
     return generateSubcommandExample(cmd, "tnmt", "create", createExample);
