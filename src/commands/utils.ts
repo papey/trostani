@@ -81,10 +81,7 @@ export function hasPermission(
 // parseExtraArgs is used to split extra args commands
 export function parseArgs(args: string, toLower: boolean = false): string[] {
   // Get args from the first line
-  let a = args
-    .split("\n")[0]
-    .replace(":", "")
-    .trim();
+  let a = args.split("\n")[0].trim();
 
   // split on "//"
   let sanitize = a.split("//");
