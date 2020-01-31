@@ -187,5 +187,5 @@ export class TnmtError extends Error {
 }
 
 // Examples
-// create sub command example
+// create subcommand example
 let createExample = `Tournament Name // Tournament Description // SW // Forgeron // 2020-11-07 at 17:00`;
