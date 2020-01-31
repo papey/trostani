@@ -17,7 +17,7 @@ import { generateSubcommandExample } from "./help";
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
-  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH-MM) \` : to create a tournament
+  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
 
   if (cmd.args.includes("create")) {
@@ -178,7 +178,7 @@ function parseTnmtType(input: string): TournamentInterfaces.tournamentTypeEnum {
 // parseDate is used to parse date from a Discord argument
 function parseDate(input: string): Date | null {
   // parse input
-  const regex = new RegExp(/(\d{4})-(\d{2})-(\d{2}) at (\d{2})-(\d{2})/);
+  const regex = new RegExp(/(\d{4})-(\d{2})-(\d{2}) at (\d{2}):(\d{2})/);
   // exec regex
   let res = regex.exec(input);
 
