@@ -17,6 +17,7 @@ import { generateSubcommandExample } from "./help";
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
+  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH-MM) \` : to create a tournament`;
 
   if (cmd.args.includes("create")) {
     return generateSubcommandExample(cmd, "tnmt", "create", createExample);
