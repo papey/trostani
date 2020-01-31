@@ -2,7 +2,7 @@
 
 // Imports
 import { Message } from "discord.js";
-import { Challonge, TournamentInterfaces } from "challonge-ts";
+import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import {
   Command,
@@ -17,12 +17,14 @@ import { generateSubcommandExample } from "./help";
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
-  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH-MM) \` : to create a tournament`;
+  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH-MM) \` : to create a tournament
+  - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
 
   if (cmd.args.includes("create")) {
     return generateSubcommandExample(cmd, "tnmt", "create", createExample);
+  } else if (cmd.args.includes("list")) {
+    return generateSubcommandExample(cmd, "tnmt", "list", listExample);
   }
-
   return message;
 }
 
@@ -43,11 +45,88 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
     case "create":
       await handleCreate(cmd, origin, chlg, config.settings.challonge);
       break;
+    case "list":
+      await handleList(cmd, origin, chlg);
+      break;
     default:
       throw new TnmtError(
         `\`${cmd.sub}\` is not a valid subcommand of the \`tnmt\` command (if you need help try \`${cmd.prefix}help\`)`
       );
   }
+}
+
+// handleList is used to list all tournaments on challonge
+async function handleList(cmd: Command, origin: Message, client: Challonge) {
+  // set a limit
+  let limit = 15;
+
+  // declare optionnal parameters
+  let params = {};
+
+  // fill optional parameters
+  if (cmd.args.toLocaleLowerCase().includes("pending")) {
+    params = { state: TournamentInterfaces.tournamentStateEnum.PENDING };
+  } else if (cmd.args.toLocaleLowerCase().includes("completed")) {
+    params = { state: TournamentInterfaces.tournamentStateEnum.ENDED };
+  } else if (cmd.args.toLocaleLowerCase().includes("underway")) {
+    params = { state: TournamentInterfaces.tournamentStateEnum.IN_PROGRESS };
+  }
+
+  // get all tournaments
+  let all = await client.getTournaments(params);
+
+  // challonge-ts sort by id, so reverse to get most recent entries
+  all = all.reverse();
+
+  // prepare output
+  let parts: string[] = [];
+
+  // check len, set limit if needed
+  let len = all.length < limit ? all.length : limit;
+
+  // loop over items (limit or length) and generate line
+  for (let index = 0; index < len; index++) {
+    parts.push(generateListLine(all[index]));
+  }
+
+  // check if something was found
+  if (parts.length == 0) {
+    origin.channel.send(`Sorry, there is no entry matching the request`);
+  } else {
+    // push message to channel by joining outputs parts
+    origin.channel.send(parts.join("\n"));
+  }
+}
+
+// generateListLine is used to generate an output line for each tournament
+function generateListLine(t: Tournament) {
+  // base of the string
+  let base = `**${t["data"]["tournament"]["name"]}** - ${t["data"]["tournament"]["full_challonge_url"]}`;
+
+  // date
+  let date = "";
+
+  // date is specific for each tournament state
+  switch (t["data"]["tournament"]["state"]) {
+    case "complete":
+      var started = new Date(t["data"]["tournament"]["started_at"]);
+      var completed = new Date(t["data"]["tournament"]["completed_at"]);
+      date = `started at **${started.toDateString()}** and completed at **${completed.toDateString()}**`;
+      break;
+    case "underway":
+      var started = new Date(t["data"]["tournament"]["started_at"]);
+      date = `started at **${started.toDateString()}**`;
+      break;
+    case "pending":
+      var start = new Date(t["data"]["tournament"]["start_at"]);
+      date = `starting at **${start.toDateString()}** | **${start.toTimeString()}**`;
+      break;
+    default:
+      break;
+  }
+
+  // return full string
+  return base + " - _" + t["data"]["tournament"]["state"] + "_ - " + date;
 }
 
 // handleCreate is used to create a tournament on challonge
@@ -189,3 +268,6 @@ export class TnmtError extends Error {
 // Examples
 // create subcommand example
 let createExample = `Tournament Name // Tournament Description // SW // Forgeron // 2020-11-07 at 17:00`;
+
+// list subcommand example
+let listExample = `pending`;
