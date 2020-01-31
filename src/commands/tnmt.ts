@@ -101,7 +101,9 @@ async function handleList(cmd: Command, origin: Message, client: Challonge) {
 // generateListLine is used to generate an output line for each tournament
 function generateListLine(t: Tournament) {
   // base of the string
-  let base = `**${t["data"]["tournament"]["name"]}** - ${t["data"]["tournament"]["full_challonge_url"]}`;
+  let base = `**${t["data"]["tournament"]["name"]}** - Code : _${getCode(
+    t["data"]["tournament"]["full_challonge_url"]
+  )}_ - ${t["data"]["tournament"]["full_challonge_url"]}`;
 
   // date
   let date = "";
@@ -235,7 +237,7 @@ async function create(args: string[], origin: Message, client: Challonge) {
 
   // send message to channel when tournament is created
   origin.channel.send(
-    `Tournament **${args[0]}** created and available at https://challonge.com/${code}`
+    `Tournament **${args[0]}** created and available at https://challonge.com/${code}, you can interact with it using the following code : **${code}**`
   );
 }
 
@@ -243,7 +245,13 @@ async function create(args: string[], origin: Message, client: Challonge) {
 function generateCode(name: string) {
   return MD5(name)
     .toString()
-    .slice(0, 9);
+    .slice(0, 5);
+}
+
+// getCode is used to retreive code from a tournament url
+function getCode(url: string): string {
+  // split on / and get the last part of the url
+  return url.split("/").reverse()[0];
 }
 
 // generateName si used to generated final name of tournament on Challonge using name and specified format
