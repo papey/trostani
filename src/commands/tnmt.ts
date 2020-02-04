@@ -101,7 +101,7 @@ async function handleList(cmd: Command, origin: Message, client: Challonge) {
 // generateListLine is used to generate an output line for each tournament
 function generateListLine(t: Tournament) {
   // base of the string
-  let base = `**${t["data"]["tournament"]["name"]}** - Code : _${getCode(
+  let base = `**${t["data"]["tournament"]["name"]}** - Code : _${getCode(
     t["data"]["tournament"]["full_challonge_url"]
   )}_ - ${t["data"]["tournament"]["full_challonge_url"]}`;
 
@@ -172,7 +172,7 @@ function parseTnmtType(input: string): TournamentInterfaces.tournamentTypeEnum {
       return TournamentInterfaces.tournamentTypeEnum.ROUND_ROBIN;
     default:
       throw new TnmtError(
-        `Tournament type ${input} is not supported by Challonge`
+        `Tournament type ${input} is not supported by Challonge`
       );
   }
 }
