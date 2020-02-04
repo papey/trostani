@@ -95,7 +95,7 @@ export class Manastack {
   ): Promise<BuilderDeckMetadata> {
     // pass error to caller is somethings goes wrong
     try {
-      // Ensure a vlid token
+      // Ensure a valid token
       await this.initialize();
       // Create an empty deck
       let deck = await this.createDeck(name);
