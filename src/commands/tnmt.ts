@@ -4,6 +4,8 @@
 import { Message } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
+import { Deck } from "../scry/mtg";
+import { Manastack } from "../builders/manastack"
 import {
   Command,
   parseArgs,
@@ -48,11 +50,85 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
     case "list":
       await handleList(cmd, origin, chlg);
       break;
+    case "join":
+      await handleJoin(cmd, origin, chlg, config.settings.builder, config.settings.challonge.key)
+      break;
     default:
       throw new TnmtError(
         `\`${cmd.sub}\` is not a valid subcommand of the \`tnmt\` command (if you need help try \`${cmd.prefix}help\`)`
       );
   }
+}
+
+// handleJoin is used to register a user to a specified challonge tournament
+async function handleJoin(cmd: Command, origin: Message, client: Challonge, builder: any, key: string) {
+
+  // parse args
+  let args = parseArgs(cmd.args)
+  // check arguments requirements
+  if (args.length >= Arguments["handleJoin"]) {
+
+    // get pending tournaments
+    let tnmts = await client.getTournaments({ state: TournamentInterfaces.tournamentStateEnum.PENDING })
+    // filter using specified ID by the participant
+    let filtered = tnmts.filter(t => {
+      return getCode(t["data"]["tournament"]["full_challonge_url"]) == args[0]
+    })
+
+    // check if tournament exists and is in pending state
+    if (filtered.length <= 0) {
+      throw new TnmtError(`You can't join tournament with id ${args[0]}.
+Please make sure tournament exists and if so, ensure that registrations are open`)
+    }
+
+    // create deck
+    let meta = new Array()
+    // prepare meta data
+    // name
+    meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`)
+    // Format, TODO more specific if format is supported by builder, use casual as default
+    meta.push(`casual`)
+    // description
+    meta.push(`Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`)
+    let deck = new Deck(meta)
+    await deck.parseDeck(origin.content, true)
+
+    // sync deck to Manastack
+    if (builder.kind && builder.kind == "manastack") {
+      let ms = new Manastack(
+        builder.username,
+        builder.password,
+        builder.url,
+        builder.profile
+      );
+
+      // Try formating the deck to ManaStack format
+      let formated = deck.exportToManaStack();
+
+      // Try creating the deck on ManaStack
+      var synced = await ms.newDeck(
+        deck.metadata.name,
+        deck.metadata.description,
+        deck.metadata.format,
+        formated
+      );
+
+    }
+
+    // add participant to associated tournament
+    let tnmt = new Tournament(key, filtered[0]["tournament"])
+    await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(error => {
+      // TODO delete deck if new participant can't be added
+      throw new TnmtError("Error registering participant")
+    })
+
+    // return decklist, and message
+    origin.channel.send(`Registration succesfull for user ${origin.author.username} in tournament ${filtered[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
+
+  } else {
+    throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
+  }
+
 }
 
 // handleList is used to list all tournaments on challonge
@@ -262,7 +338,8 @@ function generateName(name: string, format: string): string {
 
 // Arity arguments mapper
 let Arguments: { [f: string]: number } = {
-  handleCreate: 4
+  handleCreate: 4,
+  handleJoin: 1
 };
 
 // Sync Command Error
