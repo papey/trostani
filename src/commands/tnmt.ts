@@ -200,6 +200,7 @@ function parseDate(input: string): Date | null {
 
 // create is used to trigger a tournament creation on challonge
 async function create(args: string[], origin: Message, client: Challonge) {
+
   // generate pseudo-random code from name
   let code = generateCode(args[0]);
 
