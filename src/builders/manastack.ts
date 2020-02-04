@@ -55,7 +55,7 @@ export class Manastack {
   // Routes
   private routes: { [route: string]: string } = {
     login: "api/user/login",
-    deck_create: "api/decks/create",
+    deck_create: "api/deck/create",
     deck_edit: "api/deck/save",
     deck_import: "api/deck/import",
     decks_list: "api/decks/my_decks",
@@ -243,7 +243,7 @@ export class Manastack {
     format: number
   ) {
     await request
-      .post({
+      .put({
         url: `${this.url}/${this.routes["deck_edit"]}/${id}}`,
         headers: {
           "content-type": "application/json",
@@ -267,7 +267,7 @@ export class Manastack {
   // Import Decklist from a string
   private async importDeck(id: string, list: string) {
     await request
-      .post({
+      .put({
         url: `${this.url}/${this.routes["deck_import"]}`,
         headers: {
           "content-type": "application/json",
