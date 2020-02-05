@@ -44,7 +44,7 @@ export class Card {
       );
 
       // https://scryfall.com/docs/api, see Rate Limits and Good Citizenship section
-      setTimeout(() => {}, 100);
+      setTimeout(() => { }, 60);
 
       if (translate.name == null) {
         throw new TranslateError(
