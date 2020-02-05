@@ -107,7 +107,8 @@ export class Manastack {
       // return deck url
       return new BuilderDeckMetadata(
         `${this.url}/${this.routes["preview"]}/${deck.id}`,
-        deck.name
+        deck.name,
+        deck.id
       );
     } catch (error) {
       throw error;
