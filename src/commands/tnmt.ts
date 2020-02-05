@@ -214,9 +214,12 @@ async function handleCreate(
   client: Challonge,
   config: any
 ) {
+  // check authorization and permissions
   if (isAuthorized(origin.channel.id, config.channels)) {
     if (hasPermission(origin.member.roles, config.roles)) {
+      // parse args
       let args = parseArgs(cmd.args, true);
+      // ensure args requirements
       if (args.length >= Arguments["handleCreate"]) {
         await create(args, origin, client);
       } else {
