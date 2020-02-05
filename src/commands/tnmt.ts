@@ -20,12 +20,15 @@ import { generateSubcommandExample } from "./help";
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament
+  - \`join <tournament id> [... decklist... ]\` : join a tournament
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
 
   if (cmd.args.includes("create")) {
     return generateSubcommandExample(cmd, "tnmt", "create", createExample);
   } else if (cmd.args.includes("list")) {
     return generateSubcommandExample(cmd, "tnmt", "list", listExample);
+  } else if (cmd.args.includes("join")) {
+    return generateSubcommandExample(cmd, "tnmt", "join", joinExample);
   }
   return message;
 }
@@ -375,3 +378,37 @@ let createExample = `Tournament Name // Tournament Description // SW // Forgeron
 
 // list subcommand example
 let listExample = `pending`;
+
+// join subcommand example
+let joinExample = `df898
+Deck
+4 Frisson de probabilité (ELD) 146
+4 Soif de sens (THB) 74
+4 Montagne (THB) 285
+2 Falaises des eaux vives (M20) 252
+2 Électromancien gobelin (GRN) 174
+1 Étreinte de lave (GRN) 108
+3 Frappe foudroyante (XLN) 149
+4 Landes de cendres (M19) 248
+4 Révélation // Répartition (GRN) 223
+4 Marais (THB) 283
+3 Érudite des âges (M20) 74
+2 Géant rugissant (M20) 177
+2 Île (THB) 281
+1 Golem météoritique (M19) 241
+3 Don du chaudron (ELD) 83
+4 Étendues sauvages en évolution (RIX) 186
+2 Du sang pour les os (M20) 89
+3 Liche engrimoirée (M20) 219
+1 Marigot lugubre (M20) 245
+3 Ossuaire submergé (M19) 257
+4 Tritonne des fondrières (THB) 105
+
+Réserve
+3 Instant d'envie (RIX) 79
+2 Contrainte (M19) 94
+1 Étanchement (RNA) 48
+2 Cramer (M20) 140
+2 Pyrohélice de Chandra (WAR) 120
+3 Balayage de flammes (M20) 139
+2 Surgissement de Ral (WAR) 212`;
