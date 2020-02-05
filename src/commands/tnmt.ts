@@ -95,7 +95,7 @@ Please make sure tournament exists and if so, ensure that registrations are open
 
     // sync deck to Manastack
     if (builder.kind && builder.kind == "manastack") {
-      let ms = new Manastack(
+      var ms = new Manastack(
         builder.username,
         builder.password,
         builder.url,
