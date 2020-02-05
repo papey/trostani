@@ -14,7 +14,7 @@ export class Card {
   // Constructor
   constructor(name: string, edition: string, id: string, times: string) {
     this.name = name;
-    this.edition = edition.toLowerCase();
+    this.edition = fixSet(edition).toLowerCase();
     this.id = id;
     this.times = times;
   }
@@ -49,7 +49,7 @@ export class Card {
       if (translate.name == null) {
         throw new TranslateError(
           `Error translating the following card ${
-            this.name
+          this.name
           } (${this.edition.toUpperCase()}) ${this.id}`
         );
       }
@@ -309,6 +309,18 @@ export let Formats: { [f: string]: number } = {
   casual: 9,
   brawl: 10
 };
+
+// fixSet is used to fix differences between MTGA set names and real world
+function fixSet(set: string): string {
+
+  switch (set) {
+    case "DAR":
+      return "DOM"
+
+    default:
+      return set
+  }
+}
 
 // Parsing Error
 class ParsingError extends Error {
