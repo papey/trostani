@@ -117,17 +117,32 @@ Please make sure tournament exists and if so, ensure that registrations are open
 
     // add participant to associated tournament
     let tnmt = new Tournament(key, filtered[0]["tournament"])
-    await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(error => {
-      // TODO delete deck if new participant can't be added
-      throw new TnmtError("Error registering participant")
+    await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(async error => {
+      // ensure a deck delete since adding a participant trigger an error
+      if (builder.kind && builder.kind == "manastack") {
+        await ms.deleteDeck(synced.getID())
+      }
+
+      // trigger specific error
+      triggerParticipantError(error, origin.author.id, args[0])
+
     })
 
     // return decklist, and message
-    origin.channel.send(`Registration succesfull for user ${origin.author.username} in tournament ${filtered[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
+    origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filtered[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
 
   } else {
     throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
   }
+
+}
+
+// triggerParticipantError is used to create a custom error when newParcipant fails
+function triggerParticipantError(err: Error, oid: string, id: string) {
+  if (err["response"]["status"] == 422 && err["response"]["data"]["errors"]) {
+    throw new TnmtError(`Participant <@${oid}> is already registered in tournament ${id}`)
+  }
+  throw new TnmtError("Error registering participant")
 
 }
 
