@@ -60,6 +60,7 @@ export class Manastack {
     deck_import: "api/deck/import",
     decks_list: "api/decks/my_decks",
     deck_get: "api/deck?slug=new-deck-",
+    delete_deck: "api/deck/delete",
     preview: "deck/preview",
     profile: "user"
   };
@@ -84,6 +85,23 @@ export class Manastack {
   // Get profile url
   public getProfile() {
     return `${this.url}/${this.routes["profile"]}/${this.profile}`;
+  }
+
+  // Delete a deck
+  public async deleteDeck(id: string) {
+    await this.initialize();
+
+    let res = await request.delete({
+      url: `${this.url}/${this.routes["delete_deck"]}/${id}`,
+      headers: {
+        "content-type": "application/json",
+        Cookie: `PHPSESSID=${this.Cookie.token}`
+      },
+      resolveWithFullResponse: true
+    }).catch(() => {
+      throw new ManastackError("Error deleting deck on Manastack")
+    });
+
   }
 
   // Create a new deck on ManaStack
