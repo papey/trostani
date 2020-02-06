@@ -71,18 +71,7 @@ async function handleJoin(cmd: Command, origin: Message, client: Challonge, buil
   // check arguments requirements
   if (args.length >= Arguments["handleJoin"]) {
 
-    // get pending tournaments
-    let tnmts = await client.getTournaments({ state: TournamentInterfaces.tournamentStateEnum.PENDING })
-    // filter using specified ID by the participant
-    let filtered = tnmts.filter(t => {
-      return getCode(t["data"]["tournament"]["full_challonge_url"]) == args[0]
-    })
-
-    // check if tournament exists and is in pending state
-    if (filtered.length <= 0) {
-      throw new TnmtError(`You can't join tournament with id ${args[0]}.
-Please make sure tournament exists and if so, ensure that registrations are open`)
-    }
+    let filter = await filtered(args[0], client, TournamentInterfaces.tournamentStateEnum.PENDING)
 
     // create deck
     let meta = new Array()
@@ -119,7 +108,7 @@ Please make sure tournament exists and if so, ensure that registrations are open
     }
 
     // add participant to associated tournament
-    let tnmt = new Tournament(key, filtered[0]["tournament"])
+    let tnmt = new Tournament(key, filter["tournament"])
     await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(async error => {
       // ensure a deck delete since adding a participant trigger an error
       if (builder.kind && builder.kind == "manastack") {
@@ -132,7 +121,7 @@ Please make sure tournament exists and if so, ensure that registrations are open
     })
 
     // return decklist, and message
-    origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filtered[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
+    origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filter[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
 
   } else {
     throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
@@ -355,6 +344,26 @@ function getCode(url: string): string {
 // generateName si used to generated final name of tournament on Challonge using name and specified format
 function generateName(name: string, format: string): string {
   return `[Format: ${format.toLocaleUpperCase()}] ${name}`;
+}
+
+// filtered is used to get all tournaments and filter using id
+async function filtered(id: string, client: Challonge, status: TournamentInterfaces.tournamentStateEnum) {
+
+  // get pending tournaments
+  let tnmts = await client.getTournaments({ state: status })
+  // filter using specified ID by the participant
+  let filter = tnmts.filter(t => {
+    return getCode(t["data"]["tournament"]["full_challonge_url"]) == id
+  })
+
+  // check if tournament exists and is in pending state
+  if (filter.length <= 0) {
+    throw new TnmtError(`You can't join tournament with id ${id}.
+Please make sure tournament exists and if so, ensure that registrations are open`)
+  }
+
+  return filter[0]
+
 }
 
 // Arity arguments mapper
