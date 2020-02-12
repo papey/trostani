@@ -83,6 +83,10 @@ export function parseArgs(args: string, toLower: boolean = false): string[] {
   // Get args from the first line
   let a = args.split("\n")[0].trim();
 
+  if (a == "") {
+    return [];
+  }
+
   // split on "//"
   let sanitize = a.split("//");
 
