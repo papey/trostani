@@ -358,8 +358,7 @@ async function filtered(id: string, client: Challonge, status: TournamentInterfa
 
   // check if tournament exists and is in pending state
   if (filter.length <= 0) {
-    throw new TnmtError(`You can't join tournament with id ${id}.
-Please make sure tournament exists and if so, ensure that registrations are open`)
+    throw new TnmtError(`There is no tournament with status '${status.replace("_", " ")}' associated with id '${id}'.`)
   }
 
   return filter[0]
