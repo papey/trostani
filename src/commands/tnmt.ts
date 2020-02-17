@@ -77,7 +77,7 @@ async function handleJoin(cmd: Command, origin: Message, client: Challonge, buil
     let meta = new Array()
     // prepare meta data
     // name
-    meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`)
+    meta.push(`Tournament: ${args[0]}] ${origin.author.username}'s Deck`)
     // Format, TODO more specific if format is supported by builder, use casual as default
     meta.push(`casual`)
     // description
