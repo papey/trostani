@@ -20,7 +20,8 @@ import { generateSubcommandExample } from "./help";
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament
-  - \`join <tournament id> [... decklist... ]\` : join a tournament
+  - \`join <tournament id> [... decklist... ]\` : join a tournament (only with PENDING tournaments)
+  - \`status <tournament id>\` : get tournament current status and results (only with IN PROGRESS tournaments)
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
 
   if (cmd.args.includes("create")) {
@@ -56,10 +57,83 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
     case "join":
       await handleJoin(cmd, origin, chlg, config.settings.builder, config.settings.challonge.key)
       break;
+    case "status":
+      await handleStatus(cmd, origin, chlg, config.settings.challonge.key)
+      break;
     default:
       throw new TnmtError(
         `\`${cmd.sub}\` is not a valid subcommand of the \`tnmt\` command (if you need help try \`${cmd.prefix}help\`)`
       );
+  }
+}
+
+// handleStatus is used to get current status of specified challonge tournament
+async function handleStatus(cmd: Command, origin: Message, client: Challonge, key: string) {
+
+  // response message
+  let resp = ""
+
+  // parse args
+  let args = parseArgs(cmd.args)
+  // check arguments requirements
+  if (args.length >= Arguments["handleStatus"]) {
+
+    // get tournament in progress
+    let filter = await filtered(args[0], client, TournamentInterfaces.tournamentStateEnum.IN_PROGRESS)
+
+    // get tournament data
+    let tnmt = new Tournament(key, filter["tournament"])
+
+    // get all parcitipants for this tournament
+    let participants = await tnmt.getParticipants()
+
+    // since matches only contains id, ensure ability to quickly found participant from his ID
+    let idToParticipant = new Map()
+    participants.forEach(p => {
+      idToParticipant.set(p["id"], p)
+    })
+
+    // get all the matches
+    let matches = await tnmt.getMatches()
+
+    // if an arg containing round paramater is found
+    if (args[1]) {
+      // filter matches if requested
+      let matchesFilter = matches.filter(e => {
+        return e["round"] == args[1]
+      })
+      // if a filter is provided, replace matches by filtered matches
+      if (matchesFilter && matchesFilter.length >= 1) {
+        origin.channel.send(`_Here is all the matches associated with round : ${args[1]}_`)
+        matches = matchesFilter
+      } else {
+        // if filter filters nothing, fallback to all
+        origin.channel.send(`_Nothing found using filter **${args[1]}**, fallback to non filtered mode_`)
+      }
+    }
+
+    // for all matches, create response
+    matches.forEach(m => {
+      if (m["completed_at"] == null) {
+        // participants data, player 1 and player 2
+        let p1 = idToParticipant.get(m["player1_id"])
+        let p2 = idToParticipant.get(m["player2_id"])
+        resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`
+      } else {
+        // participants data, winner and loser
+        let w = idToParticipant.get(m["winner_id"])
+        let l = idToParticipant.get(m["loser_id"])
+        resp += `_Round ${m["round"]}_ - **${w["name"]} VS ${l["name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`
+      }
+      resp += "\n"
+    });
+
+    // send back response to channel
+    origin.channel.send(resp)
+
+
+  } else {
+    throw new TnmtError(generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix))
   }
 }
 
@@ -368,7 +442,8 @@ async function filtered(id: string, client: Challonge, status: TournamentInterfa
 // Arity arguments mapper
 let Arguments: { [f: string]: number } = {
   handleCreate: 4,
-  handleJoin: 1
+  handleJoin: 1,
+  handleStatus: 1
 };
 
 // Sync Command Error
