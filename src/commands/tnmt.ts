@@ -55,7 +55,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       await handleList(cmd, origin, chlg);
       break;
     case "join":
-      await handleJoin(cmd, origin, chlg, config.settings.builder, config.settings.challonge.key)
+      await handleJoin(cmd, origin, chlg, config.settings.challonge, config.settings.builder)
       break;
     case "status":
       await handleStatus(cmd, origin, chlg, config.settings.challonge.key)
@@ -138,67 +138,74 @@ async function handleStatus(cmd: Command, origin: Message, client: Challonge, ke
 }
 
 // handleJoin is used to register a user to a specified challonge tournament
-async function handleJoin(cmd: Command, origin: Message, client: Challonge, builder: any, key: string) {
+async function handleJoin(cmd: Command, origin: Message, client: Challonge, challonge: any, builder: any) {
 
-  // parse args
-  let args = parseArgs(cmd.args)
-  // check arguments requirements
-  if (args.length >= Arguments["handleJoin"]) {
+  // check if channel is authorized
+  if (isAuthorized(origin.channel.id, challonge.channels)) {
+    // parse args
+    let args = parseArgs(cmd.args)
+    // check arguments requirements
+    if (args.length >= Arguments["handleJoin"]) {
 
-    let filter = await filtered(args[0], client, TournamentInterfaces.tournamentStateEnum.PENDING)
+      let filter = await filtered(args[0], client, TournamentInterfaces.tournamentStateEnum.PENDING)
 
-    // create deck
-    let meta = new Array()
-    // prepare meta data
-    // name
-    meta.push(`Tournament: ${args[0]}] ${origin.author.username}'s Deck`)
-    // Format, TODO more specific if format is supported by builder, use casual as default
-    meta.push(`casual`)
-    // description
-    meta.push(`Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`)
-    let deck = new Deck(meta)
-    await deck.parseDeck(origin.content, true)
+      console.log(filter)
 
-    // sync deck to Manastack
-    if (builder.kind && builder.kind == "manastack") {
-      var ms = new Manastack(
-        builder.username,
-        builder.password,
-        builder.url,
-        builder.profile
-      );
+      // create deck
+      let meta = new Array()
+      // prepare meta data
+      // name
+      meta.push(`Tournament: ${args[0]}] ${origin.author.username}'s Deck`)
+      // Format, TODO more specific if format is supported by builder, use casual as default
+      meta.push(`casual`)
+      // description
+      meta.push(`Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`)
+      let deck = new Deck(meta)
+      await deck.parseDeck(origin.content, true)
 
-      // Try formating the deck to ManaStack format
-      let formated = deck.exportToManaStack();
-
-      // Try creating the deck on ManaStack
-      var synced = await ms.newDeck(
-        deck.metadata.name,
-        deck.metadata.description,
-        deck.metadata.format,
-        formated
-      );
-
-    }
-
-    // add participant to associated tournament
-    let tnmt = new Tournament(key, filter["tournament"])
-    await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(async error => {
-      // ensure a deck delete since adding a participant trigger an error
+      // sync deck to Manastack
       if (builder.kind && builder.kind == "manastack") {
-        await ms.deleteDeck(synced.getID())
+        var ms = new Manastack(
+          builder.username,
+          builder.password,
+          builder.url,
+          builder.profile
+        );
+
+        // Try formating the deck to ManaStack format
+        let formated = deck.exportToManaStack();
+
+        // Try creating the deck on ManaStack
+        var synced = await ms.newDeck(
+          deck.metadata.name,
+          deck.metadata.description,
+          deck.metadata.format,
+          formated
+        );
+
       }
 
-      // trigger specific error
-      triggerParticipantError(error, origin.author.id, args[0])
+      // add participant to associated tournament
+      let tnmt = new Tournament(challonge.key, filter["tournament"])
+      await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(async error => {
+        // ensure a deck delete since adding a participant trigger an error
+        if (builder.kind && builder.kind == "manastack") {
+          await ms.deleteDeck(synced.getID())
+        }
 
-    })
+        // trigger specific error
+        triggerParticipantError(error, origin.author.id, args[0])
 
-    // return decklist, and message
-    origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filter[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
+      })
 
+      // return decklist, and message
+      origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filter[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
+
+    } else {
+      throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
+    }
   } else {
-    throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
+    throw new TnmtError(`This command cannot be used on this channel`);
   }
 
 }
