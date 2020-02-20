@@ -199,7 +199,7 @@ async function handleJoin(cmd: Command, origin: Message, client: Challonge, chal
       })
 
       // return decklist, and message
-      origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filter[0]["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
+      origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filter["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
 
     } else {
       throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
