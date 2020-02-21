@@ -176,8 +176,6 @@ async function handleJoin(
         TournamentInterfaces.tournamentStateEnum.PENDING
       );
 
-      console.log(filter);
-
       // create deck
       let meta = new Array();
       // prepare meta data
