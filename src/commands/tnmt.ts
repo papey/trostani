@@ -5,7 +5,7 @@ import { Message } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import { Deck } from "../scry/mtg";
-import { Manastack } from "../builders/manastack"
+import { Manastack } from "../builders/manastack";
 import {
   Command,
   parseArgs,
@@ -57,10 +57,16 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       await handleList(cmd, origin, chlg);
       break;
     case "join":
-      await handleJoin(cmd, origin, chlg, config.settings.challonge, config.settings.builder)
+      await handleJoin(
+        cmd,
+        origin,
+        chlg,
+        config.settings.challonge,
+        config.settings.builder
+      );
       break;
     case "status":
-      await handleStatus(cmd, origin, chlg, config.settings.challonge.key)
+      await handleStatus(cmd, origin, chlg, config.settings.challonge.key);
       break;
     default:
       throw new TnmtError(
@@ -70,47 +76,58 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
 }
 
 // handleStatus is used to get current status of specified challonge tournament
-async function handleStatus(cmd: Command, origin: Message, client: Challonge, key: string) {
-
+async function handleStatus(
+  cmd: Command,
+  origin: Message,
+  client: Challonge,
+  key: string
+) {
   // response message
-  let resp = ""
+  let resp = "";
 
   // parse args
-  let args = parseArgs(cmd.args)
+  let args = parseArgs(cmd.args);
   // check arguments requirements
   if (args.length >= Arguments["handleStatus"]) {
-
     // get tournament in progress
-    let filter = await filtered(args[0], client, TournamentInterfaces.tournamentStateEnum.IN_PROGRESS)
+    let filter = await filtered(
+      args[0],
+      client,
+      TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
+    );
 
     // get tournament data
-    let tnmt = new Tournament(key, filter["tournament"])
+    let tnmt = new Tournament(key, filter["tournament"]);
 
     // get all parcitipants for this tournament
-    let participants = await tnmt.getParticipants()
+    let participants = await tnmt.getParticipants();
 
     // since matches only contains id, ensure ability to quickly found participant from his ID
-    let idToParticipant = new Map()
+    let idToParticipant = new Map();
     participants.forEach(p => {
-      idToParticipant.set(p["id"], p)
-    })
+      idToParticipant.set(p["id"], p);
+    });
 
     // get all the matches
-    let matches = await tnmt.getMatches()
+    let matches = await tnmt.getMatches();
 
     // if an arg containing round paramater is found
     if (args[1]) {
       // filter matches if requested
       let matchesFilter = matches.filter(e => {
-        return e["round"] == args[1]
-      })
+        return e["round"] == args[1];
+      });
       // if a filter is provided, replace matches by filtered matches
       if (matchesFilter && matchesFilter.length >= 1) {
-        origin.channel.send(`_Here is all the matches associated with round : ${args[1]}_`)
-        matches = matchesFilter
+        origin.channel.send(
+          `_Here is all the matches associated with round : ${args[1]}_`
+        );
+        matches = matchesFilter;
       } else {
         // if filter filters nothing, fallback to all
-        origin.channel.send(`_Nothing found using filter **${args[1]}**, fallback to non filtered mode_`)
+        origin.channel.send(
+          `_Nothing found using filter **${args[1]}**, fallback to non filtered mode_`
+        );
       }
     }
 
@@ -118,52 +135,62 @@ async function handleStatus(cmd: Command, origin: Message, client: Challonge, ke
     matches.forEach(m => {
       if (m["completed_at"] == null) {
         // participants data, player 1 and player 2
-        let p1 = idToParticipant.get(m["player1_id"])
-        let p2 = idToParticipant.get(m["player2_id"])
-        resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`
+        let p1 = idToParticipant.get(m["player1_id"]);
+        let p2 = idToParticipant.get(m["player2_id"]);
+        resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
       } else {
         // participants data, winner and loser
-        let w = idToParticipant.get(m["winner_id"])
-        let l = idToParticipant.get(m["loser_id"])
-        resp += `_Round ${m["round"]}_ - **${w["name"]} VS ${l["name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`
+        let w = idToParticipant.get(m["winner_id"]);
+        let l = idToParticipant.get(m["loser_id"]);
+        resp += `_Round ${m["round"]}_ - **${w["name"]} VS ${l["name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
       }
-      resp += "\n"
+      resp += "\n";
     });
 
     // send back response to channel
-    origin.channel.send(resp)
-
-
+    origin.channel.send(resp);
   } else {
-    throw new TnmtError(generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix))
+    throw new TnmtError(
+      generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix)
+    );
   }
 }
 
 // handleJoin is used to register a user to a specified challonge tournament
-async function handleJoin(cmd: Command, origin: Message, client: Challonge, challonge: any, builder: any) {
-
+async function handleJoin(
+  cmd: Command,
+  origin: Message,
+  client: Challonge,
+  challonge: any,
+  builder: any
+) {
   // check if channel is authorized
   if (isAuthorized(origin.channel.id, challonge.channels)) {
     // parse args
-    let args = parseArgs(cmd.args)
+    let args = parseArgs(cmd.args);
     // check arguments requirements
     if (args.length >= Arguments["handleJoin"]) {
+      let filter = await filtered(
+        args[0],
+        client,
+        TournamentInterfaces.tournamentStateEnum.PENDING
+      );
 
-      let filter = await filtered(args[0], client, TournamentInterfaces.tournamentStateEnum.PENDING)
-
-      console.log(filter)
+      console.log(filter);
 
       // create deck
-      let meta = new Array()
+      let meta = new Array();
       // prepare meta data
       // name
-      meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`)
+      meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`);
       // Format, TODO more specific if format is supported by builder, use casual as default
-      meta.push(`casual`)
+      meta.push(`casual`);
       // description
-      meta.push(`Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`)
-      let deck = new Deck(meta)
-      await deck.parseDeck(origin.content, true)
+      meta.push(
+        `Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`
+      );
+      let deck = new Deck(meta);
+      await deck.parseDeck(origin.content, true);
 
       // sync deck to Manastack
       if (builder.kind && builder.kind == "manastack") {
@@ -184,41 +211,48 @@ async function handleJoin(cmd: Command, origin: Message, client: Challonge, chal
           deck.metadata.format,
           formated
         );
-
       }
 
       // add participant to associated tournament
-      let tnmt = new Tournament(challonge.key, filter["tournament"])
-      await tnmt.newParticipant({ name: origin.author.username, misc: synced.getUrl() }).catch(async error => {
-        // ensure a deck delete since adding a participant trigger an error
-        if (builder.kind && builder.kind == "manastack") {
-          await ms.deleteDeck(synced.getID())
-        }
+      let tnmt = new Tournament(challonge.key, filter["tournament"]);
+      await tnmt
+        .newParticipant({ name: origin.author.username, misc: synced.getUrl() })
+        .catch(async error => {
+          // ensure a deck delete since adding a participant trigger an error
+          if (builder.kind && builder.kind == "manastack") {
+            await ms.deleteDeck(synced.getID());
+          }
 
-        // trigger specific error
-        triggerParticipantError(error, origin.author.id, args[0])
-
-      })
+          // trigger specific error
+          triggerParticipantError(error, origin.author.id, args[0]);
+        });
 
       // return decklist, and message
-      origin.channel.send(`Registration succesfull for user <@${origin.author.id}> in tournament ${filter["data"]["tournament"]["full_challonge_url"]}, deck list is available at ${synced.getUrl()}`)
-
+      origin.channel.send(
+        `Registration succesfull for user <@${
+          origin.author.id
+        }> in tournament ${
+          filter["data"]["tournament"]["full_challonge_url"]
+        }, deck list is available at ${synced.getUrl()}`
+      );
     } else {
-      throw new TnmtError(generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix));
+      throw new TnmtError(
+        generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix)
+      );
     }
   } else {
     throw new TnmtError(`This command cannot be used on this channel`);
   }
-
 }
 
 // triggerParticipantError is used to create a custom error when newParcipant fails
 function triggerParticipantError(err: Error, oid: string, id: string) {
   if (err["response"]["status"] == 422 && err["response"]["data"]["errors"]) {
-    throw new TnmtError(`Participant <@${oid}> is already registered in tournament ${id}`)
+    throw new TnmtError(
+      `Participant <@${oid}> is already registered in tournament ${id}`
+    );
   }
-  throw new TnmtError("Error registering participant")
-
+  throw new TnmtError("Error registering participant");
 }
 
 // handleList is used to list all tournaments on challonge
@@ -369,7 +403,6 @@ function parseDate(input: string): Date | null {
 
 // create is used to trigger a tournament creation on challonge
 async function create(args: string[], origin: Message, client: Challonge) {
-
   // generate pseudo-random code from name
   let code = generateCode(args[0]);
 
@@ -430,22 +463,29 @@ function generateName(name: string, format: string): string {
 }
 
 // filtered is used to get all tournaments and filter using id
-async function filtered(id: string, client: Challonge, status: TournamentInterfaces.tournamentStateEnum) {
-
+async function filtered(
+  id: string,
+  client: Challonge,
+  status: TournamentInterfaces.tournamentStateEnum
+) {
   // get pending tournaments
-  let tnmts = await client.getTournaments({ state: status })
+  let tnmts = await client.getTournaments({ state: status });
   // filter using specified ID by the participant
   let filter = tnmts.filter(t => {
-    return getCode(t["data"]["tournament"]["full_challonge_url"]) == id
-  })
+    return getCode(t["data"]["tournament"]["full_challonge_url"]) == id;
+  });
 
   // check if tournament exists and is in pending state
   if (filter.length <= 0) {
-    throw new TnmtError(`There is no tournament with status '${status.replace("_", " ")}' associated with id '${id}'.`)
+    throw new TnmtError(
+      `There is no tournament with status '${status.replace(
+        "_",
+        " "
+      )}' associated with id '${id}'.`
+    );
   }
 
-  return filter[0]
-
+  return filter[0];
 }
 
 // Arity arguments mapper
