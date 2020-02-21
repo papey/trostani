@@ -21,7 +21,7 @@ export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament
   - \`join <tournament id> [... decklist... ]\` : join a tournament (only with PENDING tournaments)
-  - \`status <tournament id>\` : get tournament current status and results (only with IN PROGRESS tournaments)
+  - \`status <tournament id> // <round> (optional) \` : get tournament current status and results (only with IN PROGRESS tournaments)
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
 
   if (cmd.args.includes("create")) {
@@ -30,6 +30,8 @@ export function tnmtHelpMessage(cmd: Command): string {
     return generateSubcommandExample(cmd, "tnmt", "list", listExample);
   } else if (cmd.args.includes("join")) {
     return generateSubcommandExample(cmd, "tnmt", "join", joinExample);
+  } else if (cmd.args.includes("status")) {
+    return generateSubcommandExample(cmd, "tnmt", "status", statusExample);
   }
   return message;
 }
@@ -502,3 +504,6 @@ Réserve
 2 Pyrohélice de Chandra (WAR) 120
 3 Balayage de flammes (M20) 139
 2 Surgissement de Ral (WAR) 212`;
+
+// status subcommand example
+let statusExample = `d6399 // 1`;
