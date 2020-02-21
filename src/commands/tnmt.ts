@@ -135,9 +135,11 @@ async function handleStatus(
     matches.forEach(m => {
       if (m["completed_at"] == null) {
         // participants data, player 1 and player 2
-        let p1 = idToParticipant.get(m["player1_id"]);
-        let p2 = idToParticipant.get(m["player2_id"]);
-        resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
+        if (m["player1_id"] != null && m["player2_id"] != null) {
+          let p1 = idToParticipant.get(m["player1_id"]);
+          let p2 = idToParticipant.get(m["player2_id"]);
+          resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
+        }
       } else {
         // participants data, winner and loser
         let w = idToParticipant.get(m["winner_id"]);
