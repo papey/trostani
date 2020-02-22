@@ -90,7 +90,7 @@ async function handleStatus(
   // check arguments requirements
   if (args.length >= Arguments["handleStatus"]) {
     // get tournament in progress
-    let filter = await filtered(
+    let filter = await findTournament(
       args[0],
       client,
       TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
@@ -172,7 +172,7 @@ async function handleJoin(
     let args = parseArgs(cmd.args);
     // check arguments requirements
     if (args.length >= Arguments["handleJoin"]) {
-      let filter = await filtered(
+      let filter = await findTournament(
         args[0],
         client,
         TournamentInterfaces.tournamentStateEnum.PENDING
@@ -462,8 +462,8 @@ function generateName(name: string, format: string): string {
   return `[Format: ${format.toLocaleUpperCase()}] ${name}`;
 }
 
-// filtered is used to get all tournaments and filter using id
-async function filtered(
+// findTournament is used to find the first tournament matching id parameter
+async function findTournament(
   id: string,
   client: Challonge,
   status: TournamentInterfaces.tournamentStateEnum
@@ -471,12 +471,12 @@ async function filtered(
   // get pending tournaments
   let tnmts = await client.getTournaments({ state: status });
   // filter using specified ID by the participant
-  let filter = tnmts.filter(t => {
+  let found = tnmts.find(t => {
     return getCode(t["data"]["tournament"]["full_challonge_url"]) == id;
   });
 
   // check if tournament exists and is in pending state
-  if (filter.length <= 0) {
+  if (found == undefined) {
     throw new TnmtError(
       `There is no tournament with status '${status.replace(
         "_",
@@ -485,7 +485,7 @@ async function filtered(
     );
   }
 
-  return filter[0];
+  return found;
 }
 
 // Arity arguments mapper
