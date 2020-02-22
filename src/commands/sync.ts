@@ -97,17 +97,16 @@ async function handlePush(
   builder: any
 ) {
   // check if the message is comming from an authorized channel
-  if (isAuthorized(origin.channel.id, channels)) {
-    // push deck and five back url to channel
-    let meta = await push(cmd, origin, translate, builder);
-    origin.channel.send(
-      `A new deck named **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
-    );
-  } else {
+  if (!isAuthorized(origin.channel.id, channels)) {
     throw new SyncError(
       "`push` subcommand of command `sync` is not authorized on this channel"
     );
   }
+  // push deck and five back url to channel
+  let meta = await push(cmd, origin, translate, builder);
+  origin.channel.send(
+    `A new deck named **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
+  );
 }
 
 // push called when a users asks for the push subcommand of the sync command

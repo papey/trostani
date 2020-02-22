@@ -88,7 +88,11 @@ async function handleStatus(
   // parse args
   let args = parseArgs(cmd.args);
   // check arguments requirements
-  if (args.length >= Arguments["handleStatus"]) {
+  if (args.length < Arguments["handleStatus"]) {
+    throw new TnmtError(
+      generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix)
+    );
+  }
     // get tournament in progress
     let filter = await findTournament(
       args[0],
@@ -151,12 +155,7 @@ async function handleStatus(
 
     // send back response to channel
     origin.channel.send(resp);
-  } else {
-    throw new TnmtError(
-      generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix)
-    );
   }
-}
 
 // handleJoin is used to register a user to a specified challonge tournament
 async function handleJoin(
@@ -166,13 +165,21 @@ async function handleJoin(
   challonge: any,
   builder: any
 ) {
-  // check if channel is authorized
-  if (isAuthorized(origin.channel.id, challonge.channels)) {
+  // check if channel is authorized, fail early
+  if (!isAuthorized(origin.channel.id, challonge.channels)) {
+    throw new TnmtError(`This command cannot be used on this channel`);
+  }
+
     // parse args
     let args = parseArgs(cmd.args);
+
     // check arguments requirements
-    if (args.length >= Arguments["handleJoin"]) {
-      let filter = await findTournament(
+  if (args.length < Arguments["handleJoin"]) {
+    throw new TnmtError(
+      generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix)
+    );
+  }
+
         args[0],
         client,
         TournamentInterfaces.tournamentStateEnum.PENDING
@@ -229,21 +236,11 @@ async function handleJoin(
 
       // return decklist, and message
       origin.channel.send(
-        `Registration succesfull for user <@${
-          origin.author.id
-        }> in tournament ${
-          filter["data"]["tournament"]["full_challonge_url"]
+    `Registration succesfull for user <@${origin.author.id}> in tournament ${
+      found["data"]["tournament"]["full_challonge_url"]
         }, deck list is available at ${synced.getUrl()}`
       );
-    } else {
-      throw new TnmtError(
-        generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix)
-      );
     }
-  } else {
-    throw new TnmtError(`This command cannot be used on this channel`);
-  }
-}
 
 // triggerParticipantError is used to create a custom error when newParcipant fails
 function triggerParticipantError(err: Error, oid: string, id: string) {
@@ -340,27 +337,28 @@ async function handleCreate(
   client: Challonge,
   config: any
 ) {
-  // check authorization and permissions
-  if (isAuthorized(origin.channel.id, config.channels)) {
-    if (hasPermission(origin.member.roles, config.roles)) {
+  // check authorization and permissions, fail early
+  if (!isAuthorized(origin.channel.id, config.channels)) {
+    throw new TnmtError(`This command cannot be used on this channel`);
+  }
+
+  if (!hasPermission(origin.member.roles, config.roles)) {
+    throw new TnmtError(
+      `You don't have the required permissions to use this command`
+    );
+  }
+
       // parse args
       let args = parseArgs(cmd.args, true);
       // ensure args requirements
-      if (args.length >= Arguments["handleCreate"]) {
-        await create(args, origin, client);
-      } else {
+  if (args.length < Arguments["handleCreate"]) {
         throw new TnmtError(
           generateArgsErrorMsg(Arguments["handleCreate"], cmd.prefix)
         );
       }
-    } else {
-      throw new TnmtError(
-        `You don't have the required permissions to use this command`
-      );
-    }
-  } else {
-    throw new TnmtError(`This command cannot be used on this channel`);
-  }
+
+  // if everything is ok, create
+  await create(args, origin, client);
 }
 
 // parseTnmtType is used to translate a tournament type as a string to a Challonge supported type
