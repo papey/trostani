@@ -93,69 +93,69 @@ async function handleStatus(
       generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix)
     );
   }
-    // get tournament in progress
-    let filter = await findTournament(
-      args[0],
-      client,
-      TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
-    );
+  // get tournament in progress
+  let found = await findTournament(
+    args[0],
+    client,
+    TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
+  );
 
-    // get tournament data
-    let tnmt = new Tournament(key, filter["tournament"]);
+  // get tournament data
+  let tnmt = new Tournament(key, found["tournament"]);
 
-    // get all parcitipants for this tournament
-    let participants = await tnmt.getParticipants();
+  // get all parcitipants for this tournament
+  let participants = await tnmt.getParticipants();
 
-    // since matches only contains id, ensure ability to quickly found participant from his ID
-    let idToParticipant = new Map();
-    participants.forEach(p => {
-      idToParticipant.set(p["id"], p);
+  // since matches only contains id, ensure ability to quickly found participant from his ID
+  let idToParticipant = new Map();
+  participants.forEach(p => {
+    idToParticipant.set(p["id"], p);
+  });
+
+  // get all the matches
+  let matches = await tnmt.getMatches();
+
+  // if an arg containing round paramater is found
+  if (args[1]) {
+    // filter matches if requested
+    let matchesFilter = matches.filter(e => {
+      return e["round"] == args[1];
     });
-
-    // get all the matches
-    let matches = await tnmt.getMatches();
-
-    // if an arg containing round paramater is found
-    if (args[1]) {
-      // filter matches if requested
-      let matchesFilter = matches.filter(e => {
-        return e["round"] == args[1];
-      });
-      // if a filter is provided, replace matches by filtered matches
-      if (matchesFilter && matchesFilter.length >= 1) {
-        origin.channel.send(
-          `_Here is all the matches associated with round : ${args[1]}_`
-        );
-        matches = matchesFilter;
-      } else {
-        // if filter filters nothing, fallback to all
-        origin.channel.send(
-          `_Nothing found using filter **${args[1]}**, fallback to non filtered mode_`
-        );
-      }
+    // if a filter is provided, replace matches by filtered matches
+    if (matchesFilter && matchesFilter.length >= 1) {
+      origin.channel.send(
+        `_Here is all the matches associated with round : ${args[1]}_`
+      );
+      matches = matchesFilter;
+    } else {
+      // if filter filters nothing, fallback to all
+      origin.channel.send(
+        `_Nothing found using filter **${args[1]}**, fallback to no filter mode_`
+      );
     }
-
-    // for all matches, create response
-    matches.forEach(m => {
-      if (m["completed_at"] == null) {
-        // participants data, player 1 and player 2
-        if (m["player1_id"] != null && m["player2_id"] != null) {
-          let p1 = idToParticipant.get(m["player1_id"]);
-          let p2 = idToParticipant.get(m["player2_id"]);
-          resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
-        }
-      } else {
-        // participants data, winner and loser
-        let w = idToParticipant.get(m["winner_id"]);
-        let l = idToParticipant.get(m["loser_id"]);
-        resp += `_Round ${m["round"]}_ - **${w["name"]} VS ${l["name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
-      }
-      resp += "\n";
-    });
-
-    // send back response to channel
-    origin.channel.send(resp);
   }
+
+  // for all matches, create response
+  matches.forEach(m => {
+    if (m["completed_at"] == null) {
+      // participants data, player 1 and player 2
+      if (m["player1_id"] != null && m["player2_id"] != null) {
+        let p1 = idToParticipant.get(m["player1_id"]);
+        let p2 = idToParticipant.get(m["player2_id"]);
+        resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
+      }
+    } else {
+      // participants data, winner and loser
+      let w = idToParticipant.get(m["winner_id"]);
+      let l = idToParticipant.get(m["loser_id"]);
+      resp += `_Round ${m["round"]}_ - **${w["name"]} VS ${l["name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
+    }
+    resp += "\n";
+  });
+
+  // send back response to channel
+  origin.channel.send(resp);
+}
 
 // handleJoin is used to register a user to a specified challonge tournament
 async function handleJoin(
@@ -170,77 +170,78 @@ async function handleJoin(
     throw new TnmtError(`This command cannot be used on this channel`);
   }
 
-    // parse args
-    let args = parseArgs(cmd.args);
+  // parse args
+  let args = parseArgs(cmd.args);
 
-    // check arguments requirements
+  // check arguments requirements
   if (args.length < Arguments["handleJoin"]) {
     throw new TnmtError(
       generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix)
     );
   }
 
-        args[0],
-        client,
-        TournamentInterfaces.tournamentStateEnum.PENDING
-      );
+  let found = await findTournament(
+    args[0],
+    client,
+    TournamentInterfaces.tournamentStateEnum.PENDING
+  );
 
-      // create deck
-      let meta = new Array();
-      // prepare meta data
-      // name
-      meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`);
-      // Format, TODO more specific if format is supported by builder, use casual as default
-      meta.push(`casual`);
-      // description
-      meta.push(
-        `Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`
-      );
-      let deck = new Deck(meta);
-      await deck.parseDeck(origin.content, true);
+  // create deck
+  let meta = new Array();
+  // prepare meta data
+  // name
+  meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`);
+  // Format, TODO more specific if format is supported by builder, use casual as default
+  meta.push(`casual`);
+  // description
+  meta.push(
+    `Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`
+  );
+  let deck = new Deck(meta);
+  await deck.parseDeck(origin.content, true);
 
-      // sync deck to Manastack
+  // sync deck to Manastack
+  if (builder.kind && builder.kind == "manastack") {
+    var ms = new Manastack(
+      builder.username,
+      builder.password,
+      builder.url,
+      builder.profile
+    );
+
+    // Try formating the deck to ManaStack format
+    let formated = deck.exportToManaStack();
+
+    // Try creating the deck on ManaStack
+    var synced = await ms.newDeck(
+      deck.metadata.name,
+      deck.metadata.description,
+      deck.metadata.format,
+      formated
+    );
+  }
+
+  // add participant to associated tournament
+  let tnmt = new Tournament(challonge.key, found["tournament"]);
+  await tnmt
+    .newParticipant({ name: origin.author.username, misc: synced.getUrl() })
+    .catch(async error => {
+      // ensure a deck delete since adding a participant trigger an error
       if (builder.kind && builder.kind == "manastack") {
-        var ms = new Manastack(
-          builder.username,
-          builder.password,
-          builder.url,
-          builder.profile
-        );
-
-        // Try formating the deck to ManaStack format
-        let formated = deck.exportToManaStack();
-
-        // Try creating the deck on ManaStack
-        var synced = await ms.newDeck(
-          deck.metadata.name,
-          deck.metadata.description,
-          deck.metadata.format,
-          formated
-        );
+        await ms.deleteDeck(synced.getID());
       }
 
-      // add participant to associated tournament
-      let tnmt = new Tournament(challonge.key, filter["tournament"]);
-      await tnmt
-        .newParticipant({ name: origin.author.username, misc: synced.getUrl() })
-        .catch(async error => {
-          // ensure a deck delete since adding a participant trigger an error
-          if (builder.kind && builder.kind == "manastack") {
-            await ms.deleteDeck(synced.getID());
-          }
+      // trigger specific error
+      triggerParticipantError(error, origin.author.id, args[0]);
+    });
 
-          // trigger specific error
-          triggerParticipantError(error, origin.author.id, args[0]);
-        });
-
-      // return decklist, and message
-      origin.channel.send(
+  // return decklist, and message
+  origin.channel.send(
     `Registration succesfull for user <@${origin.author.id}> in tournament ${
       found["data"]["tournament"]["full_challonge_url"]
-        }, deck list is available at ${synced.getUrl()}`
-      );
-    }
+    }, deck list is available at ${synced.getUrl()}`
+  );
+}
 
 // triggerParticipantError is used to create a custom error when newParcipant fails
 function triggerParticipantError(err: Error, oid: string, id: string) {
@@ -348,14 +349,14 @@ async function handleCreate(
     );
   }
 
-      // parse args
-      let args = parseArgs(cmd.args, true);
-      // ensure args requirements
+  // parse args
+  let args = parseArgs(cmd.args, true);
+  // ensure args requirements
   if (args.length < Arguments["handleCreate"]) {
-        throw new TnmtError(
-          generateArgsErrorMsg(Arguments["handleCreate"], cmd.prefix)
-        );
-      }
+    throw new TnmtError(
+      generateArgsErrorMsg(Arguments["handleCreate"], cmd.prefix)
+    );
+  }
 
   // if everything is ok, create
   await create(args, origin, client);
