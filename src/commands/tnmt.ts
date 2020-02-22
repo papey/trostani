@@ -324,11 +324,13 @@ function generateListLine(t: Tournament) {
       date = `starting at **${start.toDateString()}** | **${start.toTimeString()}**`;
       break;
     default:
+      var started = new Date(t["data"]["tournament"]["created_at"]);
+      date = `created at **${started.toDateString()}**`;
       break;
   }
 
   // return full string
-  return base + " - _" + t["data"]["tournament"]["state"] + "_ - " + date;
+  return base + " - " + t["data"]["tournament"]["state"] + " - " + date;
 }
 
 // handleCreate is used to create a tournament on challonge
