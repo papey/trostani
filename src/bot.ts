@@ -67,12 +67,12 @@ export class Trostani {
         switch (command.main) {
           case "tnmt":
             handleTnmt(command, message, this.config).catch(error => {
-              this.logErrToDiscord(error, message);
+              this.logErr(error, message);
             });
             break;
           case "sync":
             handleSync(command, message, this.config).catch(error => {
-              this.logErrToDiscord(error, message);
+              this.logErr(error, message);
             });
             break;
           case "profile":
@@ -89,8 +89,10 @@ export class Trostani {
     });
   }
 
-  // logError to stdout and channel
-  private logErrToDiscord(error: Error, message: Message) {
+  // logErr to stdout and channel
+  private logErr(error: Error, message: Message) {
+    // error goes in stdout as well as Discord channel
+    console.log(error);
     // send error to Discord channel
     message.channel.send(`**${error.message}**`);
   }
