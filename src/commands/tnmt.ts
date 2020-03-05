@@ -1,7 +1,7 @@
 // tnmt.ts contains code to handle the tnmt command and tnmt subcommands
 
 // Imports
-import { Message } from "discord.js";
+import { Message, Client } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import { Deck } from "../scry/mtg";
@@ -22,6 +22,7 @@ export function tnmtHelpMessage(cmd: Command): string {
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament
   - \`join <tournament id> [... decklist... ]\` : join a tournament (only with PENDING tournaments)
   - \`status <tournament id> // <round> (optional) \` : get tournament current status and results (only with IN PROGRESS tournaments)
+  - \`report <tournament id> // <identifier> // <winner> // <score> \` : report a tournament match result (only with IN PROGRESS tournaments)
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
 
   if (cmd.args.includes("create")) {
@@ -32,6 +33,8 @@ export function tnmtHelpMessage(cmd: Command): string {
     return generateSubcommandExample(cmd, "tnmt", "join", joinExample);
   } else if (cmd.args.includes("status")) {
     return generateSubcommandExample(cmd, "tnmt", "status", statusExample);
+  } else if (cmd.args.includes("report")) {
+    return generateSubcommandExample(cmd, "tnmt", "report", reportExample);
   }
   return message;
 }
@@ -68,11 +71,145 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
     case "status":
       await handleStatus(cmd, origin, chlg, config.settings.challonge.key);
       break;
+    case "report":
+      await handleReport(cmd, origin, chlg, config.settings.challonge);
+      break;
     default:
       throw new TnmtError(
         `\`${cmd.sub}\` is not a valid subcommand of the \`tnmt\` command (if you need help try \`${cmd.prefix}help\`)`
       );
   }
+}
+
+// handleReport is used to report a match result of a specified challonge tournament
+async function handleReport(
+  cmd: Command,
+  origin: Message,
+  client: Challonge,
+  config: any
+) {
+  // check arguments
+  let args = parseArgs(cmd.args);
+
+  // check if command is authorized on this channel (fail early)
+  if (!isAuthorized(origin.channel.id, config.channels)) {
+    throw new TnmtError(`This command cannot be used on this channel`);
+  }
+
+  // check is number of arguments is ok (fail early)
+  if (args.length < Arguments["handleReport"]) {
+    throw new TnmtError(
+      generateArgsErrorMsg(Arguments["handleReport"], cmd.prefix)
+    );
+  }
+
+  // find all requested tournament
+  let filter = await findTournament(
+    args[0],
+    client,
+    TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
+  );
+
+  // create object to interact with it
+  let tnmt = new Tournament(config.key, filter["tournament"]);
+
+  // get all matches attached to that tournament
+  let matches = await tnmt.getMatches();
+
+  // find requested match
+  let match = matches.find(m => {
+    return m["identifier"] == args[1];
+  });
+
+  // If match is not found
+  if (match == undefined) {
+    throw new TnmtError(
+      `Match with identifer ${args[1]} in tournament ${args[0]} not found`
+    );
+  }
+
+  // get winner username from mention
+  let winner = getUserFromMention(origin.client, args[2]);
+  let participants = await tnmt.getParticipants();
+  // find index of winner in participants array
+  let wIndex = participants.findIndex(p => {
+    return p["name"] == winner.username;
+  });
+
+  // if winner not found, trigger an error
+  if (wIndex == undefined) {
+    throw new TnmtError(
+      `Participant named ${args[2]} not found in tournament ${args[0]}`
+    );
+  }
+
+  // compute looser index from winner index
+  let lIndex = wIndex == 0 ? 1 : 0;
+
+  // since matches only contains id, ensure ability to quickly found participant from his ID
+  let idToParticipant = new Map();
+  participants.forEach(p => {
+    idToParticipant.set(p["id"], p);
+  });
+
+  let score = forgeScoreCSV(args[3], wIndex, lIndex);
+
+  match.selectWinner(participants[wIndex]["id"], score);
+
+  origin.channel.send(
+    `Participant **${
+      participants[wIndex]["name"]
+    }** has been set as winner of match **${args[1]}** in tournament **${
+      args[0]
+    }** _(score : ${
+      idToParticipant.get(match["player1_id"])["name"]
+    } ${score} ${idToParticipant.get(match["player2_id"])["name"]})_`
+  );
+}
+
+// forgeScoreCSV is used to ensure score is in the order requested by challonge
+export function forgeScoreCSV(score: string, winner: number, looser: number) {
+  // init regex
+  let reg = new RegExp("(\\d+)-(\\d+)");
+
+  // exec regex
+  let res = reg.exec(score);
+
+  // ensure result is valid
+  if (res.length < 3) {
+    throw new TnmtError("Error parsing score");
+  }
+
+  // check if we have to invert score
+  var inverse = false;
+
+  if (winner == 0) {
+    inverse = res[1] > res[2] ? false : true;
+  } else {
+    inverse = res[1] < res[2] ? false : true;
+  }
+
+  if (inverse) {
+    return `${res[2]}-${res[1]}`;
+  }
+
+  return `${res[1]}-${res[2]}`;
+}
+
+// getUserFromMention is used to get user from a Discord @
+// yes, this is a copy/paste from documentation
+function getUserFromMention(client: Client, mention: string) {
+  // The id is the first and only match found by the RegEx.
+  const matches = mention.match(/^<@!?(\d+)>$/);
+
+  // If supplied variable was not a mention, matches will be null instead of an array.
+  if (!matches) return;
+
+  // However the first element in the matches array will be the entire mention, not just the ID,
+  // so use index 1.
+  const id = matches[1];
+
+  return client.users.get(id);
 }
 
 // handleStatus is used to get current status of specified challonge tournament
@@ -493,7 +630,8 @@ async function findTournament(
 let Arguments: { [f: string]: number } = {
   handleCreate: 4,
   handleJoin: 1,
-  handleStatus: 1
+  handleStatus: 1,
+  handleReport: 4
 };
 
 // Sync Command Error
@@ -548,3 +686,6 @@ Réserve
 
 // status subcommand example
 let statusExample = `d6399 // 1`;
+
+// report subcommand example
+let reportExample = `a99ab // A // @Mayalabielle // 2-1`;
