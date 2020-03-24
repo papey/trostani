@@ -400,7 +400,7 @@ async function handleJoin(
 
   // return decklist, and message
   origin.channel.send(
-    `Registration succesfull for user <@${origin.author.id}> in tournament ${
+    `Registration successfull for user <@${origin.author.id}> in tournament ${
       found["data"]["tournament"]["full_challonge_url"]
     }, deck list is available at ${synced.getUrl()}`
   );
