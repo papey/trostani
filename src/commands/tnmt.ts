@@ -353,7 +353,9 @@ async function handleJoin(
   let meta = new Array();
   // prepare meta data
   // name
-  meta.push(`[Tournament: ${id}] ${origin.author.username}'s Deck`);
+  let title = `[Tournament: ${id}] ${origin.author.username}'s Deck`;
+  args.length >= 1 ? (title += ` (${args[0]})`) : title;
+  meta.push(title);
   // Format, TODO more specific if format is supported by builder, use casual as default
   meta.push(`casual`);
   // description
@@ -678,7 +680,7 @@ async function findTournament(
 // Arity arguments mapper
 let Arguments: { [f: string]: number } = {
   handleCreate: 4,
-  handleJoin: 1,
+  handleJoin: 0,
   handleStatus: 1,
   handleReport: 3
 };
