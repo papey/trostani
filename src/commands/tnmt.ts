@@ -19,11 +19,11 @@ import { generateSubcommandExample } from "./help";
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
-  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament
-  - \`join <tournament id> [... decklist... ]\` : join a tournament (only with PENDING tournaments)
-  - \`status <tournament id> // <round> (optional) \` : get tournament current status and results (only with IN PROGRESS tournaments)
-  - \`report <tournament id> // <identifier> // <winner> // <score> \` : report a tournament match result (only with IN PROGRESS tournaments)
-  - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments`;
+  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament (**admin only**)
+  - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments
+  - \`status <tournament id> // <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments)
+  - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
+  - \`report <winner> // <score> \` : to report a tournament match result (only available with with IN PROGRESS tournaments, **in dedicated channel**)`;
 
   if (cmd.args.includes("create")) {
     return generateSubcommandExample(cmd, "tnmt", "create", createExample);
