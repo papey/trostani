@@ -54,7 +54,13 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
 
   switch (cmd.sub) {
     case "create":
-      await handleCreate(cmd, origin, chlg, config.settings.challonge);
+      await handleCreate(
+        cmd,
+        origin,
+        chlg,
+        config.settings.challonge,
+        config.settings.challonge.parent
+      );
       break;
     case "list":
       await handleList(cmd, origin, chlg);
@@ -114,10 +120,8 @@ async function handleReport(
   // check arguments
   let args = parseArgs(cmd.args);
 
-  // check if command is authorized on this channel (fail early)
-  if (!isAuthorized(origin.channel.id, config.channels)) {
-    throw new TnmtError(`This command cannot be used on this channel`);
-  }
+  // check if channel if channel if valid
+  let id = tnmtIDFromChannel(origin);
 
   // check is number of arguments is ok (fail early)
   if (args.length < Arguments["handleReport"]) {
@@ -128,7 +132,7 @@ async function handleReport(
 
   // find all requested tournament
   let filter = await findTournament(
-    args[0],
+    id,
     client,
     TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
   );
@@ -141,18 +145,18 @@ async function handleReport(
 
   // find requested match
   let match = matches.find(m => {
-    return m["identifier"] == args[1];
+    return m["identifier"] == args[0];
   });
 
   // If match is not found
   if (match == undefined) {
     throw new TnmtError(
-      `Match with identifer ${args[1]} in tournament ${args[0]} not found`
+      `Match with identifer ${args[0]} in tournament ${id} not found`
     );
   }
 
   // get winner username from mention
-  let winner = getUserFromMention(origin.client, args[2]);
+  let winner = getUserFromMention(origin.client, args[1]);
   let participants = await tnmt.getParticipants();
   // find index of winner in participants array
   let wIndex = participants.findIndex(p => {
@@ -162,7 +166,7 @@ async function handleReport(
   // if winner not found, trigger an error
   if (wIndex == undefined) {
     throw new TnmtError(
-      `Participant named ${args[2]} not found in tournament ${args[0]}`
+      `Participant named ${args[1]} not found in tournament ${id}`
     );
   }
 
@@ -175,16 +179,16 @@ async function handleReport(
     idToParticipant.set(p["id"], p);
   });
 
-  let score = forgeScoreCSV(args[3], wIndex, lIndex);
+  let score = forgeScoreCSV(args[2], wIndex, lIndex);
 
   match.selectWinner(participants[wIndex]["id"], score);
 
   origin.channel.send(
     `Participant **${
       participants[wIndex]["name"]
-    }** has been set as winner of match **${args[1]}** in tournament **${
+    }** has been set as winner of match **${
       args[0]
-    }** _(score : ${
+    }** in tournament **${id}** _(score : ${
       idToParticipant.get(match["player1_id"])["name"]
     } ${score} ${idToParticipant.get(match["player2_id"])["name"]})_`
   );
@@ -325,10 +329,8 @@ async function handleJoin(
   challonge: any,
   builder: any
 ) {
-  // check if channel is authorized, fail early
-  if (!isAuthorized(origin.channel.id, challonge.channels)) {
-    throw new TnmtError(`This command cannot be used on this channel`);
-  }
+  // check if channel if channel if valid
+  let id = tnmtIDFromChannel(origin);
 
   // parse args
   let args = parseArgs(cmd.args);
@@ -341,7 +343,7 @@ async function handleJoin(
   }
 
   let found = await findTournament(
-    args[0],
+    id,
     client,
     TournamentInterfaces.tournamentStateEnum.PENDING
   );
@@ -350,12 +352,12 @@ async function handleJoin(
   let meta = new Array();
   // prepare meta data
   // name
-  meta.push(`[Tournament: ${args[0]}] ${origin.author.username}'s Deck`);
+  meta.push(`[Tournament: ${id}] ${origin.author.username}'s Deck`);
   // Format, TODO more specific if format is supported by builder, use casual as default
   meta.push(`casual`);
   // description
   meta.push(
-    `Deck played by participant ${origin.author.username} during tournament with associated ID ${args[0]}`
+    `Deck played by participant ${origin.author.username} during tournament with associated ID ${id}`
   );
   let deck = new Deck(meta);
   await deck.parseDeck(origin.content, true);
@@ -392,7 +394,7 @@ async function handleJoin(
       }
 
       // trigger specific error
-      triggerParticipantError(error, origin.author.id, args[0]);
+      triggerParticipantError(error, origin.author.id, id);
     });
 
   // return decklist, and message
@@ -496,7 +498,8 @@ async function handleCreate(
   cmd: Command,
   origin: Message,
   client: Challonge,
-  config: any
+  config: any,
+  parent: string
 ) {
   // check authorization and permissions, fail early
   if (!isAuthorized(origin.channel.id, config.channels)) {
@@ -519,7 +522,7 @@ async function handleCreate(
   }
 
   // if everything is ok, create
-  await create(args, origin, client);
+  await create(args, origin, client, parent);
 }
 
 // parseTnmtType is used to translate a tournament type as a string to a Challonge supported type
@@ -577,7 +580,12 @@ async function createTnmtChannel(
 }
 
 // create is used to trigger a tournament creation on challonge
-async function create(args: string[], origin: Message, client: Challonge) {
+async function create(
+  args: string[],
+  origin: Message,
+  client: Challonge,
+  category: string
+) {
   // generate pseudo-random code from name
   let code = generateCode(args[0]);
 
@@ -613,9 +621,12 @@ async function create(args: string[], origin: Message, client: Challonge) {
   // trigger call to challonge API
   await client.createTournament(meta);
 
+  // create specific tournament channel
+  let channel = await createTnmtChannel(origin, args[0], code, category);
+
   // send message to channel when tournament is created
   origin.channel.send(
-    `Tournament **${args[0]}** created and available at https://challonge.com/${code}, you can interact with it using the following code : **${code}**`
+    `Tournament **${args[0]}** created and available at https://challonge.com/${code}, you can now use the dedicated channel <#${channel.id}>, to interact with it`
   );
 }
 
@@ -668,7 +679,7 @@ let Arguments: { [f: string]: number } = {
   handleCreate: 4,
   handleJoin: 1,
   handleStatus: 1,
-  handleReport: 4
+  handleReport: 3
 };
 
 // Sync Command Error
