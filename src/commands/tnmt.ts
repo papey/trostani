@@ -81,6 +81,29 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
   }
 }
 
+// tnmtChannel is used to ensure origin channel is a tournament one
+function tnmtIDFromChannel(origin: Message): string {
+  // get Discord channel object
+  let ch = origin.guild.channels.find(ch => ch.id === origin.channel.id);
+  // get parts
+  let parts = ch.name.split("-");
+  // checks
+  // length
+  if (parts.length <= 2) {
+    // fail early if not a tournament channel
+    throw new TnmtError("This is not a tournament channel");
+  }
+
+  // if first part is `tnmt`
+  if (parts[0] != "tnmt") {
+    // fail early if not a tournament channel
+    throw new TnmtError("This is not a tournament channel");
+  }
+
+  // second part is channel id
+  return parts[1];
+}
+
 // handleReport is used to report a match result of a specified challonge tournament
 async function handleReport(
   cmd: Command,
@@ -537,6 +560,20 @@ function parseDate(input: string): Date | null {
 
   // create date
   return new Date(toInt[1], toInt[2], toInt[3], toInt[4], toInt[5]);
+}
+
+// createTnmtChannel is used to ensure a dedicated channel per tournament
+async function createTnmtChannel(
+  origin: Message,
+  name: string,
+  code: string,
+  category: string
+) {
+  let channel = await origin.guild.createChannel(`tnmt-${code}-${name}`, {
+    type: "text"
+  });
+  await channel.setParent(category);
+  return channel;
 }
 
 // create is used to trigger a tournament creation on challonge
