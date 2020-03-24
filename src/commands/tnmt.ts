@@ -160,7 +160,7 @@ async function handleReport(
   let participants = await tnmt.getParticipants();
   // find index of winner in participants array
   let wIndex = participants.findIndex(p => {
-    return p["name"] == winner.username;
+    return p["name"] == winner;
   });
 
   // if winner not found, trigger an error
@@ -230,13 +230,14 @@ function getUserFromMention(client: Client, mention: string) {
   const matches = mention.match(/^<@!?(\d+)>$/);
 
   // If supplied variable was not a mention, matches will be null instead of an array.
-  if (!matches) return;
+  // return non mentionned username
+  if (!matches) return mention;
 
   // However the first element in the matches array will be the entire mention, not just the ID,
   // so use index 1.
   const id = matches[1];
 
-  return client.users.get(id);
+  return client.users.get(id).username;
 }
 
 // handleStatus is used to get current status of specified challonge tournament
