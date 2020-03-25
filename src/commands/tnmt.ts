@@ -352,6 +352,8 @@ async function handleJoin(
   // init display name
   let displayName = origin.guild.members.get(origin.author.id).displayName;
 
+  origin.channel.send(`_Processing ${displayName} decklist_`);
+
   // create deck
   let meta = new Array();
   // prepare meta data
