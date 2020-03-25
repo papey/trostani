@@ -705,7 +705,7 @@ let createExample = `Tournament Name // Tournament Description // SW // Forgeron
 let listExample = `pending`;
 
 // join subcommand example
-let joinExample = `df898
+let joinExample = `Awesome deck
 Deck
 4 Frisson de probabilité (ELD) 146
 4 Soif de sens (THB) 74
@@ -742,4 +742,4 @@ Réserve
 let statusExample = `d6399 // 1`;
 
 // report subcommand example
-let reportExample = `a99ab // A // @Mayalabielle // 2-1`;
+let reportExample = `A // @Mayalabielle // 2-1`;
