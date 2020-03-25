@@ -349,18 +349,21 @@ async function handleJoin(
     TournamentInterfaces.tournamentStateEnum.PENDING
   );
 
+  // init display name
+  let displayName = origin.guild.members.get(origin.author.id).displayName;
+
   // create deck
   let meta = new Array();
   // prepare meta data
   // name
-  let title = `[Tournament: ${id}] ${origin.author.username}'s Deck`;
+  let title = `[Tournament: ${id}] ${displayName}'s Deck`;
   args.length >= 1 ? (title += ` (${args[0]})`) : title;
   meta.push(title);
   // Format, TODO more specific if format is supported by builder, use casual as default
   meta.push(`casual`);
   // description
   meta.push(
-    `Deck played by participant ${origin.author.username} during tournament with associated ID ${id}`
+    `Deck played by participant ${displayName} during tournament with associated ID ${id}`
   );
   let deck = new Deck(meta);
   await deck.parseDeck(origin.content, true);
@@ -389,7 +392,7 @@ async function handleJoin(
   // add participant to associated tournament
   let tnmt = new Tournament(challonge.key, found["tournament"]);
   await tnmt
-    .newParticipant({ name: origin.author.username, misc: synced.getUrl() })
+    .newParticipant({ name: displayName, misc: synced.getUrl() })
     .catch(async error => {
       // ensure a deck delete since adding a participant trigger an error
       if (builder.kind && builder.kind == "manastack") {
