@@ -156,46 +156,52 @@ async function handleReport(
   }
 
   // get winner username from mention
-  let winner = getUserFromMention(origin.client, args[1]);
-  let participants = await tnmt.getParticipants();
-  // find index of winner in participants array
-  let wIndex = participants.findIndex(p => {
-    return p["name"] == winner;
-  });
+  let username = getUserFromMention(origin.client, args[1]);
 
+  // get all participants
+  let participants = await tnmt.getParticipants();
+
+  // find player 1
+  let p1 = participants.find(p => {
+    return p["id"] === match["player1_id"];
+  });
+  // ensure find is ok
+  if (p1 == undefined) {
+    throw new TnmtError(`Player with id ${p1[id]} not found`);
+  }
+
+  // find player 2
+  let p2 = participants.find(p => {
+    return p["id"] === match["player2_id"];
+  });
+  // ensure find is ok
+  if (p2 == undefined) {
+    throw new TnmtError(`Player with id ${p1[id]} not found`);
+  }
+
+  // find winner in participants array
+  let winner = participants.find(p => {
+    return p["display_name"] == username;
+  });
   // if winner not found, trigger an error
-  if (wIndex == undefined) {
+  if (winner == undefined) {
     throw new TnmtError(
       `Participant named ${args[1]} not found in tournament ${id}`
     );
   }
 
-  // compute looser index from winner index
-  let lIndex = wIndex == 0 ? 1 : 0;
+  let score =
+    winner["id"] == p1["id"] ? forgeScore(args[2], 1) : forgeScore(args[2], 2);
 
-  // since matches only contains id, ensure ability to quickly found participant from his ID
-  let idToParticipant = new Map();
-  participants.forEach(p => {
-    idToParticipant.set(p["id"], p);
-  });
-
-  let score = forgeScoreCSV(args[2], wIndex, lIndex);
-
-  match.selectWinner(participants[wIndex]["id"], score);
+  match.selectWinner(winner["id"], score);
 
   origin.channel.send(
-    `Participant **${
-      participants[wIndex]["name"]
-    }** has been set as winner of match **${
-      args[0]
-    }** in tournament **${id}** _(score : ${
-      idToParticipant.get(match["player1_id"])["name"]
-    } ${score} ${idToParticipant.get(match["player2_id"])["name"]})_`
+    `Participant **${winner["display_name"]}** has been set as winner of match **${args[0]}** in tournament **${id}** _(score : ${p1["display_name"]} ${score} ${p2["display_name"]})_`
   );
 }
 
 // forgeScoreCSV is used to ensure score is in the order requested by challonge
-export function forgeScoreCSV(score: string, winner: number, looser: number) {
+export function forgeScore(score: string, winner: number) {
   // init regex
   let reg = new RegExp("(\\d+)-(\\d+)");
 
@@ -210,7 +216,7 @@ export function forgeScoreCSV(score: string, winner: number, looser: number) {
   // check if we have to invert score
   var inverse = false;
 
-  if (winner == 0) {
+  if (winner == 1) {
     inverse = res[1] > res[2] ? false : true;
   } else {
     inverse = res[1] < res[2] ? false : true;
