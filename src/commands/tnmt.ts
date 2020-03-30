@@ -20,6 +20,7 @@ import { generateSubcommandExample } from "./help";
 export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament (**admin only**)
+  - \`start\` : to start a tournament (**admin only, with PENDING tournaments, in dedicated channel**)
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments
   - \`status <tournament id> // <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments)
   - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
@@ -35,7 +36,10 @@ export function tnmtHelpMessage(cmd: Command): string {
     return generateSubcommandExample(cmd, "tnmt", "status", statusExample);
   } else if (cmd.args.includes("report")) {
     return generateSubcommandExample(cmd, "tnmt", "report", reportExample);
+  } else if (cmd.args.includes("start")) {
+    return generateSubcommandExample(cmd, "tnmt", "start", "");
   }
+
   return message;
 }
 
@@ -80,6 +84,9 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
     case "report":
       await handleReport(cmd, origin, chlg, config.settings.challonge);
       break;
+    case "start":
+      await handleStart(origin, chlg, config.settings.challonge);
+      break;
     default:
       throw new TnmtError(
         `\`${cmd.sub}\` is not a valid subcommand of the \`tnmt\` command (if you need help try \`${cmd.prefix}help\`)`
@@ -108,6 +115,33 @@ function tnmtIDFromChannel(origin: Message): string {
 
   // second part is channel id
   return parts[1];
+}
+
+async function handleStart(origin: Message, client: Challonge, config: any) {
+  // check is user requesting command have required permissions
+  if (!hasPermission(origin.member.roles, config.roles)) {
+    throw new TnmtError(
+      `You don't have the required permissions to use this command`
+    );
+  }
+
+  // check if channel if channel if valid
+  let id = tnmtIDFromChannel(origin);
+
+  // find all requested tournament (should be in pending mode)
+  let filter = await findTournament(
+    id,
+    client,
+    TournamentInterfaces.tournamentStateEnum.PENDING
+  );
+
+  // create object to interact with it
+  let tnmt = new Tournament(config.key, filter["tournament"]);
+
+  // start tournament
+  await tnmt.startTournament();
+
+  origin.channel.send("Tournament started ! GLHF !");
 }
 
 // handleReport is used to report a match result of a specified challonge tournament
