@@ -151,8 +151,10 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
     TournamentInterfaces.tournamentStateEnum.PENDING
   );
 
-  // create object to interact with it
-  let tnmt = new Tournament(config.key, filter["tournament"]);
+  // ensure a random roll of match ups
+  await tnmt.randomizeParticipants();
+
+  origin.channel.send(`Random rolling tournament **${tnmt["name"]}**`);
 
   // start tournament
   await tnmt.startTournament();
