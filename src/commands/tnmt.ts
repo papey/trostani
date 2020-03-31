@@ -143,13 +143,11 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
     );
   }
 
-  // check if channel if channel if valid
-  let id = tnmtIDFromChannel(origin);
-
-  // find all requested tournament (should be in pending mode)
-  let filter = await findTournament(
-    id,
+  // get tournament object or die trying
+  let tnmt = await tnmtFromChannel(
+    origin,
     client,
+    config,
     TournamentInterfaces.tournamentStateEnum.PENDING
   );
 
@@ -159,7 +157,7 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
   // start tournament
   await tnmt.startTournament();
 
-  origin.channel.send("Tournament started ! GLHF !");
+  origin.channel.send(`Tournament **${tnmt["name"]}** started ! 🃏 GLHF 🃏 !`);
 }
 
 // handleReport is used to report a match result of a specified challonge tournament
@@ -172,9 +170,6 @@ async function handleReport(
   // check arguments
   let args = parseArgs(cmd.args);
 
-  // check if channel if channel if valid
-  let id = tnmtIDFromChannel(origin);
-
   // check is number of arguments is ok (fail early)
   if (args.length < Arguments["handleReport"]) {
     throw new TnmtError(
@@ -182,15 +177,13 @@ async function handleReport(
     );
   }
 
-  // find all requested tournament
-  let filter = await findTournament(
-    id,
+  // get tournament
+  let tnmt = await tnmtFromChannel(
+    origin,
     client,
+    config,
     TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
   );
-
-  // create object to interact with it
-  let tnmt = new Tournament(config.key, filter["tournament"]);
 
   // get all matches attached to that tournament
   let matches = await tnmt.getMatches();
@@ -203,7 +196,7 @@ async function handleReport(
   // If match is not found
   if (match == undefined) {
     throw new TnmtError(
-      `Match with identifer ${args[0]} in tournament ${id} not found`
+      `Match with identifer ${args[0]} in tournament ${tnmt["id"]} not found`
     );
   }
 
@@ -219,7 +212,7 @@ async function handleReport(
   });
   // ensure find is ok
   if (p1 == undefined) {
-    throw new TnmtError(`Player with id ${p1[id]} not found`);
+    throw new TnmtError(`Player with id ${match["player1_id"]} not found`);
   }
 
   // find player 2
@@ -228,7 +221,7 @@ async function handleReport(
   });
   // ensure find is ok
   if (p2 == undefined) {
-    throw new TnmtError(`Player with id ${p1[id]} not found`);
+    throw new TnmtError(`Player with id ${match["player2_id"]} not found`);
   }
 
   // find winner in participants array
@@ -238,7 +231,7 @@ async function handleReport(
   // if winner not found, trigger an error
   if (winner == undefined) {
     throw new TnmtError(
-      `Participant named ${args[1]} not found in tournament ${id}`
+      `Participant named ${args[1]} not found in tournament ${tnmt["id"]}`
     );
   }
 
@@ -248,7 +241,7 @@ async function handleReport(
   match.selectWinner(winner["id"], score);
 
   origin.channel.send(
-    `Participant **${winner["display_name"]}** has been set as winner of match **${args[0]}** in tournament **${id}** _(score : ${p1["display_name"]} ${score} ${p2["display_name"]})_`
+    `Participant **${winner["display_name"]}** has been set as winner of match **${args[0]}** in tournament **${tnmt["id"]}** _(score : ${p1["display_name"]} ${score} ${p2["display_name"]})_`
   );
 }
 
@@ -385,12 +378,9 @@ async function handleJoin(
   cmd: Command,
   origin: Message,
   client: Challonge,
-  challonge: any,
+  config: any,
   builder: any
 ) {
-  // check if channel if channel if valid
-  let id = tnmtIDFromChannel(origin);
-
   // parse args
   let args = parseArgs(cmd.args);
 
@@ -401,9 +391,10 @@ async function handleJoin(
     );
   }
 
-  let found = await findTournament(
-    id,
+  let tnmt = await tnmtFromChannel(
+    origin,
     client,
+    config,
     TournamentInterfaces.tournamentStateEnum.PENDING
   );
 
@@ -416,14 +407,14 @@ async function handleJoin(
   let meta = new Array();
   // prepare meta data
   // name
-  let title = `[Tournament: ${id}] ${displayName}'s Deck`;
+  let title = `[Tournament: ${tnmt["id"]}] ${displayName}'s Deck`;
   args.length >= 1 ? (title += ` (${args[0]})`) : title;
   meta.push(title);
   // Format, TODO more specific if format is supported by builder, use casual as default
   meta.push(`casual`);
   // description
   meta.push(
-    `Deck played by participant ${displayName} during tournament with associated ID ${id}`
+    `Deck played by participant ${displayName} during tournament with associated ID ${tnmt["id"]}`
   );
   let deck = new Deck(meta);
   await deck.parseDeck(origin.content, true);
@@ -450,7 +441,6 @@ async function handleJoin(
   }
 
   // add participant to associated tournament
-  let tnmt = new Tournament(challonge.key, found["tournament"]);
   await tnmt
     .newParticipant({ name: displayName, misc: synced.getUrl() })
     .catch(async error => {
@@ -460,13 +450,13 @@ async function handleJoin(
       }
 
       // trigger specific error
-      triggerParticipantError(error, origin.author.id, id);
+      triggerParticipantError(error, origin.author.id, tnmt["id"]);
     });
 
   // return decklist, and message
   origin.channel.send(
     `Registration successfull for user <@${origin.author.id}> in tournament ${
-      found["data"]["tournament"]["full_challonge_url"]
+      tnmt["full_challonge_url"]
     }, deck list is available at ${synced.getUrl()}`
   );
 }
