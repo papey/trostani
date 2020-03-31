@@ -117,6 +117,7 @@ function tnmtIDFromChannel(origin: Message): string {
   return parts[1];
 }
 
+// handleStart handle the start tournament subcommand
 async function handleStart(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
   if (!hasPermission(origin.member.roles, config.roles)) {
