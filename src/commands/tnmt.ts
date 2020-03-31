@@ -117,6 +117,23 @@ function tnmtIDFromChannel(origin: Message): string {
   return parts[1];
 }
 
+// tnmtFromChannel is used to create and return a tournament object generated from channel name
+async function tnmtFromChannel(
+  origin: Message,
+  client: Challonge,
+  config: any,
+  state: TournamentInterfaces.tournamentStateEnum
+): Promise<Tournament> {
+  // check if channel if channel if valid
+  let id = tnmtIDFromChannel(origin);
+
+  // find all requested tournament (should be in pending mode)
+  let filter = await findTournament(id, client, state);
+
+  // create object to interact with it
+  return new Tournament(config.key, filter["tournament"]);
+}
+
 // handleStart handle the start tournament subcommand
 async function handleStart(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
