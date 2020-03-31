@@ -94,7 +94,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
   }
 }
 
-// tnmtChannel is used to ensure origin channel is a tournament one
+// tnmtIdFromChannel is used to ensure origin channel is a tournament one
 function tnmtIDFromChannel(origin: Message): string {
   // get Discord channel object
   let ch = origin.guild.channels.find(ch => ch.id === origin.channel.id);
