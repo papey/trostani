@@ -402,6 +402,10 @@ async function handleJoin(
 
   // init display name
   let displayName = origin.guild.members.get(origin.author.id).displayName;
+  // fallback to username if no displayName
+  if (displayName == undefined) {
+    displayName = origin.author.username;
+  }
 
   origin.channel.send(`_Processing ${displayName} decklist_`);
 
