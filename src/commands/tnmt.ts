@@ -354,19 +354,18 @@ async function handleStatus(
   }
 
   // for all matches, create response
-  matches.forEach(m => {
+  matches.forEach((m) => {
+    let p1 = idToParticipant.get(m["player1_id"]);
+    let p2 = idToParticipant.get(m["player2_id"]);
+
     if (m["completed_at"] == null) {
       // participants data, player 1 and player 2
       if (m["player1_id"] != null && m["player2_id"] != null) {
-        let p1 = idToParticipant.get(m["player1_id"]);
-        let p2 = idToParticipant.get(m["player2_id"]);
-        resp += `_Round ${m["round"]}_ - **${p1["name"]} VS ${p2["name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
+        resp += `_Round ${m["round"]}_ - **${p1["display_name"]} VS ${p2["display_name"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
       }
     } else {
       // participants data, winner and loser
-      let w = idToParticipant.get(m["winner_id"]);
-      let l = idToParticipant.get(m["loser_id"]);
-      resp += `_Round ${m["round"]}_ - **${w["name"]} VS ${l["name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
+      resp += `_Round ${m["round"]}_ - **${p1["display_name"]} VS ${p2["display_name"]}** - score : **${m["scores_csv"]}** - state : ${m["state"]} - identifier : ${m["identifier"]}`;
     }
     resp += "\n";
   });
