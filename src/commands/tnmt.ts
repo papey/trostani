@@ -11,7 +11,7 @@ import {
   parseArgs,
   isAuthorized,
   hasPermission,
-  generateArgsErrorMsg
+  generateArgsErrorMsg,
 } from "./utils";
 import { generateSubcommandExample } from "./help";
 
@@ -97,7 +97,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
 // tnmtIdFromChannel is used to ensure origin channel is a tournament one
 function tnmtIDFromChannel(origin: Message): string {
   // get Discord channel object
-  let ch = origin.guild.channels.find(ch => ch.id === origin.channel.id);
+  let ch = origin.guild.channels.find((ch) => ch.id === origin.channel.id);
   // get parts
   let parts = ch.name.split("-");
   // checks
@@ -191,7 +191,7 @@ async function handleReport(
   let matches = await tnmt.getMatches();
 
   // find requested match
-  let match = matches.find(m => {
+  let match = matches.find((m) => {
     return m["identifier"] == args[0];
   });
 
@@ -209,7 +209,7 @@ async function handleReport(
   let participants = await tnmt.getParticipants();
 
   // find player 1
-  let p1 = participants.find(p => {
+  let p1 = participants.find((p) => {
     return p["id"] === match["player1_id"];
   });
   // ensure find is ok
@@ -218,7 +218,7 @@ async function handleReport(
   }
 
   // find player 2
-  let p2 = participants.find(p => {
+  let p2 = participants.find((p) => {
     return p["id"] === match["player2_id"];
   });
   // ensure find is ok
@@ -227,7 +227,7 @@ async function handleReport(
   }
 
   // find winner in participants array
-  let winner = participants.find(p => {
+  let winner = participants.find((p) => {
     return p["display_name"] == username;
   });
   // if winner not found, trigger an error
@@ -326,7 +326,7 @@ async function handleStatus(
 
   // since matches only contains id, ensure ability to quickly found participant from his ID
   let idToParticipant = new Map();
-  participants.forEach(p => {
+  participants.forEach((p) => {
     idToParticipant.set(p["id"], p);
   });
 
@@ -336,7 +336,7 @@ async function handleStatus(
   // if an arg containing round paramater is found
   if (args[1]) {
     // filter matches if requested
-    let matchesFilter = matches.filter(e => {
+    let matchesFilter = matches.filter((e) => {
       return e["round"] == args[1];
     });
     // if a filter is provided, replace matches by filtered matches
@@ -448,7 +448,7 @@ async function handleJoin(
   // add participant to associated tournament
   await tnmt
     .newParticipant({ name: displayName, misc: synced.getUrl() })
-    .catch(async error => {
+    .catch(async (error) => {
       // ensure a deck delete since adding a participant trigger an error
       if (builder.kind && builder.kind == "manastack") {
         await ms.deleteDeck(synced.getID());
@@ -618,7 +618,7 @@ function parseDate(input: string): Date | null {
   }
 
   // if it's ok, convert to int
-  let toInt: number[] = res.map(e => {
+  let toInt: number[] = res.map((e) => {
     return Number.parseInt(e);
   });
 
@@ -634,7 +634,7 @@ async function createTnmtChannel(
   category: string
 ) {
   let channel = await origin.guild.createChannel(`tnmt-${code}-${name}`, {
-    type: "text"
+    type: "text",
   });
   await channel.setParent(category);
   return channel;
@@ -660,7 +660,7 @@ async function create(
     description: args[1],
     tournament_type: parseTnmtType(args[2]),
     name: name,
-    url: code
+    url: code,
   };
 
   // if a date is specified
@@ -693,9 +693,7 @@ async function create(
 
 // generateCode is used to generate a pseudo code for the current tournament
 function generateCode(name: string) {
-  return MD5(name)
-    .toString()
-    .slice(0, 5);
+  return MD5(name).toString().slice(0, 5);
 }
 
 // getCode is used to retreive code from a tournament url
@@ -718,7 +716,7 @@ async function findTournament(
   // get pending tournaments
   let tnmts = await client.getTournaments({ state: status });
   // filter using specified ID by the participant
-  let found = tnmts.find(t => {
+  let found = tnmts.find((t) => {
     return getCode(t["data"]["tournament"]["full_challonge_url"]) == id;
   });
 
@@ -740,7 +738,7 @@ let Arguments: { [f: string]: number } = {
   handleCreate: 4,
   handleJoin: 0,
   handleStatus: 1,
-  handleReport: 3
+  handleReport: 3,
 };
 
 // Sync Command Error
