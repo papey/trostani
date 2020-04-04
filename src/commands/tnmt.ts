@@ -240,7 +240,7 @@ async function handleReport(
   // If match is not found
   if (match == undefined) {
     throw new TnmtError(
-      `Match with identifer _${identifier}_ in tournament **${tnmt["id"]}** not found`
+      `Match with identifer _${identifier}_ in tournament **${tnmt["name"]}** not found`
     );
   }
 
@@ -275,7 +275,7 @@ async function handleReport(
   // if winner not found, trigger an error
   if (winner == undefined) {
     throw new TnmtError(
-      `Participant named ${args[1]} not found in tournament ${tnmt["id"]}`
+      `Participant named _${args[1]}_ not found in tournament **${tnmt["name"]}**`
     );
   }
 
@@ -285,7 +285,7 @@ async function handleReport(
   match.selectWinner(winner["id"], score);
 
   origin.channel.send(
-    `Participant **${winner["display_name"]}** has been set as winner of match **${args[0]}** in tournament **${tnmt["id"]}** _(score : ${p1["display_name"]} ${score} ${p2["display_name"]})_`
+    `Participant **${winner["display_name"]}** has been set as winner of match **${args[0]}** in tournament **${tnmt["name"]}** _(score : ${p1["display_name"]} ${score} ${p2["display_name"]})_`
   );
 }
 
@@ -466,7 +466,7 @@ async function handleJoin(
   meta.push(`casual`);
   // description
   meta.push(
-    `Deck played by participant ${displayName} during tournament with associated ID ${tnmt["id"]}`
+    `Deck played by participant ${displayName} during tournament ${tnmt["name"]}`
   );
   let deck = new Deck(meta);
   await deck.parseDeck(origin.content, true);
@@ -502,7 +502,7 @@ async function handleJoin(
       }
 
       // trigger specific error
-      triggerParticipantError(error, origin.author.id, tnmt["id"]);
+      triggerParticipantError(error, origin.author.id, tnmt["name"]);
     });
 
   // return decklist, and message
