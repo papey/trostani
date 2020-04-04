@@ -573,7 +573,7 @@ function triggerParticipantError(err: Error, oid: string, id: string) {
 // handleList is used to list all tournaments on challonge
 async function handleList(cmd: Command, origin: Message, client: Challonge) {
   // set a limit
-  let limit = 15;
+  const limit = 25;
 
   // declare optionnal parameters
   let params = {};
