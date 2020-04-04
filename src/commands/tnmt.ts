@@ -400,10 +400,19 @@ async function handleStatus(
     }
   }
 
+  // init round
+  let round = 1;
+
   // for all matches, create response
   matches.forEach((m) => {
     let p1 = idToParticipant.get(m["player1_id"]);
     let p2 = idToParticipant.get(m["player2_id"]);
+
+    // if it's a new round, add a cariage return
+    if (round != m["round"]) {
+      resp += "\n";
+      round = m["round"];
+    }
 
     if (m["completed_at"] == null) {
       // participants data, player 1 and player 2
@@ -786,7 +795,7 @@ async function findTournament(
 let Arguments: { [f: string]: number } = {
   handleCreate: 4,
   handleJoin: 0,
-  handleStatus: 1,
+  handleStatus: 0,
   handleReport: 3,
 };
 
