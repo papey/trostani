@@ -194,6 +194,10 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
     );
     return new TnmtError(`Trying to finalize a non finished tournament`);
   }
+
+  origin.channel.send(
+    `Tournament **${tnmt["name"]}** is now finalized ! Thanks everyone ! Standings are available at ${tnmt["url"]}/standings`
+  );
 }
 
 // handleReport is used to report a match result of a specified challonge tournament
