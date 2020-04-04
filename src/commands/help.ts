@@ -31,7 +31,7 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
       message = tnmtHelpMessage(cmd);
   }
 
-  origin.author.send(message);
+  origin.channel.send(message);
 }
 
 // generateSubcommandExample is used to generated a subcomment example message, nicely formated
