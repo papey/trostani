@@ -459,7 +459,9 @@ async function handleJoin(
   let meta = new Array();
   // prepare meta data
   // name
-  let title = `[Tournament: ${tnmt["id"]}] ${displayName}'s Deck`;
+  let title = `[Tournament: ${tnmtIDFromChannel(
+    origin
+  )}] ${displayName}'s Deck`;
   args.length >= 1 ? (title += ` (${args[0]})`) : title;
   meta.push(title);
   // Format, TODO more specific if format is supported by builder, use casual as default
