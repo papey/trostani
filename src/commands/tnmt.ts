@@ -477,14 +477,7 @@ async function handleJoin(
   builder: any
 ) {
   // parse args
-  let args = parseArgs(cmd.args);
-
-  // check arguments requirements
-  if (args.length < Arguments["handleJoin"]) {
-    throw new TnmtError(
-      generateArgsErrorMsg(Arguments["handleJoin"], cmd.prefix)
-    );
-  }
+  const args = parseArgs(cmd.args);
 
   let tnmt = await tnmtFromChannel(
     origin,
@@ -837,7 +830,6 @@ async function findTournament(
 // Arity arguments mapper
 let Arguments: { [f: string]: number } = {
   handleCreate: 4,
-  handleJoin: 0,
   handleReport: 3,
 };
 
