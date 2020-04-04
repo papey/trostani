@@ -18,7 +18,7 @@ import { generateSubcommandExample } from "./help";
 // Functions
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
 export function tnmtHelpMessage(cmd: Command): string {
-  let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
+  const message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament (**admin only**)
   - \`start\` : to start a tournament (**admin only, with PENDING tournaments, in dedicated channel**)
   - \`finalize\` : to finish a tournament (**admin only, with IN PROGRESS tournaments, in dedicated channel**)
@@ -111,7 +111,7 @@ function tnmtIDFromChannel(origin: Message): string {
   // get Discord channel object
   let ch = origin.guild.channels.find((ch) => ch.id === origin.channel.id);
   // get parts
-  let parts = ch.name.split("-");
+  const parts = ch.name.split("-");
   // checks
   // length
   if (parts.length <= 2) {
@@ -137,10 +137,10 @@ async function tnmtFromChannel(
   state: TournamentInterfaces.tournamentStateEnum
 ): Promise<Tournament> {
   // check if channel if channel if valid
-  let id = tnmtIDFromChannel(origin);
+  const id = tnmtIDFromChannel(origin);
 
   // find all requested tournament (should be in pending mode)
-  let filter = await findTournament(id, client, state);
+  const filter = await findTournament(id, client, state);
 
   // create object to interact with it
   return new Tournament(config.key, filter["tournament"]);
@@ -228,7 +228,7 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
     await tnmt.finalizeResults();
   } catch (error) {
     // return a clearer error message
-    return new TnmtError(
+    throw new TnmtError(
       `It's impossible to finalize a tournament containing pending matches`
     );
   }
@@ -246,7 +246,7 @@ async function handleReport(
   config: any
 ) {
   // check arguments
-  let args = parseArgs(cmd.args);
+  const args = parseArgs(cmd.args);
 
   // check is number of arguments is ok (fail early)
   if (args.length < Arguments["handleReport"]) {
@@ -266,7 +266,7 @@ async function handleReport(
   // get all matches attached to that tournament
   let matches = await tnmt.getMatches();
 
-  let identifier = args[0].toUpperCase();
+  const identifier = args[0].toUpperCase();
 
   // find requested match
   let match = matches.find((m) => {
@@ -281,13 +281,13 @@ async function handleReport(
   }
 
   // get winner username from mention
-  let username = getUserFromMention(origin.client, args[1], origin.guild);
+  const username = getUserFromMention(origin.client, args[1], origin.guild);
 
   // get all participants
   let participants = await tnmt.getParticipants();
 
   // find player 1
-  let p1 = participants.find((p) => {
+  const p1 = participants.find((p) => {
     return p["id"] === match["player1_id"];
   });
   // ensure find is ok
@@ -296,7 +296,7 @@ async function handleReport(
   }
 
   // find player 2
-  let p2 = participants.find((p) => {
+  const p2 = participants.find((p) => {
     return p["id"] === match["player2_id"];
   });
   // ensure find is ok
@@ -328,10 +328,10 @@ async function handleReport(
 // forgeScoreCSV is used to ensure score is in the order requested by challonge
 export function forgeScore(score: string, winner: number) {
   // init regex
-  let reg = new RegExp("(\\d+)-(\\d+)");
+  const reg = new RegExp("(\\d+)-(\\d+)");
 
   // exec regex
-  let res = reg.exec(score);
+  const res = reg.exec(score);
 
   // ensure result is valid
   if (res == null || res.length < 3) {
@@ -396,7 +396,7 @@ async function handleStatus(
   let resp = "";
 
   // parse args
-  let args = parseArgs(cmd.args);
+  const args = parseArgs(cmd.args);
 
   // get current tournament using channel title
   let tnmt = await tnmtFromChannel(
@@ -668,7 +668,7 @@ async function handleCreate(
   }
 
   // parse args
-  let args = parseArgs(cmd.args, true);
+  const args = parseArgs(cmd.args, true);
   // ensure args requirements
   if (args.length < Arguments["handleCreate"]) {
     throw new TnmtError(
@@ -742,10 +742,10 @@ async function create(
   category: string
 ) {
   // generate pseudo-random code from name
-  let code = generateCode(args[0]);
+  const code = generateCode(args[0]);
 
   // generate name by adding format in it
-  let name = generateName(args[0], args[3]);
+  const name = generateName(args[0], args[3]);
 
   // Here is a generic overview of arguments order
   // NAME // DESCRIPTION // TYPE // FORMAT // DATE
