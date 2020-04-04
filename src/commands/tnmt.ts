@@ -296,9 +296,16 @@ export function forgeScore(score: string, winner: number) {
   let res = reg.exec(score);
 
   // ensure result is valid
-  if (res.length < 3) {
+  if (res == null || res.length < 3) {
     throw new TnmtError(
       "Score is not expressed correctly, please verify and try again"
+    );
+  }
+
+  // check if score is valid
+  if (res[1] == res[2]) {
+    throw new TnmtError(
+      "This is not a valid score, please verify and try again"
     );
   }
 
