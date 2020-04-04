@@ -196,7 +196,7 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
   }
 
   origin.channel.send(
-    `Tournament **${tnmt["name"]}** is now finalized ! Thanks everyone ! Standings are available at ${tnmt["url"]}/standings`
+    `Tournament **${tnmt["name"]}** is now finalized ! Thanks everyone ! Standings are available at https://challonge.com/${tnmt["url"]}/standings`
   );
 }
 
