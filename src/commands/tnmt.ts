@@ -21,6 +21,7 @@ export function tnmtHelpMessage(cmd: Command): string {
   let message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
   - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament (**admin only**)
   - \`start\` : to start a tournament (**admin only, with PENDING tournaments, in dedicated channel**)
+  - \`finalize\` : to finish a tournament (**admin only, with IN PROGRESS tournaments, in dedicated channel**)
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments
   - \`status <tournament id> // <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments)
   - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
@@ -38,6 +39,8 @@ export function tnmtHelpMessage(cmd: Command): string {
     return generateSubcommandExample(cmd, "tnmt", "report", reportExample);
   } else if (cmd.args.includes("start")) {
     return generateSubcommandExample(cmd, "tnmt", "start", "");
+  } else if (cmd.args.includes("finalize")) {
+    return generateSubcommandExample(cmd, "tnmt", "finalize", "");
   }
 
   return message;
@@ -86,6 +89,9 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       break;
     case "start":
       await handleStart(origin, chlg, config.settings.challonge);
+      break;
+    case "finalize":
+      await handleFinalize(origin, chlg, config.settings.challonge);
       break;
     default:
       throw new TnmtError(
@@ -160,6 +166,34 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
   await tnmt.startTournament();
 
   origin.channel.send(`Tournament **${tnmt["name"]}** started ! 🃏 GLHF 🃏 !`);
+}
+
+// handleFinalize is used to finish and close a tournament
+async function handleFinalize(origin: Message, client: Challonge, config: any) {
+  // check is user requesting command have required permissions
+  if (!hasPermission(origin.member.roles, config.roles)) {
+    throw new TnmtError(
+      `You don't have the required permissions to use this command`
+    );
+  }
+
+  // get tournament
+  let tnmt = await tnmtFromChannel(
+    origin,
+    client,
+    config,
+    TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
+  );
+
+  // try closing, if it fails, it may be not finish yet
+  try {
+    await tnmt.finalizeResults();
+  } catch (error) {
+    origin.channel.send(
+      `I can't finalize a tournament waiting for matches results`
+    );
+    return new TnmtError(`Trying to finalize a non finished tournament`);
+  }
 }
 
 // handleReport is used to report a match result of a specified challonge tournament
