@@ -230,15 +230,17 @@ async function handleReport(
   // get all matches attached to that tournament
   let matches = await tnmt.getMatches();
 
+  let identifier = args[0].toUpperCase();
+
   // find requested match
   let match = matches.find((m) => {
-    return m["identifier"] == args[0].toUpperCase();
+    return m["identifier"] == identifier;
   });
 
   // If match is not found
   if (match == undefined) {
     throw new TnmtError(
-      `Match with identifer ${args[0]} in tournament ${tnmt["id"]} not found`
+      `Match with identifer _${identifier}_ in tournament **${tnmt["id"]}** not found`
     );
   }
 
