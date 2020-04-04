@@ -453,7 +453,12 @@ async function handleJoin(
     client,
     config,
     TournamentInterfaces.tournamentStateEnum.PENDING
-  );
+  ).catch(async () => {
+    // Overwrite the error with a more end-user explicit one
+    throw new TnmtError(
+      `Sorry <@${origin.author.id}> but registration for this tournament are closed (it's an __on going__ or __closed/deleted__ tournament)`
+    );
+  });
 
   // init display name
   let displayName = origin.guild.members.get(origin.author.id).displayName;
