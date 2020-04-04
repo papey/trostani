@@ -23,7 +23,7 @@ export function tnmtHelpMessage(cmd: Command): string {
   - \`start\` : to start a tournament (**admin only, with PENDING tournaments, in dedicated channel**)
   - \`finalize\` : to finish a tournament (**admin only, with IN PROGRESS tournaments, in dedicated channel**)
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments
-  - \`status <tournament id> // <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments)
+  - \`status <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments, **in dedicated channel**)
   - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
   - \`report <winner> // <score> \` : to report a tournament match result (only available with IN PROGRESS tournaments, **in dedicated channel**)`;
 
@@ -82,7 +82,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       );
       break;
     case "status":
-      await handleStatus(cmd, origin, chlg, config.settings.challonge.key);
+      await handleStatus(cmd, origin, chlg, config.settings.challonge);
       break;
     case "report":
       await handleReport(cmd, origin, chlg, config.settings.challonge);
@@ -345,28 +345,21 @@ async function handleStatus(
   cmd: Command,
   origin: Message,
   client: Challonge,
-  key: string
+  config: any
 ) {
   // response message
   let resp = "";
 
   // parse args
   let args = parseArgs(cmd.args);
-  // check arguments requirements
-  if (args.length < Arguments["handleStatus"]) {
-    throw new TnmtError(
-      generateArgsErrorMsg(Arguments["handleStatus"], cmd.prefix)
-    );
-  }
-  // get tournament in progress
-  let found = await findTournament(
-    args[0],
+
+  // get current tournament using channel title
+  let tnmt = await tnmtFromChannel(
+    origin,
     client,
+    config,
     TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
   );
-
-  // get tournament data
-  let tnmt = new Tournament(key, found["tournament"]);
 
   // get all parcitipants for this tournament
   let participants = await tnmt.getParticipants();
@@ -381,15 +374,15 @@ async function handleStatus(
   let matches = await tnmt.getMatches();
 
   // if an arg containing round paramater is found
-  if (args[1]) {
+  if (args[0]) {
     // filter matches if requested
     let matchesFilter = matches.filter((e) => {
-      return e["round"] == args[1];
+      return e["round"] == args[0];
     });
     // if a filter is provided, replace matches by filtered matches
     if (matchesFilter && matchesFilter.length >= 1) {
       origin.channel.send(
-        `_Here is all the matches associated with round : ${args[1]}_`
+        `_Here is all the matches associated with round : ${args[0]}_`
       );
       matches = matchesFilter;
     } else {
@@ -800,7 +793,6 @@ async function findTournament(
 let Arguments: { [f: string]: number } = {
   handleCreate: 4,
   handleJoin: 0,
-  handleStatus: 0,
   handleReport: 3,
 };
 
@@ -855,7 +847,7 @@ Réserve
 2 Surgissement de Ral (WAR) 212`;
 
 // status subcommand example
-let statusExample = `d6399 // 1`;
+let statusExample = `1`;
 
 // report subcommand example
 let reportExample = `A // @Mayalabielle // 2-1`;
