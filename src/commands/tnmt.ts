@@ -189,11 +189,9 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
   try {
     await tnmt.finalizeResults();
   } catch (error) {
-    origin.channel.send(
-      `It's impossible to finalize a tournament containing pending matches`
-    );
+    // return a clearer error message
     return new TnmtError(
-      `Trying to finalize a tournament containing pending matches`
+      `It's impossible to finalize a tournament containing pending matches`
     );
   }
 
