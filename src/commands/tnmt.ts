@@ -297,7 +297,9 @@ export function forgeScore(score: string, winner: number) {
 
   // ensure result is valid
   if (res.length < 3) {
-    throw new TnmtError("Error parsing score");
+    throw new TnmtError(
+      "Score is not expressed correctly, please verify and try again"
+    );
   }
 
   // check if we have to invert score
