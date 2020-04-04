@@ -456,7 +456,7 @@ async function handleJoin(
   ).catch(async () => {
     // Overwrite the error with a more end-user explicit one
     throw new TnmtError(
-      `Sorry <@${origin.author.id}> but registration for this tournament are closed (it's an __on going__ or __closed/deleted__ tournament)`
+      `Sorry <@${origin.author.id}> but registrations for this tournament are closed (it's an __on going__ or __closed/deleted__ tournament)`
     );
   });
 
@@ -550,7 +550,7 @@ async function handleList(cmd: Command, origin: Message, client: Challonge) {
   // fill optional parameters
   if (cmd.args.toLocaleLowerCase().includes("pending")) {
     params = { state: TournamentInterfaces.tournamentStateEnum.PENDING };
-  } else if (cmd.args.toLocaleLowerCase().includes("completed")) {
+  } else if (cmd.args.toLocaleLowerCase().includes("complete")) {
     params = { state: TournamentInterfaces.tournamentStateEnum.ENDED };
   } else if (cmd.args.toLocaleLowerCase().includes("underway")) {
     params = { state: TournamentInterfaces.tournamentStateEnum.IN_PROGRESS };
