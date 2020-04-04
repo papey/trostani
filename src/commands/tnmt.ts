@@ -25,6 +25,7 @@ export function tnmtHelpMessage(cmd: Command): string {
   - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments
   - \`status <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments, **in dedicated channel**)
   - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
+  - \`decks\` : to list all decks associated with this tournament (**in dedicated channel**)
   - \`report <winner> // <score> \` : to report a tournament match result (only available with IN PROGRESS tournaments, **in dedicated channel**)`;
 
   if (cmd.args.includes("create")) {
@@ -41,6 +42,8 @@ export function tnmtHelpMessage(cmd: Command): string {
     return generateSubcommandExample(cmd, "tnmt", "start", "");
   } else if (cmd.args.includes("finalize")) {
     return generateSubcommandExample(cmd, "tnmt", "finalize", "");
+  } else if (cmd.args.includes("decks")) {
+    return generateSubcommandExample(cmd, "tnmt", "decks", "");
   }
 
   return message;
@@ -92,6 +95,9 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       break;
     case "finalize":
       await handleFinalize(origin, chlg, config.settings.challonge);
+      break;
+    case "decks":
+      await handleDecks(origin, config.settings.builder);
       break;
     default:
       throw new TnmtError(
@@ -166,6 +172,38 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
   await tnmt.startTournament();
 
   origin.channel.send(`Tournament **${tnmt["name"]}** started ! 🃏 GLHF 🃏 !`);
+}
+
+// handleDecks is used to list all deck associated with this tournament
+async function handleDecks(origin: Message, builder: any) {
+  // get tournament id from current channel
+  const id = tnmtIDFromChannel(origin);
+
+  // if ManaStack is used
+  if (builder.kind && builder.kind == "manastack") {
+    let ms = new Manastack(
+      builder.username,
+      builder.password,
+      builder.url,
+      builder.profile
+    );
+
+    // get decks and search using tournament id
+    let results = await ms.formatSearch(`[Tournament: ${id}`);
+
+    // if no result
+    if (results.length == 0) {
+      origin.channel.send(`No decks found for this tournament`);
+    } else {
+      // create final message
+      const message = results.reduce((acc: string, e: string) => {
+        return (acc += e + `\n`);
+      }, "");
+
+      // Send message including lists of decks or an error message
+      origin.channel.send(message);
+    }
+  }
 }
 
 // handleFinalize is used to finish and close a tournament
