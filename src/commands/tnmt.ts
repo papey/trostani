@@ -1,7 +1,7 @@
 // tnmt.ts contains code to handle the tnmt command and tnmt subcommands
 
 // Imports
-import { Message, Client } from "discord.js";
+import { Message, Client, Guild } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import { Deck } from "../scry/mtg";
@@ -241,7 +241,7 @@ async function handleReport(
   }
 
   // get winner username from mention
-  let username = getUserFromMention(origin.client, args[1]);
+  let username = getUserFromMention(origin.client, args[1], origin.guild);
 
   // get all participants
   let participants = await tnmt.getParticipants();
@@ -316,7 +316,7 @@ export function forgeScore(score: string, winner: number) {
 
 // getUserFromMention is used to get user from a Discord @
 // yes, this is a copy/paste from documentation
-function getUserFromMention(client: Client, mention: string) {
+function getUserFromMention(client: Client, mention: string, guild: Guild) {
   // The id is the first and only match found by the RegEx.
   const matches = mention.match(/^<@!?(\d+)>$/);
 
@@ -328,7 +328,12 @@ function getUserFromMention(client: Client, mention: string) {
   // so use index 1.
   const id = matches[1];
 
-  return client.users.get(id).username;
+  let member = guild.members.get(id);
+  if (member.displayName == undefined) {
+    return member.user.username;
+  } else {
+    return member.displayName;
+  }
 }
 
 // handleStatus is used to get current status of specified challonge tournament
