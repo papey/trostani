@@ -230,7 +230,7 @@ async function handleReport(
 
   // find requested match
   let match = matches.find((m) => {
-    return m["identifier"] == args[0];
+    return m["identifier"] == args[0].toUpperCase();
   });
 
   // If match is not found
