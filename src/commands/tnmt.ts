@@ -492,11 +492,12 @@ async function handleJoin(
   });
 
   // init display name
-  let displayName = origin.guild.members.get(origin.author.id).displayName;
+  const member = origin.guild.members.get(origin.author.id);
   // fallback to username if no displayName
-  if (displayName == undefined) {
-    displayName = origin.author.username;
-  }
+  var displayName =
+    member.displayName == undefined
+      ? origin.author.username
+      : member.displayName;
 
   origin.channel.send(`_Processing ${displayName} decklist_`);
 
