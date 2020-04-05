@@ -14,7 +14,7 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
     config.settings.push ? "yes" : "no"
   })
   - \`tnmt\` (subcommand): to iteract with Challonge and organize tournaments (enabled : ${
-    config.settings.challonge.token ? "yes" : "no"
+    config.settings.challonge.key ? "yes" : "no"
   })
   - \`profile\`: to get user profile on remote builder
   - \`help\`: to get this help message
