@@ -72,7 +72,7 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
     let message = "";
 
     // Append each result
-    results.forEach(e => {
+    results.forEach((e) => {
       message += e + `\n`;
     });
 

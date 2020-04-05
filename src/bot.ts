@@ -66,12 +66,12 @@ export class Trostani {
         // Execute extracted command
         switch (command.main) {
           case "tnmt":
-            handleTnmt(command, message, this.config).catch(error => {
+            handleTnmt(command, message, this.config).catch((error) => {
               this.logErr(error, message);
             });
             break;
           case "sync":
-            handleSync(command, message, this.config).catch(error => {
+            handleSync(command, message, this.config).catch((error) => {
               this.logErr(error, message);
             });
             break;

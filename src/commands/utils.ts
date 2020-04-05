@@ -63,7 +63,7 @@ export function handleNotSupported(cmd: Command, origin: Message) {
 export function isAuthorized(oid: string, aids: string[]): boolean {
   // loop over the array and check if id of the channel of the original message match configured channel
   // return true or false
-  return aids.some(e => {
+  return aids.some((e) => {
     return e === oid;
   });
 }
@@ -73,7 +73,7 @@ export function hasPermission(
   or: Collection<string, Role>,
   ar: string[]
 ): boolean {
-  return or.some(r => {
+  return or.some((r) => {
     return ar.includes(r.name);
   });
 }

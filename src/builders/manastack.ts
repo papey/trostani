@@ -62,7 +62,7 @@ export class Manastack {
     deck_get: "api/deck?slug=new-deck-",
     delete_deck: "api/deck/delete",
     preview: "deck/preview",
-    profile: "user"
+    profile: "user",
   };
 
   // Manastack url
@@ -91,17 +91,18 @@ export class Manastack {
   public async deleteDeck(id: string) {
     await this.initialize();
 
-    let res = await request.delete({
-      url: `${this.url}/${this.routes["delete_deck"]}/${id}`,
-      headers: {
-        "content-type": "application/json",
-        Cookie: `PHPSESSID=${this.Cookie.token}`
-      },
-      resolveWithFullResponse: true
-    }).catch(() => {
-      throw new ManastackError("Error deleting deck on Manastack")
-    });
-
+    let res = await request
+      .delete({
+        url: `${this.url}/${this.routes["delete_deck"]}/${id}`,
+        headers: {
+          "content-type": "application/json",
+          Cookie: `PHPSESSID=${this.Cookie.token}`,
+        },
+        resolveWithFullResponse: true,
+      })
+      .catch(() => {
+        throw new ManastackError("Error deleting deck on Manastack");
+      });
   }
 
   // Create a new deck on ManaStack
@@ -193,9 +194,9 @@ export class Manastack {
         headers: { "content-type": "application/json" },
         url: `${this.url}/${this.routes["login"]}`,
         body: `{ "username": "${this.username}", "password": "${this.password}" }`,
-        resolveWithFullResponse: true
+        resolveWithFullResponse: true,
       })
-      .then(response => {
+      .then((response) => {
         if (response.headers["set-cookie"]) {
           // Get cookie and parse PHPSESSID
           let result = response.headers["set-cookie"][0].match(regex);
@@ -213,7 +214,7 @@ export class Manastack {
           throw new ManastackError("Error getting set-cookie from login");
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   }
@@ -237,13 +238,13 @@ export class Manastack {
       .post({
         url: `${this.url}/${this.routes["deck_create"]}`,
         headers: { Cookie: `PHPSESSID=${this.Cookie.token}` },
-        resolveWithFullResponse: true
+        resolveWithFullResponse: true,
       })
-      .then(response => {
+      .then((response) => {
         let obj = JSON.parse(response.body);
         deck = new Deck(obj["id"], name);
       })
-      .catch(error => {
+      .catch((error) => {
         throw new ManastackError("Error creating deck on ManaStack");
       });
 
@@ -268,7 +269,7 @@ export class Manastack {
         url: `${this.url}/${this.routes["deck_edit"]}/${id}}`,
         headers: {
           "content-type": "application/json",
-          Cookie: `PHPSESSID=${this.Cookie.token}`
+          Cookie: `PHPSESSID=${this.Cookie.token}`,
         },
         resolveWithFullResponse: true,
         body: JSON.stringify({
@@ -277,8 +278,8 @@ export class Manastack {
           private: false,
           format: { id: format },
           cards: [],
-          groups: []
-        })
+          groups: [],
+        }),
       })
       .catch(() => {
         throw new ManastackError("Error updating deck metadata on ManaStack");
@@ -292,13 +293,13 @@ export class Manastack {
         url: `${this.url}/${this.routes["deck_import"]}`,
         headers: {
           "content-type": "application/json",
-          Cookie: `PHPSESSID=${this.Cookie.token}`
+          Cookie: `PHPSESSID=${this.Cookie.token}`,
         },
         resolveWithFullResponse: true,
         body: JSON.stringify({
           deck: `${id}`,
-          list: list
-        })
+          list: list,
+        }),
       })
       .catch(() => {
         throw new ManastackError("Error importing decklist on ManaStack");
@@ -314,9 +315,9 @@ export class Manastack {
         url: `${this.url}/${this.routes["decks_list"]}`,
         headers: {
           "content-type": "application/json",
-          Cookie: `PHPSESSID=${this.Cookie.token}`
+          Cookie: `PHPSESSID=${this.Cookie.token}`,
         },
-        resolveWithFullResponse: true
+        resolveWithFullResponse: true,
       })
       .catch(() => {
         throw new ManastackError("Error getting decklists on ManaStack");

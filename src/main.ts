@@ -16,7 +16,7 @@ let args = yargs
   .option("config", {
     alias: "c",
     demand: false,
-    default: "/etc/trostani/settings.yml"
+    default: "/etc/trostani/settings.yml",
   }).argv;
 
 // Create object, using config file from args
