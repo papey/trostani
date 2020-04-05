@@ -2,10 +2,10 @@
 
 [![Build Status](https://drone.github.papey.fr/api/badges/papey/trostani/status.svg)](https://drone.github.papey.fr/papey/trostani)
 
-Trostani is a [TypeScript](http://www.typescriptlang.org/) Discord bot used
-to sync exported decklists from [Magic: The Gathering
-Arena](https://magic.wizards.com/fr/mtgarena) to an online deckbuilder of
-your choice.
+Trostani is a [TypeScript](http://www.typescriptlang.org/) Discord bot with
+various [Magic: The Gathering Arena](https://magic.wizards.com/fr/mtgarena)
+related features such as tournament management using Challonge and decklist
+sync to a online builder.
 
 Trostani currently supports one builder only : [ManaStack](https://manastack.com)
 
@@ -75,6 +75,7 @@ or for more specific stuff,
 - [discord.js](https://discordjs.guide) - A Discord bot library
 - [scryfall-sdk](https://github.com/Yuudaari/scryfall-sdk) - A Scryfall TypeScript library
 - [requests-promise](https://github.com/request/) - An HTTP request client
+- [challonge-ts](https://github.com/EdwardJFox/challonge-ts) - A Typescript wrapper for the Challonge API
 
 ## Contributing
 
