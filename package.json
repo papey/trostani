@@ -1,7 +1,7 @@
 {
   "name": "trostani",
-  "version": "0.1.1-3",
-  "description": "Sync MTGA deck lists posted on Discord channels to an online deck builder plateform",
+  "version": "0.2.0-rc1",
+  "description": "An MTGA oriented Discord bot",
   "repository": "git@github.com:papey/trostani.git",
   "author": "papey",
   "license": "Unlicense",
