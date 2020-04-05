@@ -327,11 +327,13 @@ async function handleReport(
 
 // forgeScoreCSV is used to ensure score is in the order requested by challonge
 export function forgeScore(score: string, winner: number) {
+  // sanitize output by removing useless spaces
+  const sanitize = score.replace(" ", "");
   // init regex
   const reg = new RegExp("(\\d+)-(\\d+)");
 
   // exec regex
-  const res = reg.exec(score);
+  const res = reg.exec(sanitize);
 
   // ensure result is valid
   if (res == null || res.length < 3) {
