@@ -71,7 +71,7 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
 
     // ensure there is results
     if (results.length == 0) {
-      throw new SyncError("No deck found on this profile");
+      throw new SyncError("There is no decks mathing this query");
     }
 
     // join results into one message
