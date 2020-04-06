@@ -163,8 +163,8 @@ export class Deck {
     // Split on carriage return
     let list = m.split("\n");
 
-    // Start on the third line, skipping command and deck name (line 0) and the `Deck` line (line 1)
-    for (let i = 1; i < list.length; i++) {
+    // m is a sanitize string containing decklist
+    for (let i = 0; i < list.length; i++) {
       // If an empty line is found, main deck is over
       if (list[i] == "Deck" && !isDeck) {
         // This is the deck part

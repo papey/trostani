@@ -99,8 +99,7 @@ class MTGDeckTestSuite extends Deck {
   }
 }
 
-let pushData = `!push Temur Elementals // standard // BO3 // Temur FTW ! :
-Deck
+let pushData = `Deck
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
 4 Stomping Ground (RNA) 259
@@ -132,8 +131,7 @@ Sideboard
 1 Tamiyo, Collector of Tales (WAR) 220
 3 Chandra, Awakened Inferno (M20) 127`;
 
-let pushTranslateData = `!push Bant V6 // standard // BO3 // Bant ! :
-Deck
+let pushTranslateData = `Deck
 3 Île (ELD) 257
 2 Téfeiri, effileur de temps (WAR) 221
 1 Plaine (ELD) 253
@@ -165,8 +163,7 @@ Réserve
 1 Téfeiri, effileur de temps (WAR) 221
 1 Emprunteur intrépide (ELD) 39`;
 
-let brawlTranslateData = `!push Brawl test // brawl :
-Commandant
+let brawlTranslateData = `Commandant
 1 Niv-Mizzet revenu à la vie (WAR) 208
 
 Deck

@@ -130,7 +130,7 @@ async function push(
     let deck = new Deck(meta);
 
     // Parse it
-    await deck.parseDeck(origin.content, translate);
+    await deck.parseDeck(cmd.extra, translate);
 
     // If ManaStack is used
     if (builder.kind && builder.kind == "manastack") {
@@ -174,7 +174,8 @@ export class SyncError extends Error {
 
 // Examples used in help command
 // push command example
-let pushExample: string = `Temur Elementals :
+let pushExample: string = `Temur Elementals
+Deck
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
 4 Stomping Ground (RNA) 259
@@ -200,6 +201,7 @@ let pushExample: string = `Temur Elementals :
 1 Castle Vantress (ELD) 242
 3 Fabled Passage (ELD) 244
 
+Réserve
 1 Jace, Wielder of Mysteries (WAR) 54
 3 Nissa, Who Shakes the World (WAR) 169
 1 Tamiyo, Collector of Tales (WAR) 220

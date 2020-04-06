@@ -519,7 +519,7 @@ async function handleJoin(
     `Deck played by participant ${displayName} during tournament ${tnmt["name"]}`
   );
   let deck = new Deck(meta);
-  await deck.parseDeck(origin.content, true);
+  await deck.parseDeck(cmd.extra, true);
 
   // sync deck to Manastack
   if (builder.kind && builder.kind == "manastack") {
