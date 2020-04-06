@@ -26,7 +26,7 @@ export class Command {
 
     // if there is extra args, take it
     if (lines.length > 1) {
-      this.extra = lines[1];
+      this.extra = lines.slice(1).join("\n");
     }
 
     // split first line to get all the parts
