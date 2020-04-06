@@ -144,17 +144,11 @@ export class Manastack {
     // Final message containing search result
     let results: string[] = [];
 
-    // Counter of number of items found
-    let found = 0;
-
     // Init Manastack instance instance
     this.initialize();
 
     // Call to ManaStack API to get all the decks
-    let resp = await this.getDecks();
-
-    // Extract json returned by ManaStack
-    let parsed = JSON.parse(resp.body)[0];
+    let parsed = await this.getDecks();
 
     // If decks found
     parsed.decks.forEach((e: any) => {
@@ -323,7 +317,7 @@ export class Manastack {
         throw new ManastackError("Error getting decklists on ManaStack");
       });
 
-    return res;
+    return JSON.parse(res.body)[0];
   }
 }
 
