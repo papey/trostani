@@ -12,6 +12,7 @@ import {
   isAuthorized,
   hasPermission,
   generateArgsErrorMsg,
+  SearchResultTooLong,
 } from "./utils";
 import { generateSubcommandExample } from "./help";
 
@@ -97,7 +98,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       await handleFinalize(origin, chlg, config.settings.challonge);
       break;
     case "decks":
-      await handleDecks(origin, config.settings.builder);
+      await handleDecks(cmd, origin, config.settings.builder);
       break;
     default:
       throw new TnmtError(
@@ -175,9 +176,12 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
 }
 
 // handleDecks is used to list all deck associated with this tournament
-async function handleDecks(origin: Message, builder: any) {
+async function handleDecks(cmd: Command, origin: Message, builder: any) {
   // get tournament id from current channel
   const id = tnmtIDFromChannel(origin);
+
+  // get args
+  const args = parseArgs(cmd.args, true);
 
   // if ManaStack is used
   if (builder.kind && builder.kind == "manastack") {
@@ -195,12 +199,25 @@ async function handleDecks(origin: Message, builder: any) {
     if (results.length == 0) {
       origin.channel.send(`No decks found for this tournament`);
     } else {
-      // create final message
-      const message = results.reduce((acc: string, e: string) => {
-        return (acc += e + `\n`);
-      }, "");
+      // if a keyword is passed as argument
+      if (args.length > 0) {
+        // filter using this keyword
+        results = results.filter((r) => {
+          return r.toLowerCase().includes(args[0]);
+        });
+      }
 
-      // Send message including lists of decks or an error message
+      // join message
+      const message = results.join(`\n`);
+
+      // check message length
+      if (message.length > 2000) {
+        throw new SearchResultTooLong(
+          "List is too long for Discord, please provide some keywords to filter list results"
+        );
+      }
+
+      // send message if everything is ok
       origin.channel.send(message);
     }
   }
