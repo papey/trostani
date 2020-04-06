@@ -106,3 +106,12 @@ export function parseArgs(args: string, toLower: boolean = false): string[] {
 export function generateArgsErrorMsg(na: number, prefix: string) {
   return `This command requires at least ${na} argument(s) (if you need help try \`${prefix}help\`)`;
 }
+
+// error when a message is too long to send it on Discord
+export class SearchResultTooLong extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Message length error";
+    this.message = message;
+  }
+}
