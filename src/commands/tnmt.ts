@@ -501,6 +501,18 @@ async function handleJoin(
       ? origin.author.username
       : member.displayName;
 
+  // get all participants
+  const participants = await tnmt.getParticipants();
+
+  // if participant already register, throw error
+  participants.forEach((p) => {
+    if (p["display_name"] == displayName) {
+      throw new TnmtError(
+        `Participant <@${origin.author.id}> is already registered in tournament ${tnmt["name"]}`
+      );
+    }
+  });
+
   origin.channel.send(`_Processing ${displayName} decklist_`);
 
   // create deck
@@ -551,8 +563,8 @@ async function handleJoin(
         await ms.deleteDeck(synced.getID());
       }
 
-      // trigger specific error
-      triggerParticipantError(error, origin.author.id, tnmt["name"]);
+      // continue and throw error
+      throw error;
     });
 
   // return decklist, and message
@@ -561,16 +573,6 @@ async function handleJoin(
       tnmt["full_challonge_url"]
     }, deck list is available at ${synced.getUrl()}`
   );
-}
-
-// triggerParticipantError is used to create a custom error when newParcipant fails
-function triggerParticipantError(err: Error, oid: string, id: string) {
-  if (err["response"]["status"] == 422 && err["response"]["data"]["errors"]) {
-    throw new TnmtError(
-      `Participant <@${oid}> is already registered in tournament ${id}`
-    );
-  }
-  throw new TnmtError("Error registering participant");
 }
 
 // handleList is used to list all tournaments on challonge
