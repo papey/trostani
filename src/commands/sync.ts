@@ -7,6 +7,7 @@ import { Deck } from "../scry/mtg";
 import { Manastack } from "../builders/manastack";
 import { BuilderDeckMetadata } from "../builders/utils";
 import { generateSubcommandExample } from "./help";
+import { SearchResultTooLong } from "./utils";
 
 // Functions
 // syncHelpMessage is used to generated a specific help message when asksing for a sync command
@@ -68,13 +69,13 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
     // Forge response for Discord
     let results = await ms.formatSearch(cmd.args);
 
-    // format search message
-    let message = "";
+    // ensure there is results
+    if (results.length == 0) {
+      throw new SyncError("No deck found on this profile");
+    }
 
-    // Append each result
-    results.forEach((e) => {
-      message += e + `\n`;
-    });
+    // join results into one message
+    let message = results.join(`\n`);
 
     // Final word, with result sumary
     if (cmd.args != "") {
@@ -83,7 +84,14 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
       message += `Found ${results.length} deck(s)`;
     }
 
-    // Send message including lists of decks or an error message
+    // throw error if message is too long
+    if (message.length >= 2000) {
+      throw new SearchResultTooLong(
+        `This search result is too long for Discord, please add filters`
+      );
+    }
+
+    // Send message including lists of decks
     origin.channel.send(message);
   }
 }
