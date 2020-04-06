@@ -44,12 +44,12 @@ export class Card {
       );
 
       // https://scryfall.com/docs/api, see Rate Limits and Good Citizenship section
-      setTimeout(() => { }, 60);
+      setTimeout(() => {}, 60);
 
       if (translate.name == null) {
         throw new TranslateError(
           `Error translating the following card ${
-          this.name
+            this.name
           } (${this.edition.toUpperCase()}) ${this.id}`
         );
       }
@@ -115,7 +115,7 @@ export class Deck {
 
     // Check main length, needs to be a least > 0
     if (this.main.length > 0) {
-      this.main.forEach(card => {
+      this.main.forEach((card) => {
         let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
         decklist += line;
       });
@@ -124,7 +124,7 @@ export class Deck {
     // Check side board, add something only is something was found in sideboard
     if (this.side.length > 0) {
       decklist += "Sideboard: \n";
-      this.side.forEach(card => {
+      this.side.forEach((card) => {
         let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
         decklist += line;
       });
@@ -272,7 +272,7 @@ export class Deck {
     let sum = 0;
 
     // Fill the sum
-    cards.forEach(e => {
+    cards.forEach((e) => {
       sum += parseInt(e.getTimes());
     });
 
@@ -307,18 +307,17 @@ export let Formats: { [f: string]: number } = {
   tiny: 7,
   pauper: 8,
   casual: 9,
-  brawl: 10
+  brawl: 10,
 };
 
 // fixSet is used to fix differences between MTGA set names and real world
 function fixSet(set: string): string {
-
   switch (set) {
     case "DAR":
-      return "DOM"
+      return "DOM";
 
     default:
-      return set
+      return set;
   }
 }
 
