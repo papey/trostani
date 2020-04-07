@@ -116,14 +116,16 @@ function tnmtIDFromChannel(origin: Message): string {
   // checks
   // length
   if (parts.length <= 2) {
-    // fail early if not a tournament channel
-    throw new TnmtError("This is not a tournament channel");
+    // reeturn early if not a tournament channel
+    origin.channel.send("This is not a tournament channel");
+    return;
   }
 
   // if first part is `tnmt`
   if (parts[0] != "tnmt") {
     // fail early if not a tournament channel
-    throw new TnmtError("This is not a tournament channel");
+    origin.channel.send("This is not a tournament channel");
+    return;
   }
 
   // second part is channel id
@@ -151,9 +153,10 @@ async function tnmtFromChannel(
 async function handleStart(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
   if (!hasPermission(origin.member.roles, config.roles)) {
-    throw new TnmtError(
+    origin.channel.send(
       `You don't have the required permissions to use this command`
     );
+    return;
   }
 
   // get tournament object or die trying
@@ -227,9 +230,10 @@ async function handleDecks(cmd: Command, origin: Message, builder: any) {
 async function handleFinalize(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
   if (!hasPermission(origin.member.roles, config.roles)) {
-    throw new TnmtError(
+    origin.channel.send(
       `You don't have the required permissions to use this command`
     );
+    return;
   }
 
   // get tournament
@@ -267,9 +271,10 @@ async function handleReport(
 
   // check is number of arguments is ok (fail early)
   if (args.length < Arguments["handleReport"]) {
-    throw new TnmtError(
+    origin.channel.send(
       generateArgsErrorMsg(Arguments["handleReport"], cmd.prefix)
     );
+    return;
   }
 
   // get tournament
@@ -524,9 +529,10 @@ async function handleJoin(
   // if participant already register, throw error
   participants.forEach((p) => {
     if (p["display_name"] == displayName) {
-      throw new TnmtError(
+      origin.channel.send(
         `Participant <@${origin.author.id}> is already registered in tournament ${tnmt["name"]}`
       );
+      return;
     }
   });
 
@@ -680,22 +686,25 @@ async function handleCreate(
 ) {
   // check authorization and permissions, fail early
   if (!isAuthorized(origin.channel.id, config.channels)) {
-    throw new TnmtError(`This command cannot be used on this channel`);
+    origin.channel.send(`This command cannot be used on this channel`);
+    return;
   }
 
   if (!hasPermission(origin.member.roles, config.roles)) {
-    throw new TnmtError(
+    origin.channel.send(
       `You don't have the required permissions to use this command`
     );
+    return;
   }
 
   // parse args
   const args = parseArgs(cmd.args, true);
   // ensure args requirements
   if (args.length < Arguments["handleCreate"]) {
-    throw new TnmtError(
+    origin.channel.send(
       generateArgsErrorMsg(Arguments["handleCreate"], cmd.prefix)
     );
+    return;
   }
 
   // if everything is ok, create

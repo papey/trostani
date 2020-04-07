@@ -71,7 +71,8 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
 
     // ensure there is results
     if (results.length == 0) {
-      throw new SyncError("There is no decks mathing this query");
+      origin.channel.send("There is no decks matching this query");
+      return;
     }
 
     // join results into one message
@@ -106,9 +107,10 @@ async function handlePush(
 ) {
   // check if the message is comming from an authorized channel
   if (!isAuthorized(origin.channel.id, channels)) {
-    throw new SyncError(
+    origin.channel.send(
       "`push` subcommand of command `sync` is not authorized on this channel"
     );
+    return;
   }
   // push deck and five back url to channel
   let meta = await push(cmd, origin, translate, builder);
@@ -131,7 +133,8 @@ async function push(
     let meta = parseArgs(cmd.args);
 
     if (meta[0] == "") {
-      throw new SyncError("Error, this deck needs at least a name");
+      origin.channel.send("Error, this deck needs at least a name");
+      return;
     }
 
     // Try building the deck
