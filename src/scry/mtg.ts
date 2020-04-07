@@ -193,9 +193,10 @@ export class Deck {
       }
     }
 
-    if (!this.checkCardsSum(60, this.main, ">=")) {
+    const sum = this.main.reduce<number>(this.sumer, 0);
+    if (sum != 40 && sum < 60) {
       throw new DeckBuildingError(
-        "Error building deck, main part needs 60 cards, at least"
+        `Error building main deck can't contain ${sum} cards`
       );
     }
   }
@@ -228,11 +229,17 @@ export class Deck {
       }
     }
 
-    if (!this.checkCardsSum(15, this.side, "<=")) {
+    const sum = this.side.reduce<number>(this.sumer, 0);
+    if (sum > 15) {
       throw new DeckBuildingError(
         "Error building deck, side part is limited to a maximum of 15 cards"
       );
     }
+  }
+
+  // callback used to reduce a deck part to it's sum of cards
+  protected sumer(acc: number, card: Card) {
+    return acc + parseInt(card.getTimes());
   }
 
   // Parse all parts of deck
@@ -264,35 +271,6 @@ export class Deck {
         `Error when parsing line #{c} in decklist, please verify decklist`
       );
     }
-  }
-
-  // Check if a number of card is valid in a set of cards (main and side checks)
-  protected checkCardsSum(limit: Number, cards: Card[], cmp: string): boolean {
-    // Sum counter
-    let sum = 0;
-
-    // Fill the sum
-    cards.forEach((e) => {
-      sum += parseInt(e.getTimes());
-    });
-
-    // Compare and check
-    switch (cmp) {
-      case "<=":
-        if (sum <= limit) {
-          return true;
-        }
-        break;
-      case ">=":
-        if (sum >= limit) {
-          return true;
-        }
-      default:
-        return false;
-    }
-
-    // Ensure false return
-    return false;
   }
 }
 

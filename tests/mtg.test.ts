@@ -74,11 +74,12 @@ class MTGDeckTestSuite extends Deck {
     }
   }
 
-  @test async "[checkCardSum]: Should return true or false if valid or not"() {
+  @test
+  async "[sumer]: Used as a reduce callback, should count number or cards"() {
     await this.parseDeck(pushData);
 
-    assert.equal(this.checkCardsSum(60, this.main, ">="), true);
-    assert.equal(this.checkCardsSum(15, this.side, "<="), true);
+    assert.equal(this.main.reduce(this.sumer, 0), 60);
+    assert.equal(this.side.reduce(this.sumer, 0), 8);
   }
 
   @test async "[parseDeck+translate]: Sould parse a deck, with translation"() {
