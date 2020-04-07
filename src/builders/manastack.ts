@@ -100,7 +100,8 @@ export class Manastack {
         },
         resolveWithFullResponse: true,
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
         throw new ManastackError("Error deleting deck on Manastack");
       });
   }
@@ -197,8 +198,9 @@ export class Manastack {
           // Ensure result is not null
           try {
             this.Cookie = new Cookie(result[1], result[2]);
-          } catch (_) {
+          } catch (error) {
             // Throw an error if null
+            console.error(error);
             throw new ManastackError(
               "No PHPSESSID found in set-cookie directive"
             );
@@ -209,7 +211,7 @@ export class Manastack {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }
 
@@ -239,6 +241,7 @@ export class Manastack {
         deck = new Deck(obj["id"], name);
       })
       .catch((error) => {
+        console.error(error);
         throw new ManastackError("Error creating deck on ManaStack");
       });
 
@@ -275,7 +278,8 @@ export class Manastack {
           groups: [],
         }),
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         throw new ManastackError("Error updating deck metadata on ManaStack");
       });
   }
@@ -295,7 +299,8 @@ export class Manastack {
           list: list,
         }),
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
         throw new ManastackError("Error importing decklist on ManaStack");
       });
   }
@@ -313,7 +318,8 @@ export class Manastack {
         },
         resolveWithFullResponse: true,
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
         throw new ManastackError("Error getting decklists on ManaStack");
       });
 
