@@ -210,6 +210,13 @@ async function handleDecks(cmd: Command, origin: Message, builder: any) {
         });
       }
 
+      if (results.length == 0) {
+        origin.channel.send(
+          `No decks containing **${args[0]}** found for this tournament`
+        );
+        return;
+      }
+
       // join message
       const message = results.join(`\n`);
 
