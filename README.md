@@ -70,6 +70,8 @@ or for more specific stuff,
 !help <command>
 ```
 
+An asciidoctor user documentation is also available in the `docs` directory
+
 ## Built With
 
 - [discord.js](https://discordjs.guide) - A Discord bot library

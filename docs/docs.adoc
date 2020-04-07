@@ -1,0 +1,274 @@
+= Trostani : User Documentation
+
+:toc:
+
+== Overview
+
+Trostani is a __Discord__ bot with some **Magic the Gathering** features.
+
+== Commands
+
+Every commands starts with a prefix, by default this prefix is set to `$`
+
+=== Tnmt
+
+`tnmt` command is used to interact with Challonge and **organize tournaments**
+
+==== Subcommands
+
+In order to keep things clear, some commands are restricted to one channel only.
+
+The create subcommands can only be send in a __specified channel__ grouping all tournaments announcements.
+
+When a tournament is created, a __dedicated channel__ is created for **this tournament only**.
+
+===== Administrators
+
+**create** : available only in __specified channel__
+
+`create` subcommand is used to create a tournament on Challonge, this will trigger the __dedicated channel__ creation.
+
+```text
+$tnmt create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM)
+```
+
+Example :
+
+```text
+$tnmt create Tournament of The Year // A tournament organized using Trostani // SW // Standard // 2020-11-07 at 17:00
+```
+
+**start** : available in __dedicated channel__
+
+`start` subcommand is used to start tournament **identified by channel name**
+
+```text
+$tnmt start
+```
+
+**finalize** : available in __dedicated channel__
+
+`finalize` subcommand is used to finish and close tournament **identified by channel name**
+
+```text
+$tnmt finalize
+```
+
+===== Players
+
+**list** : no channel restrictions
+
+`list` subcommand is used to list tournaments from Challonge
+
+```text
+$tnmt list <status> (optional)
+```
+
+Possible values for status are :
+
+- pending
+- underway
+- complete
+
+Example :
+
+```text
+$tnmt list pending
+```
+
+**join** : available in __dedicated channel__
+
+`join` subcommand is used to join a tournament, you can add an optional info string like archetype of your deck
+
+```text
+$tnmt join <archetype> (optional)
+```
+
+Example :
+
+```text
+$tnmt join Izzet Drake
+Deck
+4 Falaises des eaux vives (M20) 252
+2 Porte de la guilde d'Izzet (GRN) 252
+3 Étreinte de lave (GRN) 108
+9 Montagne (ELD) 265
+9 Île (ELD) 257
+4 Drakôn du logogriphe (M19) 216
+4 Drakôn crépitant (GRN) 163
+2 Plongée (XLN) 53
+4 Option (ELD) 59
+4 Ptéramandre (RNA) 47
+4 Désinvocation (M20) 78
+4 Choc (M19) 156
+4 Balayage de flammes (M20) 139
+3 Perspicacité du chimiste (GRN) 32
+
+Réserve
+3 Farfadet hypnotique (ELD) 49
+2 Rafale d'Éther (M20) 42
+3 Dispute mystique (ELD) 58
+2 Surgissement de Ral (WAR) 212
+1 Percesort (XLN) 81
+2 Raid aérien téméraire (M20) 154
+2 Cramer (M20) 140
+```
+
+**decks** : available in __dedicated channel__
+
+`decks` subcommand is used to list decks from a tournament
+
+```text
+$tnmt decks <keyword> (optional)
+```
+
+Example :
+
+```text
+$tnmt decks izzet
+```
+
+**status** : available in __dedicated channel__
+
+`status` subcommand is used to list matches for a tournament
+
+```text
+$tnmt status <round> (optional)
+```
+
+A **round** parameter can be used to filter matches attached to specified round
+
+Examples :
+
+```text
+$tnmt status
+```
+
+```text
+$tnmt status 2
+```
+
+**report** : available in __dedicated channel__
+
+`report` subcommand is used to report a match result
+
+```text
+$tnmt report <identifier> // <winner> // <score>
+```
+
+The **identifier** parameter can be found using the `status` subcommand,
+**winner** is the match winner username, **score** is formated as `X-Y` (order do not matter)
+
+Examples :
+
+```text
+$tnmt report a // @Jean // 2-0
+```
+
+```text
+$tnmt report B // Michel // 0-2
+```
+
+=== Sync
+
+`sync` command is used to interact with a remote builder (a site or an
+application used to store decks online).
+
+==== Subcommands
+
+===== search
+
+`search` subcommand is used search for keywords in a deck list name from remote builder
+
+```text
+$sync search <keyword>
+```
+
+====== Examples
+
+```text
+$sync search temur
+```
+
+```text
+$sync search aggro
+```
+
+===== push
+
+`push` subcommand is used to sync a decklist to the remote builder
+
+**This command is authorized on a specific channel to avoid flood**
+
+```text
+$sync push <name> // <format> (optional) // <description> (optional)
+[...decklist...]
+```
+
+===== Example
+
+```text
+$sync push Temur Elementals
+Deck
+4 Steam Vents (GRN) 257
+4 Breeding Pool (RNA) 246
+4 Stomping Ground (RNA) 259
+1 Jace, Wielder of Mysteries (WAR) 54
+2 Paradise Druid (WAR) 171
+4 Neoform (WAR) 206
+2 Cloudkin Seer (M20) 54
+3 Scampering Scorcher (M20) 158
+4 Shock (M20) 160
+2 Thunderkin Awakener (M20) 162
+2 Cavalier of Thorns (M20) 167
+4 Leafkin Druid (M20) 178
+1 Overgrowth Elemental (M20) 187
+4 Omnath, Locus of the Roil (M20) 216
+4 Risen Reef (M20) 217
+1 Temple of Mystery (M20) 255
+2 Island (ANA) 57
+1 Mountain (ANA) 59
+2 Forest (ANA) 60
+3 The Great Henge (ELD) 161
+1 Castle Embereth (ELD) 239
+1 Castle Garenbrig (ELD) 240
+1 Castle Vantress (ELD) 242
+3 Fabled Passage (ELD) 244
+
+Réserve
+1 Jace, Wielder of Mysteries (WAR) 54
+3 Nissa, Who Shakes the World (WAR) 169
+1 Tamiyo, Collector of Tales (WAR) 220
+3 Chandra, Awakened Inferno (M20) 127
+```
+
+=== Profile
+
+`profile` command is used to return current configurated remote builder profile
+
+```text
+$profile
+```
+
+
+=== Help
+
+`help` is used to get help on a specified command or subcommand
+
+```text
+$help <command> (optional) <subcommand> (optional)
+```
+
+==== Examples
+
+```text
+$help
+```
+
+```text
+$help tnmt
+```
+
+```text
+$help sync push
+```
