@@ -261,7 +261,7 @@ export class Deck {
     } else {
       // Create a new error and throw it if no match is found
       throw new ParsingError(
-        "Error when parsing a line in decklist, please verify decklist"
+        `Error when parsing line #{c} in decklist, please verify decklist`
       );
     }
   }

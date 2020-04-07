@@ -249,6 +249,7 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
     await tnmt.finalizeResults();
   } catch (error) {
     // return a clearer error message
+    console.error(error);
     throw new TnmtError(
       `It's impossible to finalize a tournament containing pending matches`
     );
@@ -508,7 +509,9 @@ async function handleJoin(
     client,
     config,
     TournamentInterfaces.tournamentStateEnum.PENDING
-  ).catch(async () => {
+  ).catch(async (error) => {
+    // log the error, do not shadow it
+    console.error(error);
     // Overwrite the error with a more end-user explicit one
     throw new TnmtError(
       `Sorry <@${origin.author.id}> but registrations for this tournament are closed (it's an __on going__ or __closed/deleted__ tournament)`
