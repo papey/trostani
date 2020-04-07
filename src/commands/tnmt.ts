@@ -27,7 +27,7 @@ export function tnmtHelpMessage(cmd: Command): string {
   - \`status <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments, **in dedicated channel**)
   - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
   - \`decks\` : to list all decks associated with this tournament (**in dedicated channel**)
-  - \`report <winner> // <score> \` : to report a tournament match result (only available with IN PROGRESS tournaments, **in dedicated channel**)`;
+  - \`report <identifier> // <winner> // <score> \` : to report a tournament match result (only available with IN PROGRESS tournaments, **in dedicated channel**)`;
 
   if (cmd.args.includes("create")) {
     return generateSubcommandExample(cmd, "tnmt", "create", createExample);
