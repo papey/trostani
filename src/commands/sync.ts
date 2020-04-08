@@ -212,7 +212,7 @@ Deck
 1 Castle Vantress (ELD) 242
 3 Fabled Passage (ELD) 244
 
-Réserve
+Sideboard
 1 Jace, Wielder of Mysteries (WAR) 54
 3 Nissa, Who Shakes the World (WAR) 169
 1 Tamiyo, Collector of Tales (WAR) 220
