@@ -87,31 +87,38 @@ $tnmt join <archetype> (optional)
 Example :
 
 ```text
-$tnmt join Izzet Drake
+$tnmt join Temur Elementals
 Deck
-4 Falaises des eaux vives (M20) 252
-2 Porte de la guilde d'Izzet (GRN) 252
-3 Étreinte de lave (GRN) 108
-9 Montagne (ELD) 265
-9 Île (ELD) 257
-4 Drakôn du logogriphe (M19) 216
-4 Drakôn crépitant (GRN) 163
-2 Plongée (XLN) 53
-4 Option (ELD) 59
-4 Ptéramandre (RNA) 47
-4 Désinvocation (M20) 78
-4 Choc (M19) 156
-4 Balayage de flammes (M20) 139
-3 Perspicacité du chimiste (GRN) 32
+4 Steam Vents (GRN) 257
+4 Breeding Pool (RNA) 246
+4 Stomping Ground (RNA) 259
+1 Jace, Wielder of Mysteries (WAR) 54
+2 Paradise Druid (WAR) 171
+4 Neoform (WAR) 206
+2 Cloudkin Seer (M20) 54
+3 Scampering Scorcher (M20) 158
+4 Shock (M20) 160
+2 Thunderkin Awakener (M20) 162
+2 Cavalier of Thorns (M20) 167
+4 Leafkin Druid (M20) 178
+1 Overgrowth Elemental (M20) 187
+4 Omnath, Locus of the Roil (M20) 216
+4 Risen Reef (M20) 217
+1 Temple of Mystery (M20) 255
+2 Island (ANA) 57
+1 Mountain (ANA) 59
+2 Forest (ANA) 60
+3 The Great Henge (ELD) 161
+1 Castle Embereth (ELD) 239
+1 Castle Garenbrig (ELD) 240
+1 Castle Vantress (ELD) 242
+3 Fabled Passage (ELD) 244
 
-Réserve
-3 Farfadet hypnotique (ELD) 49
-2 Rafale d'Éther (M20) 42
-3 Dispute mystique (ELD) 58
-2 Surgissement de Ral (WAR) 212
-1 Percesort (XLN) 81
-2 Raid aérien téméraire (M20) 154
-2 Cramer (M20) 140
+Sideboard
+1 Jace, Wielder of Mysteries (WAR) 54
+3 Nissa, Who Shakes the World (WAR) 169
+1 Tamiyo, Collector of Tales (WAR) 220
+3 Chandra, Awakened Inferno (M20) 127
 ```
 
 **decks** : available in __dedicated channel__
@@ -235,7 +242,7 @@ Deck
 1 Castle Vantress (ELD) 242
 3 Fabled Passage (ELD) 244
 
-Réserve
+Sideboard
 1 Jace, Wielder of Mysteries (WAR) 54
 3 Nissa, Who Shakes the World (WAR) 169
 1 Tamiyo, Collector of Tales (WAR) 220
