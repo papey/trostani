@@ -9,10 +9,14 @@ export class BuilderDeckMetadata {
   // name of the deck
   private name: string;
 
+  // id of the deck
+  private id: string;
+
   // Constructor
-  constructor(url: string, name: string) {
+  constructor(url: string, name: string, id: string) {
     this.url = url;
     this.name = name;
+    this.id = id;
   }
 
   // getters
@@ -22,5 +26,9 @@ export class BuilderDeckMetadata {
 
   public getName() {
     return this.name;
+  }
+
+  public getID() {
+    return this.id;
   }
 }

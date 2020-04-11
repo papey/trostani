@@ -14,7 +14,7 @@ export class Card {
   // Constructor
   constructor(name: string, edition: string, id: string, times: string) {
     this.name = name;
-    this.edition = edition.toLowerCase();
+    this.edition = fixSet(edition).toLowerCase();
     this.id = id;
     this.times = times;
   }
@@ -44,7 +44,7 @@ export class Card {
       );
 
       // https://scryfall.com/docs/api, see Rate Limits and Good Citizenship section
-      setTimeout(() => {}, 100);
+      setTimeout(() => {}, 60);
 
       if (translate.name == null) {
         throw new TranslateError(
@@ -115,7 +115,7 @@ export class Deck {
 
     // Check main length, needs to be a least > 0
     if (this.main.length > 0) {
-      this.main.forEach(card => {
+      this.main.forEach((card) => {
         let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
         decklist += line;
       });
@@ -124,7 +124,7 @@ export class Deck {
     // Check side board, add something only is something was found in sideboard
     if (this.side.length > 0) {
       decklist += "Sideboard: \n";
-      this.side.forEach(card => {
+      this.side.forEach((card) => {
         let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
         decklist += line;
       });
@@ -163,8 +163,8 @@ export class Deck {
     // Split on carriage return
     let list = m.split("\n");
 
-    // Start on the third line, skipping command and deck name (line 0) and the `Deck` line (line 1)
-    for (let i = 1; i < list.length; i++) {
+    // m is a sanitize string containing decklist
+    for (let i = 0; i < list.length; i++) {
       // If an empty line is found, main deck is over
       if (list[i] == "Deck" && !isDeck) {
         // This is the deck part
@@ -193,9 +193,10 @@ export class Deck {
       }
     }
 
-    if (!this.checkCardsSum(60, this.main, ">=")) {
+    const sum = this.main.reduce<number>(this.sumer, 0);
+    if (sum != 40 && sum < 60) {
       throw new DeckBuildingError(
-        "Error building deck, main part needs 60 cards, at least"
+        `Error building main deck can't contain ${sum} cards`
       );
     }
   }
@@ -228,11 +229,17 @@ export class Deck {
       }
     }
 
-    if (!this.checkCardsSum(15, this.side, "<=")) {
+    const sum = this.side.reduce<number>(this.sumer, 0);
+    if (sum > 15) {
       throw new DeckBuildingError(
         "Error building deck, side part is limited to a maximum of 15 cards"
       );
     }
+  }
+
+  // callback used to reduce a deck part to it's sum of cards
+  protected sumer(acc: number, card: Card) {
+    return acc + parseInt(card.getTimes());
   }
 
   // Parse all parts of deck
@@ -249,7 +256,7 @@ export class Deck {
     // - Nissa, celle qui fait trembler le monde
     // - WAR
     // - 169
-    const reg = new RegExp("(\\d) (.*) \\(([A-Z,0-9]{3})\\) ([A-Z,0-9]+)");
+    const reg = new RegExp("(\\d+) (.*) \\(([A-Z,0-9]{3})\\) ([A-Z,0-9]+)");
 
     // Match cardline with regex
     let res = c.match(reg);
@@ -261,38 +268,9 @@ export class Deck {
     } else {
       // Create a new error and throw it if no match is found
       throw new ParsingError(
-        "Error when parsing a line in decklist, please verify decklist"
+        `Error when parsing line #{c} in decklist, please verify decklist`
       );
     }
-  }
-
-  // Check if a number of card is valid in a set of cards (main and side checks)
-  protected checkCardsSum(limit: Number, cards: Card[], cmp: string): boolean {
-    // Sum counter
-    let sum = 0;
-
-    // Fill the sum
-    cards.forEach(e => {
-      sum += parseInt(e.getTimes());
-    });
-
-    // Compare and check
-    switch (cmp) {
-      case "<=":
-        if (sum <= limit) {
-          return true;
-        }
-        break;
-      case ">=":
-        if (sum >= limit) {
-          return true;
-        }
-      default:
-        return false;
-    }
-
-    // Ensure false return
-    return false;
   }
 }
 
@@ -307,8 +285,19 @@ export let Formats: { [f: string]: number } = {
   tiny: 7,
   pauper: 8,
   casual: 9,
-  brawl: 10
+  brawl: 10,
 };
+
+// fixSet is used to fix differences between MTGA set names and real world
+function fixSet(set: string): string {
+  switch (set) {
+    case "DAR":
+      return "DOM";
+
+    default:
+      return set;
+  }
+}
 
 // Parsing Error
 class ParsingError extends Error {

@@ -2,12 +2,29 @@
 
 // Imports
 import { Message } from "discord.js";
-import { Command } from "./utils";
+import { Command, parseArgs, isAuthorized } from "./utils";
 import { Deck } from "../scry/mtg";
 import { Manastack } from "../builders/manastack";
 import { BuilderDeckMetadata } from "../builders/utils";
+import { generateSubcommandExample } from "./help";
+import { SearchResultTooLong } from "./utils";
 
 // Functions
+// syncHelpMessage is used to generated a specific help message when asksing for a sync command
+export function syncHelpMessage(cmd: Command) {
+  let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
+  - \`search <keywords>\` : to search for deck containing <keywords> in their name
+  - \`push <name> // <format> (optional) // <description> (optional) : [...decklist...(on a new line)]\` : to push the decklist formated as MTGA export`;
+
+  if (cmd.args.includes("search")) {
+    return generateSubcommandExample(cmd, "sync", "search", searchExample);
+  } else if (cmd.args.includes("push")) {
+    return generateSubcommandExample(cmd, "sync", "push", pushExample);
+  }
+
+  return message;
+}
+
 // handleSync is triggered when a user asks for a sync sub command
 export async function handleSync(cmd: Command, origin: Message, config: any) {
   switch (cmd.sub) {
@@ -38,23 +55,6 @@ export async function handleSync(cmd: Command, origin: Message, config: any) {
   }
 }
 
-// syncHelpMessage is used to generated a specific help message when asksing for a sync command
-export function syncHelpMessage(cmd: Command) {
-  let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
-  - \`search <keywords>\` : to search for deck containing <keywords> in their name
-  - \`push <name> // <format> (optional) // <description> (optional) : [...decklist...]\` : to push the decklist formated as MTGA export`;
-
-  if (cmd.args.includes("search")) {
-    message = `Here is an example of the \`search\` subcommand of the \`sync\` command :
-    \`\`\`${cmd.prefix}sync search ${searchExample}\`\`\``;
-  } else if (cmd.args.includes("push")) {
-    message = `Here is an example of the \`push\` subcommand of the \`sync\` command :
-    \`\`\`${cmd.prefix}sync push ${pushExample}\`\`\``;
-  }
-
-  return message;
-}
-
 // handleSearch handles the subcommand search of the sync command
 async function handleSearch(cmd: Command, origin: Message, builder: any) {
   // If ManaStack is used
@@ -69,13 +69,14 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
     // Forge response for Discord
     let results = await ms.formatSearch(cmd.args);
 
-    // format search message
-    let message = "";
+    // ensure there is results
+    if (results.length == 0) {
+      origin.channel.send("There is no decks matching this query");
+      return;
+    }
 
-    // Append each result
-    results.forEach(e => {
-      message += e + `\n`;
-    });
+    // join results into one message
+    let message = results.join(`\n`);
 
     // Final word, with result sumary
     if (cmd.args != "") {
@@ -84,7 +85,14 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
       message += `Found ${results.length} deck(s)`;
     }
 
-    // Send message including lists of decks or an error message
+    // throw error if message is too long
+    if (message.length >= 2000) {
+      throw new SearchResultTooLong(
+        `This search result is too long for Discord, please add filters`
+      );
+    }
+
+    // Send message including lists of decks
     origin.channel.send(message);
   }
 }
@@ -98,45 +106,17 @@ async function handlePush(
   builder: any
 ) {
   // check if the message is comming from an authorized channel
-  if (isAuthorized(origin.channel.id, channels)) {
-    // push deck and five back url to channel
-    let meta = await push(cmd, origin, translate, builder);
+  if (!isAuthorized(origin.channel.id, channels)) {
     origin.channel.send(
-      `A new deck named **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
-    );
-  } else {
-    throw new SyncError(
       "`push` subcommand of command `sync` is not authorized on this channel"
     );
+    return;
   }
-}
-
-// isAuthorized ensures that push command is comming from an authorized channel
-function isAuthorized(oid: string, aids: string[]): boolean {
-  // loop over the array and check if id of the channel of the original message match configured channel
-  // return true or false
-  return aids.some(e => {
-    return e === oid;
-  });
-}
-
-// extract deck metadata from command args
-function parseDeckMetadata(cmd: Command): string[] {
-  // Get metadata from the first line
-  let metas = cmd.args
-    .split("\n")[0]
-    .replace(":", "")
-    .trim();
-
-  // Metadata fields are separated using //
-  let data = metas.split("//");
-
-  for (let i = 0; i < data.length; i++) {
-    data[i] = data[i].trimLeft().trimRight();
-  }
-
-  // Return it
-  return data;
+  // push deck and five back url to channel
+  let meta = await push(cmd, origin, translate, builder);
+  origin.channel.send(
+    `A new deck named **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
+  );
 }
 
 // push called when a users asks for the push subcommand of the sync command
@@ -150,17 +130,18 @@ async function push(
   origin.channel.send("_Analysing and publishing decklist_");
 
   try {
-    let meta = parseDeckMetadata(cmd);
+    let meta = parseArgs(cmd.args);
 
     if (meta[0] == "") {
-      throw new SyncError("Error, this deck needs at least a name");
+      origin.channel.send("Error, this deck needs at least a name");
+      return;
     }
 
     // Try building the deck
     let deck = new Deck(meta);
 
     // Parse it
-    await deck.parseDeck(origin.content, translate);
+    await deck.parseDeck(cmd.extra, translate);
 
     // If ManaStack is used
     if (builder.kind && builder.kind == "manastack") {
@@ -201,9 +182,11 @@ export class SyncError extends Error {
     this.message = message;
   }
 }
+
 // Examples used in help command
 // push command example
-let pushExample: string = `Temur Elementals :
+let pushExample: string = `Temur Elementals
+Deck
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
 4 Stomping Ground (RNA) 259
@@ -229,6 +212,7 @@ let pushExample: string = `Temur Elementals :
 1 Castle Vantress (ELD) 242
 3 Fabled Passage (ELD) 244
 
+Sideboard
 1 Jace, Wielder of Mysteries (WAR) 54
 3 Nissa, Who Shakes the World (WAR) 169
 1 Tamiyo, Collector of Tales (WAR) 220

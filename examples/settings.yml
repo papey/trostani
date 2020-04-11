@@ -1,7 +1,7 @@
 settings:
   translate: true
   token: "TOKEN"
-  activity: "Brewing some MTG decks"
+  activity: "MtG Tournament Manager 2020"
   name: Trostani
   prefix: "!"
   builder:
@@ -10,6 +10,13 @@ settings:
     username: "email@example.com"
     password: "p4ssw0rd"
     profile: "example"
+  challonge:
+    key: "KEY"
+    channels:
+      - "ID"
+    roles:
+      - "role"
+    parent: "ID"
   push:
-    channel:
-      - "628129686910967809"
+    channels:
+      - "ID"

@@ -11,12 +11,12 @@ import * as yargs from "yargs";
 // Args and cli setup
 let args = yargs
   .scriptName("Trostani")
-  .version("0.1.1-3")
+  .version("0.2.0")
   .help()
   .option("config", {
     alias: "c",
     demand: false,
-    default: "/etc/trostani/settings.yml"
+    default: "/etc/trostani/settings.yml",
   }).argv;
 
 // Create object, using config file from args

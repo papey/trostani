@@ -50,4 +50,4 @@ COPY --from=builder /opt/trostani/node_modules ./node_modules
 USER trostani
 
 # Go !
-ENTRYPOINT ["node", "/opt/trostani/dist/index.js"]
+ENTRYPOINT ["node", "/opt/trostani/dist/main.js"]
