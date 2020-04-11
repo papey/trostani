@@ -98,6 +98,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 - [Scryfall](https://scryfall.com) for the awesome tooling they provide for free
 - [Discord](https://discordapp.com) for the plateform they provide for free
 - [Val & PL Magic Arena FR](https://www.youtube.com/channel/UCQJQLJFuAj0Q8LPgqdzTbag) two MTGA french steamers who inspired this bot
+- [Forgeron Community](https://forgeronmtg.wixsite.com/mtgforgeron) for crash testing tournament features
 - Kudos @Namarand !
 
 ## Notes
