@@ -263,7 +263,7 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
   }
 
   origin.channel.send(
-    `Tournament **${tnmt["name"]}** is now finalized ! Thanks everyone ! Standings are available at https://challonge.com/${tnmt["url"]}/standings`
+    `Tournament **${tnmt["name"]}** is now finalized ! Thanks everyone ! Standings are available at ${tnmt["full_challonge_url"]}/standings`
   );
 }
 
@@ -815,14 +815,14 @@ async function create(
   }
 
   // trigger call to challonge API
-  await client.createTournament(meta);
+  const tnmt = await client.createTournament(meta);
 
   // create specific tournament channel
   let channel = await createTnmtChannel(origin, args[0], code, category);
 
   // send message to channel when tournament is created
   origin.channel.send(
-    `Tournament **${args[0]}** created and available at https://challonge.com/${code}, you can now use the dedicated channel <#${channel.id}>, to interact with it`
+    `Tournament **${args[0]}** created and available at ${tnmt["full_challonge_url"]}, you can now use the dedicated channel <#${channel.id}>, to interact with it`
   );
 }
 
