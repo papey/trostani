@@ -35,6 +35,11 @@ export class Card {
     return this.times;
   }
 
+  // Get edition
+  public getEdition(): string {
+    return this.edition.toUpperCase();
+  }
+
   // Try to get a translation for card from scryfall
   public async translate() {
     try {
@@ -116,7 +121,7 @@ export class Deck {
     // Check main length, needs to be a least > 0
     if (this.main.length > 0) {
       this.main.forEach((card) => {
-        let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
+        let line: string = `${card.getTimes()} ${card.getFirstPartName()} (${card.getEdition()})\n`;
         decklist += line;
       });
     }
@@ -125,7 +130,7 @@ export class Deck {
     if (this.side.length > 0) {
       decklist += "Sideboard: \n";
       this.side.forEach((card) => {
-        let line: string = `${card.getTimes()} ${card.getFirstPartName()}\n`;
+        let line: string = `${card.getTimes()} ${card.getFirstPartName()} (${card.getEdition()})\n`;
         decklist += line;
       });
     }

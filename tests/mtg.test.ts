@@ -36,11 +36,11 @@ class MTGDeckTestSuite extends Deck {
 
     let splited = list.split("\n");
 
-    assert.equal(splited[0], "4 Steam Vents");
-    assert.equal(splited[23], "3 Fabled Passage");
+    assert.equal(splited[0], "4 Steam Vents (GRN)");
+    assert.equal(splited[23], "3 Fabled Passage (ELD)");
     assert.equal(splited[24], "Sideboard: ");
-    assert.equal(splited[25], "1 Jace, Wielder of Mysteries");
-    assert.equal(splited[27], "1 Tamiyo, Collector of Tales");
+    assert.equal(splited[25], "1 Jace, Wielder of Mysteries (WAR)");
+    assert.equal(splited[27], "1 Tamiyo, Collector of Tales (WAR)");
     assert.equal(splited[29], "");
     assert.equal(splited.length, 30);
   }
