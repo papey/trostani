@@ -15,6 +15,7 @@ import {
   SearchResultTooLong,
 } from "./utils";
 import { generateSubcommandExample } from "./help";
+import { setPriority } from "os";
 
 // Functions
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
@@ -110,7 +111,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
 // tnmtIdFromChannel is used to ensure origin channel is a tournament one
 function tnmtIDFromChannel(origin: Message): string {
   // get Discord channel object
-  let ch = origin.guild.channels.find((ch) => ch.id === origin.channel.id);
+  let ch = origin.guild.channels.cache.find((ch) => ch.id === origin.channel.id);
   // get parts
   const parts = ch.name.split("-");
   // checks
@@ -152,7 +153,7 @@ async function tnmtFromChannel(
 // handleStart handle the start tournament subcommand
 async function handleStart(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
-  if (!hasPermission(origin.member.roles, config.roles)) {
+  if (!hasPermission(origin.member.roles.cache, config.roles)) {
     origin.channel.send(
       `You don't have the required permissions to use this command`
     );
@@ -236,7 +237,7 @@ async function handleDecks(cmd: Command, origin: Message, builder: any) {
 // handleFinalize is used to finish and close a tournament
 async function handleFinalize(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
-  if (!hasPermission(origin.member.roles, config.roles)) {
+  if (!hasPermission(origin.member.roles.cache, config.roles)) {
     origin.channel.send(
       `You don't have the required permissions to use this command`
     );
@@ -409,7 +410,7 @@ function getUserFromMention(client: Client, mention: string, guild: Guild) {
   // so use index 1.
   const id = matches[1];
 
-  let member = guild.members.get(id);
+  let member = guild.members.cache.get(id);
   if (member.displayName == undefined) {
     return member.user.username;
   } else {
@@ -526,7 +527,7 @@ async function handleJoin(
   });
 
   // init display name
-  const member = origin.guild.members.get(origin.author.id);
+  const member = origin.guild.members.cache.get(origin.author.id);
   // fallback to username if no displayName
   var displayName =
     member.displayName == undefined
@@ -603,7 +604,7 @@ async function handleJoin(
   // return decklist, and message
   origin.channel.send(
     `Registration successfull for user <@${origin.author.id}> in tournament ${
-      tnmt["full_challonge_url"]
+    tnmt["full_challonge_url"]
     }, deck list is available at ${synced.getUrl()}`
   );
 }
@@ -700,7 +701,7 @@ async function handleCreate(
     return;
   }
 
-  if (!hasPermission(origin.member.roles, config.roles)) {
+  if (!hasPermission(origin.member.roles.cache, config.roles)) {
     origin.channel.send(
       `You don't have the required permissions to use this command`
     );
@@ -768,10 +769,10 @@ async function createTnmtChannel(
   code: string,
   category: string
 ) {
-  let channel = await origin.guild.createChannel(`tnmt-${code}-${name}`, {
+  let channel = await origin.guild.channels.create(`tnmt-${code}-${name}`, {
     type: "text",
-  });
-  await channel.setParent(category);
+  }).then(ch => ch.setParent(category));
+
   return channel;
 }
 
