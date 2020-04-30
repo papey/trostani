@@ -49,5 +49,8 @@ COPY --from=builder /opt/trostani/node_modules ./node_modules
 
 USER trostani
 
-# Go !
-ENTRYPOINT ["node", "/opt/trostani/dist/main.js"]
+# setup default args
+CMD ["/opt/trostani/dist/main.js"]
+
+# setup entrypoint command
+ENTRYPOINT ["node"]
