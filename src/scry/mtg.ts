@@ -199,9 +199,9 @@ export class Deck {
     }
 
     const sum = this.main.reduce<number>(this.sumer, 0);
-    if (sum != 40 && sum < 60) {
+    if (sum < 40) {
       throw new DeckBuildingError(
-        `Error building main deck can't contain ${sum} cards`
+        `Error building deck, main deck can't contain ${sum} cards (minimum required : 40 cards)`
       );
     }
   }
@@ -235,9 +235,9 @@ export class Deck {
     }
 
     const sum = this.side.reduce<number>(this.sumer, 0);
-    if (sum > 15) {
+    if (sum > 50) {
       throw new DeckBuildingError(
-        "Error building deck, side part is limited to a maximum of 15 cards"
+        "Error building deck, side part is limited to a maximum of 50 cards"
       );
     }
   }
