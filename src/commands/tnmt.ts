@@ -111,7 +111,9 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
 // tnmtIdFromChannel is used to ensure origin channel is a tournament one
 function tnmtIDFromChannel(origin: Message): string {
   // get Discord channel object
-  let ch = origin.guild.channels.cache.find((ch) => ch.id === origin.channel.id);
+  let ch = origin.guild.channels.cache.find(
+    (ch) => ch.id === origin.channel.id
+  );
   // get parts
   const parts = ch.name.split("-");
   // checks
@@ -565,7 +567,7 @@ async function handleJoin(
     `Deck played by participant ${displayName} during tournament ${tnmt["name"]}`
   );
   let deck = new Deck(meta);
-  await deck.parseDeck(cmd.extra, true);
+  await deck.buildDeck(cmd.extra, true);
 
   // sync deck to Manastack
   if (builder.kind && builder.kind == "manastack") {
@@ -604,7 +606,7 @@ async function handleJoin(
   // return decklist, and message
   origin.channel.send(
     `Registration successfull for user <@${origin.author.id}> in tournament ${
-    tnmt["full_challonge_url"]
+      tnmt["full_challonge_url"]
     }, deck list is available at ${synced.getUrl()}`
   );
 }
@@ -612,7 +614,7 @@ async function handleJoin(
 // handleList is used to list all tournaments on challonge
 async function handleList(cmd: Command, origin: Message, client: Challonge) {
   // set a limit
-  const limit = 25;
+  const limit = 10;
 
   // declare optionnal parameters
   let params = {};
@@ -769,9 +771,11 @@ async function createTnmtChannel(
   code: string,
   category: string
 ) {
-  let channel = await origin.guild.channels.create(`tnmt-${code}-${name}`, {
-    type: "text",
-  }).then(ch => ch.setParent(category));
+  let channel = await origin.guild.channels
+    .create(`tnmt-${code}-${name}`, {
+      type: "text",
+    })
+    .then((ch) => ch.setParent(category));
 
   return channel;
 }

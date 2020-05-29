@@ -141,7 +141,7 @@ async function push(
     let deck = new Deck(meta);
 
     // Parse it
-    await deck.parseDeck(cmd.extra, translate);
+    await deck.buildDeck(cmd.extra, translate);
 
     // If ManaStack is used
     if (builder.kind && builder.kind == "manastack") {

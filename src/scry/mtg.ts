@@ -1,7 +1,7 @@
 // mtg.ts file, containing all stuff to represent cards ands decks
 
 // Imports
-import { Cards as ScryCards } from "scryfall-sdk";
+import { Cards as ScryCards, CardIdentifier } from "scryfall-sdk";
 
 // Classes
 // Class used to represent a card
@@ -25,7 +25,17 @@ export class Card {
     return this.name;
   }
 
-  // Gett only the first part of a double card name
+  // Setter for name (used for translation purpose)
+  public setName(name: string) {
+    this.name = name;
+  }
+
+  // Getter for id
+  public getID(): string {
+    return this.id;
+  }
+
+  // Get only the first part of a double card name
   public getFirstPartName(): string {
     return this.name.split("//")[0].trim();
   }
@@ -38,6 +48,11 @@ export class Card {
   // Get edition
   public getEdition(): string {
     return this.edition.toUpperCase();
+  }
+
+  // Export card to string
+  public export(): string {
+    return `${this.getTimes()} ${this.getFirstPartName()} (${this.getEdition()})`;
   }
 
   // Try to get a translation for card from scryfall
@@ -102,6 +117,11 @@ export class Deck {
   // Meta informations about the deck
   public metadata: Metadata;
 
+  // Companion card
+  protected companion: Card = null;
+  // Commander card
+  protected commander: Card = null;
+
   // Main cards
   protected main: Card[] = [];
   // Sideboard cards
@@ -118,20 +138,25 @@ export class Deck {
     // Init a decklist containing nothing
     let decklist: string = "";
 
-    // Check main length, needs to be a least > 0
+    // Commander is in the main deck
+    if (this.commander) {
+      decklist = `${this.commander.export()}\n`;
+    }
+
     if (this.main.length > 0) {
       this.main.forEach((card) => {
-        let line: string = `${card.getTimes()} ${card.getFirstPartName()} (${card.getEdition()})\n`;
-        decklist += line;
+        decklist += `${card.export()}\n`;
       });
     }
 
-    // Check side board, add something only is something was found in sideboard
-    if (this.side.length > 0) {
+    if (this.side.length > 0 || this.companion) {
       decklist += "Sideboard: \n";
+      // companion goes in sideboard
+      if (this.companion) {
+        decklist += `${this.companion.export()}\n`;
+      }
       this.side.forEach((card) => {
-        let line: string = `${card.getTimes()} ${card.getFirstPartName()} (${card.getEdition()})\n`;
-        decklist += line;
+        decklist += `${card.export()}\n`;
       });
     }
 
@@ -139,122 +164,145 @@ export class Deck {
     return decklist;
   }
 
-  // Methods (protected)
-  // Parse and add card to array
-  protected async parseAddCardTo(
-    line: string,
-    part: Array<Card>,
-    translate: boolean = false
-  ) {
-    // Try to parse card line
-    let card = this.parseCard(line);
-    // If ok, add to main deck
-    if (card != null) {
-      if (translate) {
-        await card.translate();
-      }
-      part.push(card);
-    }
-  }
-
-  // Parse main deck cards
-  protected async parseMainDeck(m: string, translate: boolean = false) {
-    // Ensure we are in the deck part
-    let isDeck = false;
-
-    // Array of cards in main deck
-    this.main = [];
-
-    // Split on carriage return
-    let list = m.split("\n");
-
-    // m is a sanitize string containing decklist
-    for (let i = 0; i < list.length; i++) {
-      // If an empty line is found, main deck is over
-      if (list[i] == "Deck" && !isDeck) {
-        // This is the deck part
-        isDeck = true;
-        // Just and iterate over deck cards
-        continue;
-      }
-
-      // Is this deck a brawl deck ?
-      if ((list[i] == "Commandant" || list[i] == "Commander") && !isDeck) {
-        this.metadata.format = Formats["brawl"];
-        // Make index pointing to commander lne
-        i += 1;
-        // Try parse and adding commander card
-        await this.parseAddCardTo(list[i], this.main, translate);
-        continue;
-      }
-
-      if (isDeck) {
-        // If empty line, deck part is over
-        if (list[i] == "") {
-          break;
-        }
-        // Try parsing and adding deck cards
-        await this.parseAddCardTo(list[i], this.main, translate);
-      }
-    }
-
-    const sum = this.main.reduce<number>(this.sumer, 0);
-    if (sum < 40) {
-      throw new DeckBuildingError(
-        `Error building deck, main deck can't contain ${sum} cards (minimum required : 40 cards)`
-      );
-    }
-  }
-
-  // Parse main deck cards
-  protected async parseSideboard(m: string, translate: boolean = false) {
-    // Are we working on a sideboard ?
-    let isSide = false;
-
-    // Array of cards in main deck
-    this.side = [];
-
-    // Split on carriage return
-    let list = m.split("\n");
-
-    // Start on the second line, command line does not need to be checked
-    for (let i = 1; i < list.length; i++) {
-      // If keyword Sideboard or Réserve is found, this is the sideboard part
-      if ((list[i] == "Réserve" || list[i] == "Sideboard") && !isSide) {
-        // Activate side part
-        isSide = true;
-        // Just iterate over sideboard cards
-        continue;
-      }
-
-      // If we are in she side and the line is not empty
-      if (isSide && list[i] != "") {
-        // Try to parse card line
-        await this.parseAddCardTo(list[i], this.side, translate);
-      }
-    }
-
-    const sum = this.side.reduce<number>(this.sumer, 0);
-    if (sum > 50) {
-      throw new DeckBuildingError(
-        "Error building deck, side part is limited to a maximum of 50 cards"
-      );
-    }
-  }
-
-  // callback used to reduce a deck part to it's sum of cards
+  // Callback used to reduce a deck part to it's sum of cards
   protected sumer(acc: number, card: Card) {
     return acc + parseInt(card.getTimes());
   }
 
   // Parse all parts of deck
   public async parseDeck(list: string, translate: boolean = false) {
-    await this.parseMainDeck(list, translate);
-    await this.parseSideboard(list, translate);
+    // split decklist into parts, ensure all possible line returns are handled
+    const parts = list
+      .replace(/\n\r/g, "\n")
+      .replace(/\r/g, "\n")
+      .split(/\n{2,}/g);
+
+    // check length
+    if (parts.length < 1) {
+      throw new DeckBuildingError(
+        "Error when building the deck, can't find any parts (main, sideboard, commander or companion) in this decklist"
+      );
+    }
+
+    // For each part fill the deck object
+    for (const subpart of parts) {
+      const lines = subpart.split("\n");
+      if (lines.length < 2) {
+        throw new DeckBuildingError(
+          `Error when building the deck, subpart named ${lines[0]} is empty`
+        );
+      }
+      // Deck part
+      if (Translations["deck"].includes(lines[0].toLowerCase())) {
+        // parse all cards in deck part (slice first line containing part name)
+        this.main = lines.slice(1).map((line) => this.parseCard(line));
+      } // Sideboard part
+      else if (Translations["sideboard"].includes(lines[0].toLowerCase())) {
+        // parse all cards in sideboard part (slice first line containing "Sideboard")
+        this.side = lines.slice(1).map((line) => this.parseCard(line));
+      } // Commander part
+      else if (Translations["commander"].includes(lines[0].toLowerCase())) {
+        // parse commander card
+        if (lines.length > 2) {
+          throw new DeckBuildingError(
+            "Error when building the deck, Commander part contains too much cards"
+          );
+        }
+        this.commander = this.parseCard(lines[1]);
+        // set format to brawl since it's the only one with a commander supported by MTGA
+        this.metadata.format = Formats["brawl"];
+      } // Companion part
+      else if (Translations["companion"].includes(lines[0].toLowerCase())) {
+        // parse companion card
+        if (lines.length > 2) {
+          throw new DeckBuildingError(
+            "Error when building the deck, Companion part contains too much cards"
+          );
+        }
+        this.companion = this.parseCard(lines[1]);
+      } else {
+        console.warn(`Part of kind ${lines[0]} is not supported`);
+      }
+    }
+  }
+
+  // Verify basic constraints
+  private constraints() {
+    // companion constraints
+    if (this.companion) {
+      if (parseInt(this.companion.getTimes()) != 1) {
+        throw new DeckBuildingError(`A deck can only contains one companion`);
+      }
+    }
+
+    // commander constraints
+    if (this.commander) {
+      if (parseInt(this.commander.getTimes()) != 1) {
+        throw new DeckBuildingError(`A deck can only contains one commander`);
+      }
+    }
+
+    // main deck constraints
+    if (this.main.reduce<number>(this.sumer, 0) < 40) {
+      throw new DeckBuildingError(`Main deck is at least 40 cards`);
+    }
+
+    // side deck constaints
+    if (this.side.reduce<number>(this.sumer, 0) > 30) {
+      throw new DeckBuildingError(`Side deck is limited to 30 cards`);
+    }
+  }
+
+  // Translate an entire deck
+  protected async translateDeck() {
+    // translate companion
+    if (this.companion != null) {
+      await this.companion.translate();
+    }
+
+    // translate commander
+    if (this.commander != null) {
+      await this.commander.translate();
+    }
+
+    // translate deck
+    await this.translator(...this.main);
+    // translate sideboard
+    await this.translator(...this.side);
+  }
+
+  // Build a deck
+  public async buildDeck(list: string, translate: boolean = false) {
+    // parse deck
+    this.parseDeck(list);
+
+    // ensure constraints
+    this.constraints();
+
+    // translate deck if requested
+    if (translate) {
+      await this.translateDeck();
+    }
+  }
+
+  // Take an entire deck part and translate it
+  protected async translator(...parts: Card[]) {
+    // prepare collection
+    const collection = parts.map((c) =>
+      CardIdentifier.bySet(c.getEdition(), c.getID())
+    );
+
+    // get translated data collection
+    const translated = await ScryCards.collection(...collection).waitForAll();
+
+    // for each card replace original name with it's en translation
+    for (let i = 0; i < parts.length; i++) {
+      parts[i].setName(translated[i].name);
+    }
   }
 
   // Parse a card
-  protected parseCard(c: string): Card | null {
+  protected parseCard(c: string): Card {
     // Data example : 4 Nissa, celle qui fait trembler le monde (WAR) 169
     // Captured groups :
     // - 4
@@ -266,14 +314,14 @@ export class Deck {
     // Match cardline with regex
     let res = c.match(reg);
 
-    // If it ok
+    // If it's ok
     if (res != null) {
       // return Card object
       return new Card(res[2], res[3], res[4], res[1]);
     } else {
       // Create a new error and throw it if no match is found
       throw new ParsingError(
-        `Error when parsing line #{c} in decklist, please verify decklist`
+        `Error when parsing line ${c} in decklist, please verify decklist`
       );
     }
   }
@@ -291,6 +339,22 @@ export let Formats: { [f: string]: number } = {
   pauper: 8,
   casual: 9,
   brawl: 10,
+};
+
+// Translations of all deck parts
+let Translations: { [f: string]: string[] } = {
+  // en, fr, pt, it, de, es
+  deck: ["deck", "mazzo", "mazo"],
+  sideboard: ["sideboard", "réserve", "reserva", "sideboard"],
+  commander: ["commander", "commandant", "comandante", "kommandeur"],
+  companion: [
+    "companion",
+    "compagnon",
+    "companheiro",
+    "compagno",
+    "gefährte",
+    "compañero",
+  ],
 };
 
 // fixSet is used to fix differences between MTGA set names and real world

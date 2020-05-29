@@ -8,10 +8,11 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "test": "mocha --recursive --extension ts --timeout 105000 -R spec -r ts-node/register tests"
+    "test": "mocha --recursive --extension ts --timeout 5000 -R spec -r ts-node/register tests"
   },
   "dependencies": {
     "@types/crypto-js": "^3.1.43",
+    "chai-as-promised": "^7.1.1",
     "challonge-ts": "^0.0.1",
     "crypto-js": "^4.0.0",
     "discord.js": "^12.2.0",
