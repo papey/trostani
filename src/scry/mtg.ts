@@ -170,7 +170,7 @@ export class Deck {
   }
 
   // Parse all parts of deck
-  public async parseDeck(list: string, translate: boolean = false) {
+  public async parseDeck(list: string) {
     // split decklist into parts, ensure all possible line returns are handled
     const parts = list
       .replace(/\r\n/g, "\n")
