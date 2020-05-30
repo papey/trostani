@@ -173,7 +173,7 @@ export class Deck {
   public async parseDeck(list: string, translate: boolean = false) {
     // split decklist into parts, ensure all possible line returns are handled
     const parts = list
-      .replace(/\n\r/g, "\n")
+      .replace(/\r\n/g, "\n")
       .replace(/\r/g, "\n")
       .split(/\n{2,}/g);
 
@@ -186,7 +186,7 @@ export class Deck {
 
     // For each part fill the deck object
     for (const subpart of parts) {
-      const lines = subpart.split("\n");
+      const lines = subpart.split("\n").filter((l) => l != "");
       if (lines.length < 2) {
         throw new DeckBuildingError(
           `Error when building the deck, subpart named ${lines[0]} is empty`
