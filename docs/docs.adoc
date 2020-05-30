@@ -83,6 +83,7 @@ $tnmt list pending
 ```text
 $tnmt join <archetype> (optional)
 ```
+If the deck is too large (more than 2000 chars), just use the **attach as text file option**
 
 Example :
 
@@ -211,6 +212,7 @@ $sync search aggro
 $sync push <name> // <format> (optional) // <description> (optional)
 [...decklist...]
 ```
+If the deck is too large (more than 2000 chars), just use the **attach as text file option**
 
 ===== Example
 
