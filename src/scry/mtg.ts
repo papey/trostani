@@ -274,7 +274,7 @@ export class Deck {
   // Build a deck
   public async buildDeck(list: string, translate: boolean = false) {
     // parse deck
-    this.parseDeck(list);
+    await this.parseDeck(list);
 
     // ensure constraints
     this.constraints();
