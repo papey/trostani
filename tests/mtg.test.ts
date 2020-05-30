@@ -1,9 +1,13 @@
 // mtg.ts testing file
 
 // Imports
-import { Deck, Metadata, Card } from "../src/scry/mtg";
+import { Deck, Card } from "../src/scry/mtg";
 import { suite, test } from "mocha-typescript";
-import { assert } from "chai";
+// Chai setup, mandatory for promised based tests
+const chai = require("chai");
+const expect = chai.expect;
+const assert = chai.assert;
+chai.use(require("chai-as-promised"));
 
 // MTG, Card class test suite
 @suite("MTG, Card Test Suite")
@@ -25,13 +29,13 @@ class MTGCardTestSuite extends Card {
 // MTG, Deck test suite
 @suite("MTG, Deck Test Suite")
 class MTGDeckTestSuite extends Deck {
-  constructor(data: string = pushData) {
+  constructor(data: string = base) {
     super(["Test"]);
   }
 
   @test
   async "[exportToManastack]: Should return a list formatted for ManaStack"() {
-    await this.parseDeck(pushData);
+    await this.parseDeck(base);
     let list = this.exportToManaStack();
 
     let splited = list.split("\n");
@@ -46,8 +50,8 @@ class MTGDeckTestSuite extends Deck {
   }
 
   @test
-  async "[parseMainDeck]: Should fill a list of cards for maindeck part inside the deck object"() {
-    await this.parseMainDeck(pushData);
+  async "[buildDeck]: Should parse an entire deck"() {
+    await this.buildDeck(base);
 
     assert.equal(this.main.length, 24);
     assert.equal(this.main[0].getName(), "Steam Vents");
@@ -56,14 +60,12 @@ class MTGDeckTestSuite extends Deck {
   }
 
   @test
-  async "[parseSideboard]: Sould fill a list of cards for sideboard part inside the deck object"() {
-    await this.parseSideboard(pushData);
-
-    assert.equal(this.side[0].getName(), "Jace, Wielder of Mysteries");
-    assert.equal(this.side[2].getTimes(), "1");
+  async "[buildDeck]: Should failed at constraints validation"() {
+    await expect(this.buildDeck(partial)).to.be.rejectedWith(Error);
   }
 
-  @test "[parseCard]: Should return a card object based on an exported line"() {
+  @test
+  async "[parseCard]: Should return a card object based on an exported line"() {
     let card = this.parseCard("2 Cavalier of Thorns (M20) 162");
 
     if (card != null) {
@@ -75,32 +77,30 @@ class MTGDeckTestSuite extends Deck {
   }
 
   @test
+  async "[buildDeck+brawl]: Sould build a brawl deck"() {
+    let deck = new MTGDeckTestSuite();
+
+    await deck.buildDeck(brawl, false);
+
+    assert.equal(deck.commander.getName(), "Niv-Mizzet revenu à la vie");
+  }
+
+  @test async "[buildDeck+translate]: Sould buld and translate a deck"() {
+    await this.buildDeck(translate, true);
+
+    assert.equal(this.main[0].getName(), "Island");
+  }
+
+  @test
   async "[sumer]: Used as a reduce callback, should count number or cards"() {
-    await this.parseDeck(pushData);
+    await this.buildDeck(base);
 
     assert.equal(this.main.reduce(this.sumer, 0), 60);
     assert.equal(this.side.reduce(this.sumer, 0), 8);
   }
-
-  @test async "[parseDeck+translate]: Sould parse a deck, with translation"() {
-    let deck = new MTGDeckTestSuite();
-
-    await deck.parseDeck(pushTranslateData, true);
-
-    assert.equal(deck.main[0].getName(), "Island");
-  }
-
-  @test
-  async "[parseDeck+translate+brawl]: Sould parse a brawl deck, with translation"() {
-    let deck = new MTGDeckTestSuite();
-
-    await deck.parseDeck(brawlTranslateData, true);
-
-    assert.equal(deck.main[0].getName(), "Niv-Mizzet Reborn");
-  }
 }
 
-let pushData = `Deck
+let base = `Deck
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
 4 Stomping Ground (RNA) 259
@@ -132,7 +132,13 @@ Sideboard
 1 Tamiyo, Collector of Tales (WAR) 220
 3 Chandra, Awakened Inferno (M20) 127`;
 
-let pushTranslateData = `Deck
+let partial = `Deck
+4 Steam Vents (GRN) 257
+
+Sideboard
+3 Chandra, Awakened Inferno (M20) 127`;
+
+let translate = `Deck
 3 Île (ELD) 257
 2 Téfeiri, effileur de temps (WAR) 221
 1 Plaine (ELD) 253
@@ -164,7 +170,7 @@ Réserve
 1 Téfeiri, effileur de temps (WAR) 221
 1 Emprunteur intrépide (ELD) 39`;
 
-let brawlTranslateData = `Commandant
+let brawl = `Commandant
 1 Niv-Mizzet revenu à la vie (WAR) 208
 
 Deck
