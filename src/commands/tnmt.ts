@@ -13,6 +13,7 @@ import {
   hasPermission,
   generateArgsErrorMsg,
   SearchResultTooLong,
+  decklistFromAttachment,
 } from "./utils";
 import { generateSubcommandExample } from "./help";
 import { setPriority } from "os";
@@ -567,7 +568,16 @@ async function handleJoin(
     `Deck played by participant ${displayName} during tournament ${tnmt["name"]}`
   );
   let deck = new Deck(meta);
-  await deck.buildDeck(cmd.extra, true);
+
+  // Build it
+  // try from attachment
+  const fromAttachment = await decklistFromAttachment(origin);
+  if (fromAttachment != null) {
+    await deck.buildDeck(fromAttachment, true);
+  } // if not found, fallback to text message
+  else {
+    await deck.buildDeck(cmd.extra, true);
+  }
 
   // sync deck to Manastack
   if (builder.kind && builder.kind == "manastack") {

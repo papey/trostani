@@ -2,6 +2,7 @@
 
 // Imports
 import { Message, Role, Collection } from "discord.js";
+import request = require("request-promise");
 
 // Classes
 // Command class containing all parts of a command
@@ -105,6 +106,21 @@ export function parseArgs(args: string, toLower: boolean = false): string[] {
 // generateArgsErrorMsg is used to generate an argument error message
 export function generateArgsErrorMsg(na: number, prefix: string) {
   return `This command requires at least ${na} argument(s) (if you need help try \`${prefix}help\`)`;
+}
+
+// decklistFromAttachment is used to read a decklist from a file attachment
+export async function decklistFromAttachment(
+  message: Message
+): Promise<string | null> {
+  // filter ou the first txt file
+  const file = message.attachments.find((a) => a.name?.includes(".txt"));
+  if (file) {
+    // return data
+    return await request.get({ url: file.url });
+  }
+
+  // if no file found, return null
+  return null;
 }
 
 // error when a message is too long to send it on Discord

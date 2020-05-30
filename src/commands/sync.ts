@@ -7,7 +7,7 @@ import { Deck } from "../scry/mtg";
 import { Manastack } from "../builders/manastack";
 import { BuilderDeckMetadata } from "../builders/utils";
 import { generateSubcommandExample } from "./help";
-import { SearchResultTooLong } from "./utils";
+import { SearchResultTooLong, decklistFromAttachment } from "./utils";
 
 // Functions
 // syncHelpMessage is used to generated a specific help message when asksing for a sync command
@@ -140,8 +140,15 @@ async function push(
     // Try building the deck
     let deck = new Deck(meta);
 
-    // Parse it
-    await deck.buildDeck(cmd.extra, translate);
+    // Build it
+    // try from attachment
+    const fromAttachment = await decklistFromAttachment(origin);
+    if (fromAttachment != null) {
+      await deck.buildDeck(fromAttachment, translate);
+    } // if not found, fallback to text message
+    else {
+      await deck.buildDeck(cmd.extra, translate);
+    }
 
     // If ManaStack is used
     if (builder.kind && builder.kind == "manastack") {
