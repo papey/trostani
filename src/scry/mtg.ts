@@ -295,10 +295,26 @@ export class Deck {
     // get translated data collection
     const translated = await ScryCards.collection(...collection).waitForAll();
 
+    if (translated.not_found.length != 0) {
+      const notFound = this.getCard(
+        translated.not_found[0].collector_number,
+        translated.not_found[0].set,
+        parts
+      );
+      throw new DeckBuildingError(
+        `Card "${notFound.getName()}" as number ${notFound.getID()} of set ${notFound.getEdition()} not found`
+      );
+    }
+
     // for each card replace original name with it's en translation
     for (let i = 0; i < parts.length; i++) {
       parts[i].setName(translated[i].name);
     }
+  }
+
+  // Get a card by it's id and set
+  protected getCard(id: string, set: string, part: Card[]) {
+    return part.find((c) => c.getID() == id && c.getEdition() == set);
   }
 
   // Parse a card
