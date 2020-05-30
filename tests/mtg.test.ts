@@ -80,7 +80,7 @@ class MTGDeckTestSuite extends Deck {
   async "[buildDeck+brawl]: Sould build a brawl deck"() {
     let deck = new MTGDeckTestSuite();
 
-    await deck.parseDeck(brawl, false);
+    await deck.buildDeck(brawl, false);
 
     assert.equal(deck.commander.getName(), "Niv-Mizzet revenu à la vie");
   }
