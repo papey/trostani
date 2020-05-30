@@ -325,7 +325,7 @@ export class Deck {
     // - Nissa, celle qui fait trembler le monde
     // - WAR
     // - 169
-    const reg = new RegExp("(\\d+) (.*) \\(([A-Z,0-9]{3})\\) ([A-Z,0-9]+)");
+    const reg = new RegExp("(\\d+) (.*) \\(([A-Z,0-9]{3,4})\\) ([A-Z,0-9]+)");
 
     // Match cardline with regex
     let res = c.match(reg);
@@ -378,6 +378,8 @@ function fixSet(set: string): string {
   switch (set) {
     case "DAR":
       return "DOM";
+    case "CONF":
+      return "CON";
 
     default:
       return set;
