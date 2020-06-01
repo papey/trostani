@@ -6,7 +6,7 @@ import { suite, test } from "mocha-typescript";
 import { assert } from "chai";
 
 // Trostani class testing suite
-@suite("ManaStack, Cookie Test Suite")
+@suite("Builder, Cookie Test Suite")
 class BuilderCookieTestSuite extends Cookie {
   constructor() {
     super("TOKEN", "Mon, 21-Oct-2018 13:06:45 GMT");
