@@ -10,6 +10,11 @@ steps:
 
   - name: tests
     image: bearstech/node-dev:12
+    environment:
+      MVUSER:
+        from_secret: mv_user
+      MVPASS:
+        from_secret: mv_pass
     commands:
       - yarn
       - yarn test
