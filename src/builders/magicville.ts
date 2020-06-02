@@ -1,7 +1,7 @@
 // magicville.ts contains Magic Ville (https://www.magic-ville.com/fr/index) builder implementation
 
 // Imports
-import request = require("request-promise");
+const got = require("got");
 import { Builder, Cookie } from "./builder";
 
 // Magic Ville classe
@@ -26,7 +26,7 @@ export class MagicVille implements Builder {
 
   // Check is a user is correctly logged or not
   async isLogged(): Promise<boolean> {
-    const resp = await request.get({
+    const resp = await got.get({
       url: `${this.url}/${this.routes["register"]}`,
       headers: {
         // Magic Ville needs this "magicville" extra cookie containing the username 🤷
@@ -47,7 +47,7 @@ export class MagicVille implements Builder {
     // if there is no cookie or it's not valid
     if (!this.cookie || !this.cookie.valid()) {
       // request for a new login
-      await request
+      await got
         .post({
           headers: { "content-type": "application/x-www-form-urlencoded" },
           url: `${this.url}/${this.routes["login"]}`,
