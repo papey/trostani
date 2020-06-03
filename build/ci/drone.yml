@@ -10,6 +10,12 @@ steps:
 
   - name: tests
     image: bearstech/node-dev:12
+    environment:
+      MS_USER:
+        from_secret: MS_USER
+      MS_PASSWORD:
+        from_secret: MS_PASSWORD
+
     commands:
       - yarn
       - yarn test
