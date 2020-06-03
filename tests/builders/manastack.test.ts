@@ -2,7 +2,7 @@
 
 // Imports
 import { Cookie } from "../../src/builders/manastack";
-import { suite, test } from "mocha-typescript";
+import { suite, test } from "@testdeck/mocha";
 import { assert } from "chai";
 
 // Trostani class testing suite

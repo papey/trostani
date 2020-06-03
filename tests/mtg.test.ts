@@ -2,7 +2,7 @@
 
 // Imports
 import { Deck, Card } from "../src/scry/mtg";
-import { suite, test } from "mocha-typescript";
+import { suite, test } from "@testdeck/mocha";
 // Chai setup, mandatory for promised based tests
 const chai = require("chai");
 const expect = chai.expect;

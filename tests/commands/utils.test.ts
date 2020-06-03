@@ -2,7 +2,7 @@
 
 // Imports
 import { Command } from "../../src/commands/utils";
-import { suite, test } from "mocha-typescript";
+import { suite, test } from "@testdeck/mocha";
 import { assert } from "chai";
 
 // Command class test suite
