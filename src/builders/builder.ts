@@ -1,5 +1,7 @@
 // builder.ts file contains all the logic used to represent an online deck builder
 
+import { Deck, Metadata } from "../scry/mtg";
+
 // Builder base interface
 export interface Builder {
   // builder name
@@ -14,6 +16,10 @@ export interface Builder {
   url: string;
 
   login(): void;
+
+  pushDeck(d: Deck): void;
+
+  format(d: Deck): string;
 }
 
 // Builder user class
@@ -44,5 +50,18 @@ export class Cookie {
   // Ensure cookie is valid
   public valid(): boolean {
     return new Date() < this.expiration;
+  }
+}
+
+// BuilderDeckMetadata contains generic Metadatas from a deck builder object
+export class BuilderDeckMetadata {
+  id: string;
+  url: string;
+  dm: Metadata;
+
+  constructor(id: string, u: string, dm: Metadata) {
+    this.id = id;
+    this.url = u;
+    this.dm = dm;
   }
 }
