@@ -37,4 +37,48 @@ class MSTestSuite extends MS {
     // Purge created deck if requested (usefull for CI)
     if (process.env.MS_PURGE) await this.deleteDeck(bdm.id);
   }
+
+  @test
+  async "[getDecks]: Sould get the entire decklist"() {
+    // Create deck
+    const deck = new Deck(["La Simplexité", "casual", "This is a test"]);
+    // Wait for login and parsing to complete
+    await Promise.all([this.login(), deck.parseDeck(base)]);
+    // Push deck
+    const bdm = await this.pushDeck(deck);
+
+    // Check if pushed deck is in list
+    const decks = await this.getDecks();
+
+    assert(decks.length > 0, "No deck found");
+    assert(
+      decks.find((d) => d.title == "La Simplexité"),
+      "No deck named `Le Simplexité` found"
+    );
+
+    // Purge created deck if requested (usefull for CI)
+    if (process.env.MS_PURGE) await this.deleteDeck(bdm.id);
+  }
+
+  @test
+  async "[search]: Sould search for a deck"() {
+    // Create deck
+    const deck = new Deck([
+      "Choose Bandit For Mayor",
+      "casual",
+      "This is a test",
+    ]);
+    // Wait for login and parsing to complete
+    await Promise.all([this.login(), deck.parseDeck(base)]);
+    // Push deck
+    const bdm = await this.pushDeck(deck);
+
+    // Check if pushed deck is in list
+    const res = await this.search(["Bandit", "Mayor"]);
+
+    assert(res.length == 1, "Found multiple or no deck(s)");
+
+    // Purge created deck if requested (usefull for CI)
+    if (process.env.MS_PURGE) await this.deleteDeck(bdm.id);
+  }
 }

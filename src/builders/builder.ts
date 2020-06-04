@@ -21,6 +21,10 @@ export interface Builder {
 
   deleteDeck(identifier: string): void;
 
+  getDecks(): Promise<DeckResult[]>;
+
+  search(keywords: string[]): Promise<DeckResult[]>;
+
   format(d: Deck): string;
 }
 
@@ -65,5 +69,18 @@ export class BuilderDeckMetadata {
     this.id = id;
     this.url = u;
     this.dm = dm;
+  }
+}
+
+// DeckResults contains generic information about a deck returned from a deck search
+export class DeckResult {
+  url: string;
+  creator: string;
+  title: string;
+
+  constructor(u: string, c: string, t: string) {
+    this.url = u;
+    this.creator = c;
+    this.title = t;
   }
 }

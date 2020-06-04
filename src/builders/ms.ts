@@ -1,7 +1,13 @@
 // ms.ts contains the ManaStack Builder interface implementation
 
 // Imports
-import { Builder, User, Cookie, BuilderDeckMetadata } from "./builder";
+import {
+  Builder,
+  User,
+  Cookie,
+  BuilderDeckMetadata,
+  DeckResult,
+} from "./builder";
 import { Deck, Metadata } from "../scry/mtg";
 const got = require("got");
 
@@ -18,6 +24,7 @@ export class MS implements Builder {
     deck_create: "api/deck/create",
     deck_edit: "api/deck/save",
     deck_import: "api/deck/import",
+    decks_list: "api/decks/my_decks",
     deck_delete: "api/deck/delete",
     preview: "deck/preview",
   };
@@ -83,6 +90,50 @@ export class MS implements Builder {
         // Return the error
         return Promise.reject(err);
       });
+  }
+
+  // Get all the decks from remote builder
+  async getDecks(): Promise<DeckResult[]> {
+    // get all the deck
+    return (
+      got
+        .get(`${this.url}/${this.routes["decks_list"]}`, {
+          headers: {
+            "content-type": "application/json",
+            Cookie: `PHPSESSID=${this.cookie.value}`,
+          },
+        })
+        // then map them all to a DeckResult object
+        .then((res) => {
+          const data = JSON.parse(res.body);
+          return data[0]["decks"].map(
+            (d) =>
+              new DeckResult(
+                `${this.url}/deck/${d.slug}`,
+                d.owner.username,
+                d.name
+              )
+          );
+        })
+        .catch((error) => Promise.reject(new ManastackError(error)))
+    );
+  }
+
+  // Search for a specific deck
+  async search(keywords: string[]): Promise<DeckResult[]> {
+    // Get all decks
+    return this.getDecks().then((res) => {
+      // Then filter
+      return res.filter((d) => {
+        // Search over each keywords
+        for (const kw of keywords) {
+          // If a keyword if found, return true, deck is filtered
+          if (d.title.toLowerCase().includes(kw.toLowerCase())) return true;
+        }
+        // If deck title contains no kw, return false
+        return false;
+      });
+    });
   }
 
   // format a deck into an importable builder string
