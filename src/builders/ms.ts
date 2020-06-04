@@ -1,5 +1,6 @@
 // ms.ts contains the ManaStack Builder interface implementation
 
+// Imports
 import { Builder, User, Cookie, BuilderDeckMetadata } from "./builder";
 import { Deck, Metadata } from "../scry/mtg";
 const got = require("got");
