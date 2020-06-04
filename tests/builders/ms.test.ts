@@ -25,9 +25,16 @@ class MSTestSuite extends MS {
   }
 
   @test async "[pushDeck]: Sould push an entire deck to remote builder"() {
+    // Create deck
     const deck = new Deck(["Unit Test Deck", "casual", "This is a test"]);
+    // Wait for login and parsing to complete
     await Promise.all([this.login(), deck.parseDeck(base)]);
+    // push the deck
     const bdm = await this.pushDeck(deck);
+    // created deck needs an id, ensure there is one
     assert(bdm.id != "", "Deck do not have any ID on the remote builder");
+
+    // Purge created deck if requested (usefull for CI)
+    if (process.env.MS_PURGE) await this.deleteDeck(bdm.id);
   }
 }

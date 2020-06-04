@@ -11,6 +11,7 @@ steps:
   - name: tests
     image: bearstech/node-dev:12
     environment:
+      MS_PURGE: true
       MS_USER:
         from_secret: MS_USER
       MS_PASSWORD:
