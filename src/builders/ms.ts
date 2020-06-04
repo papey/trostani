@@ -71,9 +71,18 @@ export class MS implements Builder {
 
   // Push a deck to the remote builder
   async pushDeck(d: Deck): Promise<BuilderDeckMetadata> {
-    return this.newDeck(d.metadata)
-      .then((bdm) => this.editMedataData(bdm))
-      .then((bdm) => this.importDeck(d, bdm));
+    // Create emtpy deck
+    const bdm = await this.newDeck(d.metadata);
+
+    // Fill deck with medatadata and cards
+    return this.editMedataData(bdm)
+      .then((bdm) => this.importDeck(d, bdm))
+      .catch(async (err) => {
+        // if something fails, try delete the non complete deck
+        this.deleteDeck(bdm.id);
+        // Return the error
+        return Promise.reject(err);
+      });
   }
 
   // format a deck into an importable builder string
