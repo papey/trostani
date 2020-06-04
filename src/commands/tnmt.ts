@@ -595,7 +595,8 @@ async function handleJoin(
     var synced = await ms.newDeck(
       deck.metadata.name,
       deck.metadata.description,
-      deck.metadata.format,
+      // FIXME: quick fix to enable transition to interface
+      9,
       formated
     );
   }
