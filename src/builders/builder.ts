@@ -19,6 +19,8 @@ export interface Builder {
 
   pushDeck(d: Deck): void;
 
+  deleteDeck(identifier: string): void;
+
   format(d: Deck): string;
 }
 

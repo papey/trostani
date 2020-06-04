@@ -18,6 +18,7 @@ export class MS implements Builder {
     deck_create: "api/deck/create",
     deck_edit: "api/deck/save",
     deck_import: "api/deck/import",
+    deck_delete: "api/deck/delete",
     preview: "deck/preview",
   };
 
@@ -54,6 +55,18 @@ export class MS implements Builder {
           }
         });
     }
+  }
+
+  // Remove a deck from the remote builder
+  async deleteDeck(identifier: string) {
+    return got
+      .delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
+        headers: {
+          "content-type": "application/json",
+          Cookie: `PHPSESSID=${this.cookie.value}`,
+        },
+      })
+      .then(() => identifier);
   }
 
   // Push a deck to the remote builder
