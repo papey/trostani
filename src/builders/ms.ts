@@ -128,7 +128,7 @@ export class MS implements Builder {
           groups: [],
         }),
       })
-      .then((_) => bdm)
+      .then(() => bdm)
       .catch((err) => Promise.reject(new ManastackError(err)));
   }
 
@@ -147,7 +147,7 @@ export class MS implements Builder {
           list: this.format(d),
         }),
       })
-      .then((_) => bdm)
+      .then(() => bdm)
       .catch((err) => Promise.reject(new ManastackError(err)));
   }
 }
