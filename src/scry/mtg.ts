@@ -85,7 +85,7 @@ export class Metadata {
   // Name of the deck
   public name: string;
   // Format (standard, modern, casual)
-  public format: number = Formats["casual"];
+  public format: Formats = Formats.casual;
   // Description of the deck
   public description: string = "";
 
@@ -344,18 +344,14 @@ export class Deck {
 }
 
 // Supported formats
-export let Formats: { [f: string]: number } = {
-  standard: 1,
-  modern: 2,
-  legacy: 3,
-  vintage: 4,
-  commander: 5,
-  sealed: 6,
-  tiny: 7,
-  pauper: 8,
-  casual: 9,
-  brawl: 10,
-};
+export enum Formats {
+  standard = "standard",
+  historic = "historic",
+  brawl = "brawl",
+  sealed = "sealed",
+  draft = "draft",
+  casual = "casual",
+}
 
 // Translations of all deck parts
 let Translations: { [f: string]: string[] } = {
