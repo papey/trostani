@@ -100,7 +100,7 @@ class MTGDeckTestSuite extends Deck {
   }
 }
 
-let base = `Deck
+export const base = `Deck
 4 Steam Vents (GRN) 257
 4 Breeding Pool (RNA) 246
 4 Stomping Ground (RNA) 259
@@ -117,9 +117,9 @@ let base = `Deck
 4 Omnath, Locus of the Roil (M20) 216
 4 Risen Reef (M20) 217
 1 Temple of Mystery (M20) 255
-2 Island (ANA) 57
-1 Mountain (ANA) 59
-2 Forest (ANA) 60
+2 Island (ELD) 57
+1 Mountain (ELD) 59
+2 Forest (ELD) 60
 3 The Great Henge (ELD) 161
 1 Castle Embereth (ELD) 239
 1 Castle Garenbrig (ELD) 240
