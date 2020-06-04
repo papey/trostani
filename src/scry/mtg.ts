@@ -132,6 +132,27 @@ export class Deck {
     this.metadata = new Metadata(metadata);
   }
 
+  // Getters
+  // companion
+  public getCompanion() {
+    return this.companion;
+  }
+
+  // commander
+  public getCommander() {
+    return this.commander;
+  }
+
+  // main deck
+  public getMain() {
+    return this.main;
+  }
+
+  // sideboard
+  public getSide() {
+    return this.side;
+  }
+
   // Methods (public)
   // Export to ManaStack format
   public exportToManaStack(): string {
