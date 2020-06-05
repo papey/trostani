@@ -1,5 +1,6 @@
 // builder.ts file contains all the logic used to represent an online deck builder
 
+// Imports
 import { Deck, Metadata } from "../scry/mtg";
 
 // Builder base interface
