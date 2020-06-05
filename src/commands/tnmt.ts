@@ -5,7 +5,7 @@ import { Message, Client, Guild } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import { Deck } from "../scry/mtg";
-import { Manastack } from "../builders/manastack";
+import { newBuilder } from "../builders/builder";
 import {
   Command,
   parseArgs,
@@ -100,7 +100,7 @@ export async function handleTnmt(cmd: Command, origin: Message, config: any) {
       await handleFinalize(origin, chlg, config.settings.challonge);
       break;
     case "decks":
-      await handleDecks(cmd, origin, config.settings.builder);
+      await handleDecks(origin, config.settings.builder);
       break;
     default:
       throw new TnmtError(
@@ -183,58 +183,35 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
 }
 
 // handleDecks is used to list all deck associated with this tournament
-async function handleDecks(cmd: Command, origin: Message, builder: any) {
+async function handleDecks(origin: Message, builder: any) {
   // get tournament id from current channel
   const id = tnmtIDFromChannel(origin);
 
-  // get args
-  const args = parseArgs(cmd.args, true);
+  // create builder
+  const bldr = newBuilder(builder.kind, builder.username, builder.password);
 
-  // if ManaStack is used
-  if (builder.kind && builder.kind == "manastack") {
-    let ms = new Manastack(
-      builder.username,
-      builder.password,
-      builder.url,
-      builder.profile
-    );
+  // search deck containing tournament in their names
+  const results = await bldr
+    .login()
+    .then(() => bldr.search([`Tournament: ${id}`]));
 
-    // get decks and search using tournament id
-    let results = await ms.formatSearch(`[Tournament: ${id}`);
-
-    // if no result
-    if (results.length == 0) {
-      origin.channel.send(`No decks found for this tournament`);
-    } else {
-      // if a keyword is passed as argument
-      if (args.length > 0) {
-        // filter using this keyword
-        results = results.filter((r) => {
-          return r.toLowerCase().includes(args[0]);
-        });
-      }
-
-      if (results.length == 0) {
-        origin.channel.send(
-          `No decks containing **${args[0]}** found for this tournament`
-        );
-        return;
-      }
-
-      // join message
-      const message = results.join(`\n`);
-
-      // check message length
-      if (message.length > 2000) {
-        throw new SearchResultTooLong(
-          "List is too long for Discord, please provide some keywords to filter list results"
-        );
-      }
-
-      // send message if everything is ok
-      origin.channel.send(message);
-    }
+  if (results.length == 0) {
+    origin.channel.send(`No decks found for this tournament`);
+    return;
   }
+
+  // join message
+  const message = results.reduce((acc, r) => `${acc}${r.title} - ${r.url}`, "");
+
+  // check message length
+  if (message.length > 2000) {
+    throw new SearchResultTooLong(
+      "Tournament deck lists is too long for Discord"
+    );
+  }
+
+  // send message if everything is ok
+  origin.channel.send(message);
 }
 
 // handleFinalize is used to finish and close a tournament
@@ -579,36 +556,16 @@ async function handleJoin(
     await deck.buildDeck(cmd.extra, true);
   }
 
-  // sync deck to Manastack
-  if (builder.kind && builder.kind == "manastack") {
-    var ms = new Manastack(
-      builder.username,
-      builder.password,
-      builder.url,
-      builder.profile
-    );
-
-    // Try formating the deck to ManaStack format
-    let formated = deck.exportToManaStack();
-
-    // Try creating the deck on ManaStack
-    var synced = await ms.newDeck(
-      deck.metadata.name,
-      deck.metadata.description,
-      // FIXME: quick fix to enable transition to interface
-      9,
-      formated
-    );
-  }
+  const bldr = newBuilder(builder.kind, builder.username, builder.password);
+  const synced = await bldr.login().then(() => bldr.pushDeck(deck));
 
   // add participant to associated tournament
   await tnmt
-    .newParticipant({ name: displayName, misc: synced.getUrl() })
+    .newParticipant({ name: displayName, misc: synced.url })
     .catch(async (error) => {
       // ensure a deck delete since adding a participant trigger an error
-      if (builder.kind && builder.kind == "manastack") {
-        await ms.deleteDeck(synced.getID());
-      }
+      console.info(`Deck : ${synced}, deleted due to tnmt error`);
+      await bldr.deleteDeck(synced.id);
 
       // continue and throw error
       throw error;
@@ -616,9 +573,7 @@ async function handleJoin(
 
   // return decklist, and message
   origin.channel.send(
-    `Registration successfull for user <@${origin.author.id}> in tournament ${
-      tnmt["full_challonge_url"]
-    }, deck list is available at ${synced.getUrl()}`
+    `Registration successfull for user <@${origin.author.id}> in tournament ${tnmt["full_challonge_url"]}, deck list is available at ${synced.url}`
   );
 }
 
