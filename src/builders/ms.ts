@@ -35,7 +35,7 @@ export class MS implements Builder {
   }
 
   // User login
-  async login() {
+  async login(): Promise<boolean> {
     // if there is no cookie or if cookie is invalid
     if (!this.cookie || !this.cookie.valid()) {
       // 'PHPSESSID=jhe7o5b5pi2d1dh211714sbrk6; expires=Mon, 14-Oct-2019 16:30:18 GMT; Max-Age=604800; path=/'
@@ -62,6 +62,8 @@ export class MS implements Builder {
           }
         });
     }
+
+    return true;
   }
 
   // Remove a deck from the remote builder

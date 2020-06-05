@@ -16,9 +16,9 @@ export interface Builder {
   // Base url
   url: string;
 
-  login(): void;
+  login(): Promise<boolean>;
 
-  pushDeck(d: Deck): void;
+  pushDeck(d: Deck): Promise<BuilderDeckMetadata>;
 
   deleteDeck(identifier: string): void;
 
