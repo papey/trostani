@@ -9,7 +9,7 @@ settings:
     url: "https://manastack.com"
     username: "email@example.com"
     password: "p4ssw0rd"
-    profile: "example"
+    profile: "https://manastack.com/example"
   challonge:
     key: "KEY"
     channels:

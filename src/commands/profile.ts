@@ -2,25 +2,14 @@
 
 // Imports
 import { Message } from "discord.js";
-import { Manastack } from "../builders/manastack";
 
 // Functions
 // handleProfile is triggered when a used enter the profile command
 export function handleProfile(config: any, origin: Message) {
   // If ManaStack is used
-  if (
-    config.settings.builder.kind &&
-    config.settings.builder.kind == "manastack"
-  ) {
-    let ms = new Manastack(
-      config.settings.builder.username,
-      config.settings.builder.password,
-      config.settings.builder.url,
-      config.settings.builder.profile
-    );
-
-    origin.channel.send(ms.getProfile());
-
+  if (config.settings.builder.kind && config.settings.builder.profile) {
+    // just return configured value
+    origin.channel.send(config.settings.builder.profile);
     // early return
     return;
   }
