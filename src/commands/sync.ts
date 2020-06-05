@@ -71,7 +71,7 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
 
   // join results into one message
   let message = results.reduce(
-    (acc, r) => (acc += `${r.title} (${r.creator}) - ${r.url}\n`),
+    (acc, r) => (acc += `${r.title} - (${r.creator}) - ${r.url}\n`),
     ""
   );
 
