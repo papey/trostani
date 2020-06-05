@@ -2,6 +2,7 @@
 
 // Imports
 import { Deck, Metadata } from "../scry/mtg";
+import { MS } from "./ms";
 
 // Builder base interface
 export interface Builder {
@@ -27,6 +28,20 @@ export interface Builder {
   search(keywords: string[]): Promise<DeckResult[]>;
 
   format(d: Deck): string;
+}
+
+export function newBuilder(
+  kind: string,
+  user: string,
+  password: string
+): Builder {
+  switch (kind) {
+    case "manastack":
+      return new MS(user, password);
+
+    default:
+      throw new Error(`Builder ${kind} not supported`);
+  }
 }
 
 // Builder user class
