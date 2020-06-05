@@ -4,8 +4,7 @@
 import { Message } from "discord.js";
 import { Command, parseArgs, isAuthorized } from "./utils";
 import { Deck } from "../scry/mtg";
-import { Manastack } from "../builders/manastack";
-import { BuilderDeckMetadata } from "../builders/utils";
+import { newBuilder } from "../builders/builder";
 import { generateSubcommandExample } from "./help";
 import { SearchResultTooLong, decklistFromAttachment } from "./utils";
 
@@ -57,44 +56,41 @@ export async function handleSync(cmd: Command, origin: Message, config: any) {
 
 // handleSearch handles the subcommand search of the sync command
 async function handleSearch(cmd: Command, origin: Message, builder: any) {
-  // If ManaStack is used
-  if (builder.kind && builder.kind == "manastack") {
-    let ms = new Manastack(
-      builder.username,
-      builder.password,
-      builder.url,
-      builder.profile
-    );
+  // Init builder
+  const bldr = newBuilder(builder.kind, builder.username, builder.password);
 
-    // Forge response for Discord
-    let results = await ms.formatSearch(cmd.args);
+  const results = await bldr
+    .login()
+    .then(() => bldr.search(cmd.args.split(" ").map((e) => e.toLowerCase())));
 
-    // ensure there is results
-    if (results.length == 0) {
-      origin.channel.send("There is no decks matching this query");
-      return;
-    }
-
-    // join results into one message
-    let message = results.join(`\n`);
-
-    // Final word, with result sumary
-    if (cmd.args != "") {
-      message += `Found ${results.length} deck(s) associated with keyword(s) _${cmd.args}_`;
-    } else {
-      message += `Found ${results.length} deck(s)`;
-    }
-
-    // throw error if message is too long
-    if (message.length >= 2000) {
-      throw new SearchResultTooLong(
-        `This search result is too long for Discord, please add filters`
-      );
-    }
-
-    // Send message including lists of decks
-    origin.channel.send(message);
+  // ensure there is results
+  if (results.length == 0) {
+    origin.channel.send("There is no decks matching this query");
+    return;
   }
+
+  // join results into one message
+  let message = results.reduce(
+    (acc, r) => (acc += `${r.title} (${r.creator}) - ${r.url}\n`),
+    ""
+  );
+
+  // Final word, with result sumary
+  if (cmd.args != "") {
+    message += `Found ${results.length} deck(s) associated with keyword(s) _${cmd.args}_`;
+  } else {
+    message += `Found ${results.length} deck(s)`;
+  }
+
+  // throw error if message is too long
+  if (message.length >= 2000) {
+    throw new SearchResultTooLong(
+      `This search result is too long for Discord, please add keywords to filter your research`
+    );
+  }
+
+  // Send message including lists of decks
+  origin.channel.send(message);
 }
 
 // handlePush handles the subcommand push of the sync command
@@ -112,74 +108,33 @@ async function handlePush(
     );
     return;
   }
-  // push deck and five back url to channel
-  let meta = await push(cmd, origin, translate, builder);
-  origin.channel.send(
-    `A new deck named **${meta.getName()}** is available ! Go check it at ${meta.getUrl()}`
-  );
-}
 
-// push called when a users asks for the push subcommand of the sync command
-async function push(
-  cmd: Command,
-  origin: Message,
-  translate: boolean,
-  builder: any
-): Promise<BuilderDeckMetadata> {
-  // Send a nice message
-  origin.channel.send("_Analysing and publishing decklist_");
-
-  try {
-    let meta = parseArgs(cmd.args);
-
-    if (meta[0] == "") {
-      origin.channel.send("Error, this deck needs at least a name");
-      return;
-    }
-
-    // Try building the deck
-    let deck = new Deck(meta);
-
-    // Build it
-    // try from attachment
-    const fromAttachment = await decklistFromAttachment(origin);
-    if (fromAttachment != null) {
-      await deck.buildDeck(fromAttachment, translate);
-    } // if not found, fallback to text message
-    else {
-      await deck.buildDeck(cmd.extra, translate);
-    }
-
-    // If ManaStack is used
-    if (builder.kind && builder.kind == "manastack") {
-      let ms = new Manastack(
-        builder.username,
-        builder.password,
-        builder.url,
-        builder.profile
-      );
-
-      // Try formating the deck to ManaStack format
-      let formated = deck.exportToManaStack();
-
-      // Try creating the deck on ManaStack
-      let meta = await ms.newDeck(
-        deck.metadata.name,
-        deck.metadata.description,
-        // FIXME: quick fix to enable transition to interface
-        9,
-        formated
-      );
-
-      // return deck url
-      return meta;
-    }
-  } catch (error) {
-    // If error, throw it
-    throw error;
+  // get meta data
+  const meta = parseArgs(cmd.args);
+  if (meta[0] == "") {
+    origin.channel.send("Error, this deck needs at least a name");
+    return;
   }
 
-  return Promise.reject("Error when pushing deck");
+  // Build and parse the deck
+  let deck = new Deck(meta);
+  // try from attachment
+  const fromAttachment = await decklistFromAttachment(origin);
+  if (fromAttachment != null) {
+    await deck.buildDeck(fromAttachment, translate);
+  } // if not found, fallback to text message
+  else {
+    await deck.buildDeck(cmd.extra, translate);
+  }
+
+  // create builder object
+  const bldr = newBuilder(builder.kind, builder.username, builder.password);
+
+  // Push the deck
+  const bdm = await bldr.login().then(() => bldr.pushDeck(deck));
+  origin.channel.send(
+    `A new deck named **${bdm.dm.name}** is available ! Go check it at ${bdm.url}`
+  );
 }
 
 // Sync Command Error
