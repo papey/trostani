@@ -34,22 +34,6 @@ class MTGDeckTestSuite extends Deck {
   }
 
   @test
-  async "[exportToManastack]: Should return a list formatted for ManaStack"() {
-    await this.parseDeck(base);
-    let list = this.exportToManaStack();
-
-    let splited = list.split("\n");
-
-    assert.equal(splited[0], "4 Steam Vents (GRN)");
-    assert.equal(splited[23], "3 Fabled Passage (ELD)");
-    assert.equal(splited[24], "Sideboard: ");
-    assert.equal(splited[25], "1 Jace, Wielder of Mysteries (WAR)");
-    assert.equal(splited[27], "1 Tamiyo, Collector of Tales (WAR)");
-    assert.equal(splited[29], "");
-    assert.equal(splited.length, 30);
-  }
-
-  @test
   async "[buildDeck]: Should parse an entire deck"() {
     await this.buildDeck(base);
 
