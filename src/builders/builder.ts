@@ -21,7 +21,7 @@ export interface Builder {
 
   pushDeck(d: Deck): Promise<BuilderDeckMetadata>;
 
-  deleteDeck(identifier: string): void;
+  deleteDeck(identifier: string): Promise<string>;
 
   getDecks(): Promise<DeckResult[]>;
 

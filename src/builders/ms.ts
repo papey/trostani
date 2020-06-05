@@ -67,7 +67,7 @@ export class MS implements Builder {
   }
 
   // Remove a deck from the remote builder
-  async deleteDeck(identifier: string) {
+  async deleteDeck(identifier: string): Promise<string> {
     return got
       .delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
         headers: {
