@@ -9,7 +9,7 @@ import { tnmtHelpMessage } from "./tnmt";
 // Functions
 // handleHelp is triggered when a used asks for the help command
 export function handleHelp(cmd: Command, origin: Message, config: any) {
-  let message = `Using prefix **${cmd.prefix}**, available commands are :
+  const message = `Using prefix **${cmd.prefix}**, available commands are :
   - \`sync\` (subcommand): to iteract with the remote builder (enabled : ${
     config.settings.push ? "yes" : "no"
   })
