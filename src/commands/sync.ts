@@ -9,7 +9,7 @@ import { SubHelp, CmdHelp } from "./help";
 import { SearchResultTooLong, decklistFromAttachment } from "./utils";
 
 // handleSync is triggered when a user asks for a sync sub command
-export async function handleSync(cmd: Command, origin: Message, config: any) {
+async function handleSync(cmd: Command, origin: Message, config: any) {
   switch (cmd.sub) {
     case "push":
       if (config.settings.push.channels) {
@@ -191,7 +191,7 @@ Réserve
 }
 
 // Sync Command Error
-export class SyncError extends Error {
+class SyncError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "Sync Command Error";
@@ -199,4 +199,5 @@ export class SyncError extends Error {
   }
 }
 
-export { SyncHelp };
+// List of exported elements from this module
+export { handleSync, SyncHelp };

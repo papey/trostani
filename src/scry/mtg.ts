@@ -4,7 +4,7 @@
 import { Cards as ScryCards, CardIdentifier } from "scryfall-sdk";
 
 // Class used to represent a card
-export class Card {
+class Card {
   private name!: string;
   private edition: string;
   private id: string;
@@ -78,7 +78,7 @@ export class Card {
 }
 
 // Class metadada used to represent deck metada informations
-export class Metadata {
+class Metadata {
   // Name of the deck
   public name: string;
   // Format (standard, modern, casual)
@@ -109,7 +109,7 @@ export class Metadata {
 }
 
 // Class used to represent a decklist
-export class Deck {
+class Deck {
   // Meta informations about the deck
   public metadata: Metadata;
 
@@ -360,7 +360,7 @@ export class Deck {
 }
 
 // Supported formats
-export enum Formats {
+enum Formats {
   standard = "standard",
   historic = "historic",
   brawl = "brawl",
@@ -424,3 +424,6 @@ class TranslateError extends Error {
     this.message = message;
   }
 }
+
+// List of exported elements from this module
+export { Deck, Metadata, Card };

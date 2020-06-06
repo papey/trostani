@@ -17,7 +17,7 @@ import {
 } from "./utils";
 import { CmdHelp, SubHelp } from "./help";
 
-export async function handleTnmt(cmd: Command, origin: Message, config: any) {
+async function handleTnmt(cmd: Command, origin: Message, config: any) {
   if (
     config.settings.challonge == undefined ||
     config.settings.challonge.key == undefined
@@ -914,7 +914,7 @@ Réserve
 }
 
 // Sync Command Error
-export class TnmtError extends Error {
+class TnmtError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "Tournament Error";
@@ -922,4 +922,5 @@ export class TnmtError extends Error {
   }
 }
 
-export { TnmtHelp };
+// List of exported elements from this module
+export { handleTnmt, TnmtHelp };

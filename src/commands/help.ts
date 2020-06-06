@@ -84,4 +84,5 @@ interface CmdHelp {
   handle(): string;
 }
 
+// List of exported elements from this module
 export { SubHelp, CmdHelp };

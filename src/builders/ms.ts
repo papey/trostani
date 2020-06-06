@@ -11,7 +11,7 @@ import {
 import { Deck, Metadata } from "../scry/mtg";
 const got = require("got");
 
-export class MS implements Builder {
+class MS implements Builder {
   name = "ManaStack";
   user: User;
 
@@ -248,3 +248,6 @@ class ManastackError extends Error {
     this.name = "Error when interacting with Manastack";
   }
 }
+
+// List of exported elements from this module
+export { MS };
