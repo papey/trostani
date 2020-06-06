@@ -62,7 +62,10 @@ export class Trostani {
         message.content.startsWith(this.config.settings.prefix)
       ) {
         // Extract command
-        let command = new Command(message.content, this.config.settings.prefix);
+        const command = new Command(
+          message.content,
+          this.config.settings.prefix
+        );
         // Execute extracted command
         switch (command.main) {
           case "tnmt":
