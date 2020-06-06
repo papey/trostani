@@ -73,50 +73,6 @@ async function handleTnmt(cmd: Command, origin: Message, config: any) {
   }
 }
 
-// tnmtIdFromChannel is used to ensure origin channel is a tournament one
-function tnmtIDFromChannel(origin: Message): string {
-  // get Discord channel object
-  let ch = origin.guild.channels.cache.find(
-    (ch) => ch.id === origin.channel.id
-  );
-  // get parts
-  const parts = ch.name.split("-");
-  // checks
-  // length
-  if (parts.length <= 2) {
-    // reeturn early if not a tournament channel
-    origin.channel.send("This is not a tournament channel");
-    return;
-  }
-
-  // if first part is `tnmt`
-  if (parts[0] != "tnmt") {
-    // fail early if not a tournament channel
-    origin.channel.send("This is not a tournament channel");
-    return;
-  }
-
-  // second part is channel id
-  return parts[1];
-}
-
-// tnmtFromChannel is used to create and return a tournament object generated from channel name
-async function tnmtFromChannel(
-  origin: Message,
-  client: Challonge,
-  config: any,
-  state: TournamentInterfaces.tournamentStateEnum
-): Promise<Tournament> {
-  // check if channel if channel if valid
-  const id = tnmtIDFromChannel(origin);
-
-  // find all requested tournament (should be in pending mode)
-  const filter = await findTournament(id, client, state);
-
-  // create object to interact with it
-  return new Tournament(config.key, filter["tournament"]);
-}
-
 // handleStart handle the start tournament subcommand
 async function handleStart(origin: Message, client: Challonge, config: any) {
   // check is user requesting command have required permissions
@@ -654,6 +610,49 @@ async function handleCreate(
   await create(args, origin, client, parent);
 }
 
+// tnmtIdFromChannel is used to ensure origin channel is a tournament one
+function tnmtIDFromChannel(origin: Message): string {
+  // get Discord channel object
+  let ch = origin.guild.channels.cache.find(
+    (ch) => ch.id === origin.channel.id
+  );
+  // get parts
+  const parts = ch.name.split("-");
+  // checks
+  // length
+  if (parts.length <= 2) {
+    // reeturn early if not a tournament channel
+    origin.channel.send("This is not a tournament channel");
+    return;
+  }
+
+  // if first part is `tnmt`
+  if (parts[0] != "tnmt") {
+    // fail early if not a tournament channel
+    origin.channel.send("This is not a tournament channel");
+    return;
+  }
+
+  // second part is channel id
+  return parts[1];
+}
+
+// tnmtFromChannel is used to create and return a tournament object generated from channel name
+async function tnmtFromChannel(
+  origin: Message,
+  client: Challonge,
+  config: any,
+  state: TournamentInterfaces.tournamentStateEnum
+): Promise<Tournament> {
+  // check if channel if channel if valid
+  const id = tnmtIDFromChannel(origin);
+
+  // find all requested tournament (should be in pending mode)
+  const filter = await findTournament(id, client, state);
+
+  // create object to interact with it
+  return new Tournament(config.key, filter["tournament"]);
+}
 // parseTnmtType is used to translate a tournament type as a string to a Challonge supported type
 function parseTnmtType(input: string): TournamentInterfaces.tournamentTypeEnum {
   // return specific value for each possible tournament
