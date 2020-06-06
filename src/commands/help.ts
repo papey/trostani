@@ -44,3 +44,44 @@ export function generateSubcommandExample(
   return `Here is an example of the \`${sub}\` subcommand of the \`${main}\` command :
     \`\`\`${cmd.prefix}${main} ${sub} ${example}\`\`\``;
 }
+
+// Represent a subcommand helper with associated example
+class SubHelp {
+  // Subcommand string identifier
+  subcmd: string;
+  // Subcommand arg list
+  args: string;
+  // Subcommand default help desciption
+  help: string;
+  // Subcommand args example
+  example: string;
+
+  // Generate a help line for this subcommand
+  generate(): string {
+    return `\`${this.subcmd} ${this.args}\` : ${this.help}`;
+  }
+
+  constructor(subcmd: string, args: string, help: string, example: string) {
+    this.subcmd = subcmd;
+    this.args = args;
+    this.help = help;
+    this.example = example;
+  }
+}
+
+// Represent a per command help, all commands with subcommands needs to implement this interface
+interface CmdHelp {
+  // Command name
+  cmd: string;
+  // Commmand default help message
+  help: string;
+  // Help command send by the user
+  request: Command;
+  // Map of all subcommands with associated subcommand object
+  sub: { [subcmd: string]: SubHelp };
+
+  // An handle function to call when this help command is trigger
+  handle(): string;
+}
+
+export { SubHelp, CmdHelp };
