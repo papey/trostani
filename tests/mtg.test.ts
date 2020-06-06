@@ -116,7 +116,7 @@ Sideboard
 1 Tamiyo, Collector of Tales (WAR) 220
 3 Chandra, Awakened Inferno (M20) 127`;
 
-let partial = `Deck
+const partial = `Deck
 4 Steam Vents (GRN) 257
 
 Sideboard
@@ -154,7 +154,7 @@ Réserve
 1 Téfeiri, effileur de temps (WAR) 221
 1 Emprunteur intrépide (ELD) 39`;
 
-let brawl = `Commandant
+const brawl = `Commandant
 1 Niv-Mizzet revenu à la vie (WAR) 208
 
 Deck
