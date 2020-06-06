@@ -10,14 +10,14 @@ import { tnmtHelpMessage } from "./tnmt";
 // handleHelp is triggered when a used asks for the help command
 export function handleHelp(cmd: Command, origin: Message, config: any) {
   const message = `Using prefix **${cmd.prefix}**, available commands are :
-  - \`sync\` (subcommand): to iteract with the remote builder (enabled : ${
+  - \`sync\` (subcommand): iteract with the remote builder (enabled : ${
     config.settings.push ? "yes" : "no"
   })
-  - \`tnmt\` (subcommand): to iteract with Challonge and organize tournaments (enabled : ${
+  - \`tnmt\` (subcommand): iteract with Challonge and organize tournaments (enabled : ${
     config.settings.challonge.key ? "yes" : "no"
   })
-  - \`profile\`: to get user profile on remote builder
-  - \`help\`: to get this help message
+  - \`profile\`: get user profile on remote builder
+  - \`help\`: get this help message
 
   You can also type \`${
     cmd.prefix
