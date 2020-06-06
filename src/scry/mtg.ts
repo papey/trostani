@@ -286,10 +286,11 @@ export class Deck {
       await this.commander.translate();
     }
 
-    // translate deck
-    await this.translator(...this.main);
-    // translate sideboard
-    await this.translator(...this.side);
+    // Await for all remaning cards to be translated
+    await Promise.all([
+      this.translator(...this.main),
+      this.translator(...this.side),
+    ]);
   }
 
   // Build a deck
