@@ -17,8 +17,6 @@
     "crypto-js": "^4.0.0",
     "discord.js": "^12.2.0",
     "got": "^11.2.0",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4",
     "scryfall-sdk": "^1.5.1",
     "yargs": "^15.0.4"
   },

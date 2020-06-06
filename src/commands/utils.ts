@@ -2,7 +2,7 @@
 
 // Imports
 import { Message, Role, Collection } from "discord.js";
-import request = require("request-promise");
+const got = require("got");
 
 // Classes
 // Command class containing all parts of a command
@@ -116,7 +116,7 @@ export async function decklistFromAttachment(
   const file = message.attachments.find((a) => a.name?.includes(".txt"));
   if (file) {
     // return data
-    return await request.get({ url: file.url });
+    return await got(file.url);
   }
 
   // if no file found, return null
