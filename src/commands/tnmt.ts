@@ -16,7 +16,6 @@ import {
   decklistFromAttachment,
 } from "./utils";
 import { generateSubcommandExample } from "./help";
-import { setPriority } from "os";
 
 // Functions
 // tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
