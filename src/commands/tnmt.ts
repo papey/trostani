@@ -291,7 +291,7 @@ async function handleReport(
   }
 
   // get winner username from mention
-  const username = getUserFromMention(origin.client, args[1], origin.guild);
+  const username = getUserFromMention(args[1], origin.guild);
 
   // get all participants
   let participants = await tnmt.getParticipants();
@@ -377,7 +377,7 @@ export function forgeScore(score: string, winner: number) {
 
 // getUserFromMention is used to get user from a Discord @
 // yes, this is a copy/paste from documentation
-function getUserFromMention(client: Client, mention: string, guild: Guild) {
+function getUserFromMention(mention: string, guild: Guild) {
   // The id is the first and only match found by the RegEx.
   const matches = mention.match(/^<@!?(\d+)>$/);
 
