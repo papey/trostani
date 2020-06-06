@@ -11,6 +11,7 @@ import {
 import { Deck, Metadata } from "../scry/mtg";
 const got = require("got");
 
+// ManaStack builder interface implementation
 class MS implements Builder {
   name = "ManaStack";
   user: User;
