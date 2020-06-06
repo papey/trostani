@@ -15,43 +15,8 @@ import {
   SearchResultTooLong,
   decklistFromAttachment,
 } from "./utils";
-import { generateSubcommandExample } from "./help";
+import { CmdHelp, SubHelp } from "./help";
 
-// Functions
-// tnmtHelpMessage is used to generate an help message for the tnmt command and subcommands
-export function tnmtHelpMessage(cmd: Command): string {
-  const message = `Using command \`${cmd.prefix}tnmt\`, available subcommands are :
-  - \`create <name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM) \` : to create a tournament (**admin only**)
-  - \`start\` : to start a tournament (**admin only, with PENDING tournaments, in dedicated channel**)
-  - \`finalize\` : to finish a tournament (**admin only, with IN PROGRESS tournaments, in dedicated channel**)
-  - \`list <filter> (optional, values: pending, underway, complete)\` : to list tournaments
-  - \`join <description> (optional) [... decklist... ]\` : join a tournament (only available with PENDING tournaments, **in dedicated channel**)
-  - \`status <round> (optional) \` : to get tournament current status and results (only with IN PROGRESS tournaments, **in dedicated channel**)
-  - \`decks\` : to list all decks associated with this tournament (**in dedicated channel**)
-  - \`report <identifier> // <winner> // <score> \` : to report a tournament match result (only available with IN PROGRESS tournaments, **in dedicated channel**)`;
-
-  if (cmd.args.includes("create")) {
-    return generateSubcommandExample(cmd, "tnmt", "create", createExample);
-  } else if (cmd.args.includes("list")) {
-    return generateSubcommandExample(cmd, "tnmt", "list", listExample);
-  } else if (cmd.args.includes("join")) {
-    return generateSubcommandExample(cmd, "tnmt", "join", joinExample);
-  } else if (cmd.args.includes("status")) {
-    return generateSubcommandExample(cmd, "tnmt", "status", statusExample);
-  } else if (cmd.args.includes("report")) {
-    return generateSubcommandExample(cmd, "tnmt", "report", reportExample);
-  } else if (cmd.args.includes("start")) {
-    return generateSubcommandExample(cmd, "tnmt", "start", "");
-  } else if (cmd.args.includes("finalize")) {
-    return generateSubcommandExample(cmd, "tnmt", "finalize", "");
-  } else if (cmd.args.includes("decks")) {
-    return generateSubcommandExample(cmd, "tnmt", "decks", "");
-  }
-
-  return message;
-}
-
-// handleTnmt is triggered when a user asks for a tnmt command
 export async function handleTnmt(cmd: Command, origin: Message, config: any) {
   if (
     config.settings.challonge == undefined ||
@@ -844,6 +809,110 @@ let Arguments: { [f: string]: number } = {
   handleReport: 3,
 };
 
+// CmdHelp interface implementation for tnmt command
+class TnmtHelp implements CmdHelp {
+  cmd = "tnmt";
+  help: string;
+  sub: { [subcmd: string]: SubHelp } = {};
+  request: Command;
+
+  constructor(cmd: Command) {
+    // Subcommand help
+    this.sub["create"] = new SubHelp(
+      "create",
+      "<name> // <description> // <type> (SW, DE, SE or RR) // <format> // <date> (optional, format: YYYY-MM-DD at HH:MM)",
+      "create a tournament (**admin only**)",
+      "Tournament Name // Tournament Description // SW // Forgeron // 2020-11-07 at 17:00"
+    );
+    this.sub["start"] = new SubHelp(
+      "start",
+      "",
+      "start a tournament (**admin only, with PENDING tournaments, in dedicated channel**)",
+      ""
+    );
+    this.sub["finalize"] = new SubHelp(
+      "finalize",
+      "",
+      "finish a tournament (**admin only, with IN PROGRESS tournaments, in dedicated channel**)",
+      ""
+    );
+    this.sub["list"] = new SubHelp(
+      "list",
+      "<filter> (optional, values: pending, underway, complete)",
+      "list tournaments",
+      "pending"
+    );
+    this.sub["join"] = new SubHelp(
+      "join",
+      "<description> (optional) [... decklist... ]",
+      "join a tournament (only available with PENDING tournaments, **in dedicated channel**)",
+      `Mange un Bento
+Deck
+4 Téfeiri, effileur de temps (WAR) 221
+3 Plaine (SLD) 63
+7 Île (SLD) 64
+3 Narset, déchireuse des voiles (WAR) 61
+3 Absorption (RNA) 151
+3 La naissance de Mélétis (THB) 5
+2 Yorion, nomade céleste (IKO) 232
+3 Elspeth conquiert la Mort (THB) 13
+3 Typhon de requins (IKO) 67
+4 Augure de la mer (THB) 58
+3 Fracassement du ciel (THB) 37
+2 Dispute mystique (ELD) 58
+1 Véto de Dovin (WAR) 193
+3 Augure du soleil (THB) 30
+4 Temple de l'illumination (THB) 246
+4 Passage merveilleux (ELD) 244
+1 Château Vantress (ELD) 242
+3 Château Ardenval (ELD) 238
+4 Fontaine sacrée (RNA) 251
+
+Réserve
+3 Archonte de la grâce solaire (THB) 3
+2 Dispute mystique (ELD) 58
+3 Rafale d'Éther (M20) 42
+4 Cercueil de verre (ELD) 15
+3 Véto de Dovin (WAR) 193`
+    );
+    this.sub["status"] = new SubHelp(
+      "status",
+      "<round> (optional)",
+      "get tournament current status and results (only with IN PROGRESS tournaments, **in dedicated channel**)",
+      "status 2"
+    );
+    this.sub["decks"] = new SubHelp(
+      "decks",
+      "",
+      "list all decks associated with this tournament (**in dedicated channel**)",
+      ""
+    );
+    this.sub["report"] = new SubHelp(
+      "report",
+      "<identifier> // <winner> // <score>",
+      "report a tournament match result (only available with IN PROGRESS tournaments, **in dedicated channel**)",
+      "A // @Mayalabielle // 2-1"
+    );
+
+    this.request = cmd;
+
+    this.help = `Using command \`${this.request.prefix}${this.cmd}\`, available subcommands are :\n`;
+    for (const k in this.sub) {
+      this.help += `- ${this.sub[k].generate()}\n`;
+    }
+  }
+
+  handle(): string {
+    for (const key in this.sub) {
+      if (this.request.args.includes(key)) {
+        return `\`\`\`${this.request.prefix}${this.request.sub} ${this.request.args} ${this.sub[key].example}\`\`\``;
+      }
+    }
+
+    return this.help;
+  }
+}
+
 // Sync Command Error
 export class TnmtError extends Error {
   constructor(message: string) {
@@ -853,49 +922,4 @@ export class TnmtError extends Error {
   }
 }
 
-// Examples
-// create subcommand example
-let createExample = `Tournament Name // Tournament Description // SW // Forgeron // 2020-11-07 at 17:00`;
-
-// list subcommand example
-let listExample = `pending`;
-
-// join subcommand example
-let joinExample = `Awesome deck
-Deck
-4 Frisson de probabilité (ELD) 146
-4 Soif de sens (THB) 74
-4 Montagne (THB) 285
-2 Falaises des eaux vives (M20) 252
-2 Électromancien gobelin (GRN) 174
-1 Étreinte de lave (GRN) 108
-3 Frappe foudroyante (XLN) 149
-4 Landes de cendres (M19) 248
-4 Révélation // Répartition (GRN) 223
-4 Marais (THB) 283
-3 Érudite des âges (M20) 74
-2 Géant rugissant (M20) 177
-2 Île (THB) 281
-1 Golem météoritique (M19) 241
-3 Don du chaudron (ELD) 83
-4 Étendues sauvages en évolution (RIX) 186
-2 Du sang pour les os (M20) 89
-3 Liche engrimoirée (M20) 219
-1 Marigot lugubre (M20) 245
-3 Ossuaire submergé (M19) 257
-4 Tritonne des fondrières (THB) 105
-
-Réserve
-3 Instant d'envie (RIX) 79
-2 Contrainte (M19) 94
-1 Étanchement (RNA) 48
-2 Cramer (M20) 140
-2 Pyrohélice de Chandra (WAR) 120
-3 Balayage de flammes (M20) 139
-2 Surgissement de Ral (WAR) 212`;
-
-// status subcommand example
-let statusExample = `1`;
-
-// report subcommand example
-let reportExample = `A // @Mayalabielle // 2-1`;
+export { TnmtHelp };

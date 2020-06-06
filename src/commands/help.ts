@@ -4,7 +4,7 @@
 import { Message } from "discord.js";
 import { Command } from "./utils";
 import { SyncHelp } from "./sync";
-import { tnmtHelpMessage } from "./tnmt";
+import { TnmtHelp } from "./tnmt";
 
 // Functions
 // handleHelp is triggered when a used asks for the help command
@@ -28,7 +28,8 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
       origin.channel.send(new SyncHelp(cmd).handle());
       return;
     case "tnmt":
-      message = tnmtHelpMessage(cmd);
+      origin.channel.send(new TnmtHelp(cmd).handle());
+      return;
   }
 
   origin.channel.send(message);
