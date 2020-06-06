@@ -3,7 +3,7 @@
 // Imports
 import { Message } from "discord.js";
 import { Command } from "./utils";
-import { syncHelpMessage } from "./sync";
+import { SyncHelp } from "./sync";
 import { tnmtHelpMessage } from "./tnmt";
 
 // Functions
@@ -25,8 +25,8 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
 
   switch (cmd.sub) {
     case "sync":
-      message = syncHelpMessage(cmd);
-      break;
+      origin.channel.send(new SyncHelp(cmd).handle());
+      return;
     case "tnmt":
       message = tnmtHelpMessage(cmd);
   }

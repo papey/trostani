@@ -5,24 +5,8 @@ import { Message } from "discord.js";
 import { Command, parseArgs, isAuthorized } from "./utils";
 import { Deck } from "../scry/mtg";
 import { newBuilder } from "../builders/builder";
-import { generateSubcommandExample } from "./help";
+import { SubHelp, CmdHelp } from "./help";
 import { SearchResultTooLong, decklistFromAttachment } from "./utils";
-
-// Functions
-// syncHelpMessage is used to generated a specific help message when asksing for a sync command
-export function syncHelpMessage(cmd: Command) {
-  let message = `Using command \`${cmd.prefix}sync\`, available subcommands are :
-  - \`search <keywords>\` : to search for deck containing <keywords> in their name
-  - \`push <name> // <format> (optional) // <description> (optional) : [...decklist...(on a new line)]\` : to push the decklist formated as MTGA export`;
-
-  if (cmd.args.includes("search")) {
-    return generateSubcommandExample(cmd, "sync", "search", searchExample);
-  } else if (cmd.args.includes("push")) {
-    return generateSubcommandExample(cmd, "sync", "push", pushExample);
-  }
-
-  return message;
-}
 
 // handleSync is triggered when a user asks for a sync sub command
 export async function handleSync(cmd: Command, origin: Message, config: any) {
@@ -137,6 +121,75 @@ async function handlePush(
   );
 }
 
+// CmdHelp interface implementation for sync command
+class SyncHelp implements CmdHelp {
+  cmd = "sync";
+  help: string;
+  sub: { [subcmd: string]: SubHelp } = {};
+  request: Command;
+
+  constructor(cmd: Command) {
+    // Subcommand Help
+    this.sub["search"] = new SubHelp(
+      "search",
+      "<keywords>",
+      "search for a deck containing <keywords> in their name",
+      "temur aggro"
+    );
+    this.sub["push"] = new SubHelp(
+      "push",
+      "<name> // <format> (optional) // <description> (optional) [decklist (on a new line, exported as MTGA format)]",
+      "push a list to the remote builder",
+      `Bento
+Deck
+4 Téfeiri, effileur de temps (WAR) 221
+3 Plaine (SLD) 63
+7 Île (SLD) 64
+3 Narset, déchireuse des voiles (WAR) 61
+3 Absorption (RNA) 151
+3 La naissance de Mélétis (THB) 5
+2 Yorion, nomade céleste (IKO) 232
+3 Elspeth conquiert la Mort (THB) 13
+3 Typhon de requins (IKO) 67
+4 Augure de la mer (THB) 58
+3 Fracassement du ciel (THB) 37
+2 Dispute mystique (ELD) 58
+1 Véto de Dovin (WAR) 193
+3 Augure du soleil (THB) 30
+4 Temple de l'illumination (THB) 246
+4 Passage merveilleux (ELD) 244
+1 Château Vantress (ELD) 242
+3 Château Ardenval (ELD) 238
+4 Fontaine sacrée (RNA) 251
+
+Réserve
+3 Archonte de la grâce solaire (THB) 3
+2 Dispute mystique (ELD) 58
+3 Rafale d'Éther (M20) 42
+4 Cercueil de verre (ELD) 15
+3 Véto de Dovin (WAR) 193
+`
+    );
+
+    this.request = cmd;
+
+    this.help = `Using command \`${this.request.prefix}${this.cmd}\`, available subcommands are :\n`;
+    for (const k in this.sub) {
+      this.help += `- ${this.sub[k].generate()}\n`;
+    }
+  }
+
+  handle(): string {
+    for (const key in this.sub) {
+      if (this.request.args.includes(key)) {
+        return `\`\`\`${this.request.prefix}${this.request.sub} ${this.request.args} ${this.sub[key].example}\`\`\``;
+      }
+    }
+
+    return this.help;
+  }
+}
+
 // Sync Command Error
 export class SyncError extends Error {
   constructor(message: string) {
@@ -146,41 +199,4 @@ export class SyncError extends Error {
   }
 }
 
-// Examples used in help command
-// push command example
-let pushExample: string = `Temur Elementals
-Deck
-4 Steam Vents (GRN) 257
-4 Breeding Pool (RNA) 246
-4 Stomping Ground (RNA) 259
-1 Jace, Wielder of Mysteries (WAR) 54
-2 Paradise Druid (WAR) 171
-4 Neoform (WAR) 206
-2 Cloudkin Seer (M20) 54
-3 Scampering Scorcher (M20) 158
-4 Shock (M20) 160
-2 Thunderkin Awakener (M20) 162
-2 Cavalier of Thorns (M20) 167
-4 Leafkin Druid (M20) 178
-1 Overgrowth Elemental (M20) 187
-4 Omnath, Locus of the Roil (M20) 216
-4 Risen Reef (M20) 217
-1 Temple of Mystery (M20) 255
-2 Island (ANA) 57
-1 Mountain (ANA) 59
-2 Forest (ANA) 60
-3 The Great Henge (ELD) 161
-1 Castle Embereth (ELD) 239
-1 Castle Garenbrig (ELD) 240
-1 Castle Vantress (ELD) 242
-3 Fabled Passage (ELD) 244
-
-Sideboard
-1 Jace, Wielder of Mysteries (WAR) 54
-3 Nissa, Who Shakes the World (WAR) 169
-1 Tamiyo, Collector of Tales (WAR) 220
-3 Chandra, Awakened Inferno (M20) 127
-`;
-
-// search command example
-let searchExample: string = `temur aggro`;
+export { SyncHelp };
