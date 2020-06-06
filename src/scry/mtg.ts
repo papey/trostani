@@ -55,7 +55,7 @@ class Card {
   // Try to get a translation for card from scryfall
   public async translate() {
     try {
-      let translate: any = await ScryCards.bySet(
+      const translate: any = await ScryCards.bySet(
         this.edition,
         parseInt(this.id)
       );
@@ -146,37 +146,6 @@ class Deck {
   // sideboard
   public getSide() {
     return this.side;
-  }
-
-  // Export to ManaStack format
-  public exportToManaStack(): string {
-    // Init a decklist containing nothing
-    let decklist: string = "";
-
-    // Commander is in the main deck
-    if (this.commander) {
-      decklist = `${this.commander.export()}\n`;
-    }
-
-    if (this.main.length > 0) {
-      this.main.forEach((card) => {
-        decklist += `${card.export()}\n`;
-      });
-    }
-
-    if (this.side.length > 0 || this.companion) {
-      decklist += "Sideboard: \n";
-      // companion goes in sideboard
-      if (this.companion) {
-        decklist += `${this.companion.export()}\n`;
-      }
-      this.side.forEach((card) => {
-        decklist += `${card.export()}\n`;
-      });
-    }
-
-    // Return decklist
-    return decklist;
   }
 
   // Callback used to reduce a deck part to it's sum of cards
@@ -344,7 +313,7 @@ class Deck {
     const reg = new RegExp("(\\d+) (.*) \\(([A-Z,0-9]{3,4})\\) ([A-Z,0-9]+)");
 
     // Match cardline with regex
-    let res = c.match(reg);
+    const res = c.match(reg);
 
     // If it's ok
     if (res != null) {
@@ -370,7 +339,7 @@ enum Formats {
 }
 
 // Translations of all deck parts
-let Translations: { [f: string]: string[] } = {
+const Translations: { [f: string]: string[] } = {
   // en, fr, pt, it, de, es
   deck: ["deck", "mazzo", "mazo"],
   sideboard: ["sideboard", "réserve", "reserva", "sideboard"],
