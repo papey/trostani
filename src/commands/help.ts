@@ -34,17 +34,6 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
   origin.channel.send(message);
 }
 
-// generateSubcommandExample is used to generated a subcomment example message, nicely formated
-export function generateSubcommandExample(
-  cmd: Command,
-  main: string,
-  sub: string,
-  example: string
-) {
-  return `Here is an example of the \`${sub}\` subcommand of the \`${main}\` command :
-    \`\`\`${cmd.prefix}${main} ${sub} ${example}\`\`\``;
-}
-
 // Represent a subcommand helper with associated example
 class SubHelp {
   // Subcommand string identifier
