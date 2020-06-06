@@ -61,7 +61,7 @@ class MTGDeckTestSuite extends Deck {
   }
 
   @test
-  async "[buildDeck+brawl]: Sould build a brawl deck"() {
+  async "[buildDeck+brawl]: Should build a brawl deck"() {
     let deck = new MTGDeckTestSuite();
 
     await deck.buildDeck(brawl, false);
@@ -69,7 +69,7 @@ class MTGDeckTestSuite extends Deck {
     assert.equal(deck.commander.getName(), "Niv-Mizzet revenu à la vie");
   }
 
-  @test async "[buildDeck+translate]: Sould buld and translate a deck"() {
+  @test async "[buildDeck+translate]: Should build and translate a deck"() {
     await this.buildDeck(translate, true);
 
     assert.equal(this.main[0].getName(), "Island");
