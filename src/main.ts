@@ -3,7 +3,6 @@
 // Imports
 // Main bot class
 import { Trostani } from "./bot";
-// Manastack builder tool
 
 // Argument parsing
 import * as yargs from "yargs";

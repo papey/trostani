@@ -6,7 +6,6 @@ import { Command } from "./utils";
 import { SyncHelp } from "./sync";
 import { TnmtHelp } from "./tnmt";
 
-// Functions
 // handleHelp is triggered when a used asks for the help command
 export function handleHelp(cmd: Command, origin: Message, config: any) {
   const message = `Using prefix **${cmd.prefix}**, available commands are :

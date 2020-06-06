@@ -3,7 +3,6 @@
 // Imports
 import { Cards as ScryCards, CardIdentifier } from "scryfall-sdk";
 
-// Classes
 // Class used to represent a card
 export class Card {
   private name!: string;
@@ -11,7 +10,6 @@ export class Card {
   private id: string;
   private times: string;
 
-  // Constructor
   constructor(name: string, edition: string, id: string, times: string) {
     this.name = name;
     this.edition = fixSet(edition).toLowerCase();
@@ -19,7 +17,6 @@ export class Card {
     this.times = times;
   }
 
-  // Methods (public)
   // Getter for name
   public getName(): string {
     return this.name;
@@ -89,7 +86,6 @@ export class Metadata {
   // Description of the deck
   public description: string = "";
 
-  // Constructor
   constructor(metadatas: string[]) {
     // get all metadatas
     if (metadatas.length < 1) {
@@ -132,7 +128,6 @@ export class Deck {
     this.metadata = new Metadata(metadata);
   }
 
-  // Getters
   // companion
   public getCompanion() {
     return this.companion;
@@ -153,7 +148,6 @@ export class Deck {
     return this.side;
   }
 
-  // Methods (public)
   // Export to ManaStack format
   public exportToManaStack(): string {
     // Init a decklist containing nothing

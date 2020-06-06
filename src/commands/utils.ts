@@ -4,7 +4,6 @@
 import { Message, Role, Collection } from "discord.js";
 const got = require("got");
 
-// Classes
 // Command class containing all parts of a command
 export class Command {
   // main command
@@ -53,7 +52,6 @@ export class Command {
   }
 }
 
-// Functions
 // handle cases where user asks for an unsupported function
 export function handleNotSupported(cmd: Command, origin: Message) {
   let message = `Command, \`${cmd.prefix}${cmd.main}\`, not supported (if you need help try \`${cmd.prefix}help\`)`;

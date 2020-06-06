@@ -10,7 +10,6 @@ import { handleTnmt } from "./commands/tnmt";
 // Use to read yaml file
 import * as YAML from "yamljs";
 
-// Classes
 // Trostani, the Discordant : the main bot class
 export class Trostani {
   // Discord client
@@ -18,7 +17,6 @@ export class Trostani {
   // Bot configuration
   public config: any;
 
-  // Constructor
   constructor(confPath: string) {
     // Config
     try {
@@ -33,7 +31,6 @@ export class Trostani {
     this.client = new Client();
   }
 
-  // Methods (public)
   // Start
   public start(): void {
     // Basic setup
@@ -50,7 +47,6 @@ export class Trostani {
     this.client.login(this.config.settings.token);
   }
 
-  // Methods (private)
   // Setup routes to commands
   private routes() {
     // When a message is received
@@ -136,14 +132,12 @@ export class Trostani {
       console.error("Error validating config file, `prefix` field is missing");
       process.exit(1);
     }
-
     // builder
     if (this.config.settings.builder == undefined) {
       console.error("Error validating config file, `builder` field is missing");
       process.exit(1);
     }
-
-    // check translate config valitity
+    // check translate config
     if (this.config.settings.translate == undefined) {
       if (this.config.settings.translate.typeof() != Boolean) {
         this.config.settings.translate = false;
