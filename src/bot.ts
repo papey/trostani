@@ -79,7 +79,7 @@ export class Trostani {
             });
             break;
           case "profile":
-            handleProfile(this.config, message);
+            handleProfile(message, this.config);
             break;
           case "help":
             handleHelp(command, message, this.config);

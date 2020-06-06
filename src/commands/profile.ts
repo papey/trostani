@@ -5,7 +5,7 @@ import { Message } from "discord.js";
 
 // Functions
 // handleProfile is triggered when a used enter the profile command
-export function handleProfile(config: any, origin: Message) {
+export function handleProfile(origin: Message, config: any) {
   // If ManaStack is used
   if (config.settings.builder.kind && config.settings.builder.profile) {
     // just return configured value
