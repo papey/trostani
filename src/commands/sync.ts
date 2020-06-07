@@ -2,11 +2,16 @@
 
 // Imports
 import { Message } from "discord.js";
-import { Command, parseArgs, isAuthorized } from "./utils";
 import { Deck } from "../scry/mtg";
 import { newBuilder } from "../builders/builder";
 import { SubHelp, CmdHelp } from "./help";
-import { SearchResultTooLong, decklistFromAttachment } from "./utils";
+import {
+  SearchResultTooLong,
+  decklistFromAttachment,
+  Command,
+  parseArgs,
+  isAuthorized,
+} from "./utils";
 
 // handleSync is triggered when a user asks for a sync sub command
 async function handleSync(cmd: Command, origin: Message, config: any) {
