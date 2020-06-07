@@ -1,7 +1,7 @@
 // tnmt.ts contains code to handle the tnmt command and tnmt subcommands
 
 // Imports
-import { Message, Client, Guild } from "discord.js";
+import { Message, Guild } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import { Deck } from "../scry/mtg";
