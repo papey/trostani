@@ -232,8 +232,8 @@ class Deck {
     }
 
     // side deck constaints
-    if (this.side.reduce<number>(this.sumer, 0) > 30) {
-      throw new DeckBuildingError(`Side deck is limited to 30 cards`);
+    if (this.side.reduce<number>(this.sumer, 0) > 50) {
+      throw new DeckBuildingError(`Side deck is limited to 50 cards`);
     }
   }
 
