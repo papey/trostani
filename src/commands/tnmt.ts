@@ -269,7 +269,7 @@ export function forgeScore(score: string, winner: number) {
   // ensure result is valid
   if (res == null || res.length < 3) {
     throw new TnmtError(
-      "Score is not expressed correctly, please verify and try again"
+      "Score is not formated correctly, please verify and try again"
     );
   }
 

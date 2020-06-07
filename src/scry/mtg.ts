@@ -89,7 +89,7 @@ class Metadata {
   constructor(metadatas: string[]) {
     // get all metadatas
     if (metadatas.length < 1) {
-      throw new DeckBuildingError("Deck name is missing from metadata");
+      throw new DeckBuildingError("Deck name is missing");
     }
 
     // meta[0] == Name,
@@ -228,7 +228,7 @@ class Deck {
 
     // main deck constraints
     if (this.main.reduce<number>(this.sumer, 0) < 40) {
-      throw new DeckBuildingError(`Main deck is at least 40 cards`);
+      throw new DeckBuildingError(`Main deck needs at at least 40 cards`);
     }
 
     // side deck constaints
