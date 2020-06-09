@@ -417,15 +417,7 @@ async function handleJoin(
     client,
     config,
     TournamentInterfaces.tournamentStateEnum.PENDING
-  ).catch(async (error) => {
-    // log the error, do not shadow it
-    console.error(error);
-    // Overwrite the error with a more end-user explicit one
-    throw new TnmtError(
-      `Sorry <@${origin.author.id}> but registrations for this tournament are closed (it's an __on going__ or __closed/deleted__ tournament)`
     );
-  });
-
   // init display name
   const member = origin.guild.members.cache.get(origin.author.id);
   // fallback to username if no displayName
@@ -622,15 +614,13 @@ function tnmtIDFromChannel(origin: Message): string {
   // length
   if (parts.length <= 2) {
     // reeturn early if not a tournament channel
-    origin.channel.send("This is not a tournament channel");
-    return;
+    throw new TnmtError("This is not a tournament channel");
   }
 
   // if first part is `tnmt`
   if (parts[0] != "tnmt") {
     // fail early if not a tournament channel
-    origin.channel.send("This is not a tournament channel");
-    return;
+    throw new TnmtError("This is not a tournament channel");
   }
 
   // second part is channel id
