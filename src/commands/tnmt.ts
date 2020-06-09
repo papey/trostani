@@ -417,7 +417,7 @@ async function handleJoin(
     client,
     config,
     TournamentInterfaces.tournamentStateEnum.PENDING
-    );
+  );
   // init display name
   const member = origin.guild.members.cache.get(origin.author.id);
   // fallback to username if no displayName
@@ -589,7 +589,7 @@ async function handleCreate(
   }
 
   // parse args
-  const args = parseArgs(cmd.args, true);
+  const args = parseArgs(cmd.args);
   // ensure args requirements
   if (args.length < Arguments["handleCreate"]) {
     origin.channel.send(
