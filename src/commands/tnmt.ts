@@ -739,7 +739,14 @@ async function create(
   }
 
   // trigger call to challonge API
-  const tnmt = await client.createTournament(meta);
+  const tnmt = await client.createTournament(meta).catch(e => {
+    // if response code is 422, tournament with same id already exists
+    if (e.response.status == 422) {
+      throw new TnmtError("A tournament with the same ID already exists on Challonge, please change tournament name")
+    }
+    // bubble up error if it's another one
+    throw e;
+  });
 
   // create specific tournament channel
   let channel = await createTnmtChannel(origin, args[0], code, category);
