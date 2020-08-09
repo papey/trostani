@@ -17,6 +17,8 @@ import {
 } from "./utils";
 import { CmdHelp, SubHelp } from "./help";
 
+const HASHLEN = 7
+
 async function handleTnmt(cmd: Command, origin: Message, config: any) {
   if (
     config.settings.challonge == undefined ||
@@ -759,7 +761,7 @@ async function create(
 
 // generateCode is used to generate a pseudo code for the current tournament
 function generateCode(name: string) {
-  return MD5(name).toString().slice(0, 5);
+  return MD5(name).toString().slice(0, HASHLEN);
 }
 
 // getCode is used to retreive code from a tournament url
