@@ -9,6 +9,9 @@ import { handleSync } from "./commands/sync";
 import { handleTnmt } from "./commands/tnmt";
 // Use to read yaml file
 import * as YAML from "yamljs";
+// Logger
+import * as log from "log4js";
+
 
 // Trostani, the Discordant : the main bot class
 export class Trostani {
@@ -16,6 +19,8 @@ export class Trostani {
   private client: Client;
   // Bot configuration
   public config: any;
+
+  private logger: log.Logger;
 
   constructor(confPath: string) {
     // Config
@@ -29,6 +34,9 @@ export class Trostani {
     this.verifyConfig();
     // Create a Discord client class
     this.client = new Client();
+
+    this.logger = log.getLogger("bot");
+    this.logger.level = "info"
   }
 
   // Start
@@ -91,7 +99,7 @@ export class Trostani {
   // logErr to stdout and channel
   private logErr(error: Error, message: Message) {
     // error goes in stdout as well as Discord channel
-    console.log(error);
+    this.logger.error(error);
     // send error to Discord channel
     message.channel.send(`**${error.message}**`);
   }
@@ -108,8 +116,8 @@ export class Trostani {
         this.client.user.setUsername(this.config.settings.name);
       }
       // Ensure a return in logs when everything looks good
-      console.log("Ready to go using the following settings : ");
-      console.log(this.config.settings);
+      this.logger.info("Ready to go using the following settings : ");
+      this.logger.info(this.config.settings);
     });
   }
 
