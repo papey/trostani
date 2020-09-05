@@ -17,7 +17,7 @@ import {
 } from "./utils";
 import { CmdHelp, SubHelp } from "./help";
 
-const HASHLEN = 7
+const HASHLEN = 7;
 
 async function handleTnmt(cmd: Command, origin: Message, config: any) {
   if (
@@ -741,10 +741,12 @@ async function create(
   }
 
   // trigger call to challonge API
-  const tnmt = await client.createTournament(meta).catch(e => {
+  const tnmt = await client.createTournament(meta).catch((e) => {
     // if response code is 422, tournament with same id already exists
     if (e.response.status == 422) {
-      throw new TnmtError("A tournament with the same ID already exists on Challonge, please change tournament name")
+      throw new TnmtError(
+        "A tournament with the same ID already exists on Challonge, please change tournament name"
+      );
     }
     // bubble up error if it's another one
     throw e;

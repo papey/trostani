@@ -12,7 +12,6 @@ import * as YAML from "yamljs";
 // Logger
 import * as log from "log4js";
 
-
 // Trostani, the Discordant : the main bot class
 export class Trostani {
   // Discord client
@@ -36,7 +35,7 @@ export class Trostani {
     this.client = new Client();
 
     this.logger = log.getLogger("bot");
-    this.logger.level = "info"
+    this.logger.level = "info";
   }
 
   // Start
