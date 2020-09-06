@@ -16,6 +16,7 @@ import {
   decklistFromAttachment,
 } from "./utils";
 import { CmdHelp, SubHelp } from "./help";
+import { lookupService } from "dns";
 
 const HASHLEN = 7;
 
@@ -695,8 +696,8 @@ async function createTnmtChannel(
   let channel = await origin.guild.channels
     .create(`tnmt-${code}-${name}`, {
       type: "text",
-    })
-    .then((ch) => ch.setParent(category));
+      parent: category,
+    });
 
   return channel;
 }
