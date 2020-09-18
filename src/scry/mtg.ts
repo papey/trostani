@@ -61,12 +61,11 @@ class Card {
       );
 
       // https://scryfall.com/docs/api, see Rate Limits and Good Citizenship section
-      setTimeout(() => {}, 60);
+      setTimeout(() => { }, 60);
 
       if (translate.name == null) {
         throw new TranslateError(
-          `Error translating the following card ${
-            this.name
+          `Error translating the following card ${this.name
           } (${this.edition.toUpperCase()}) ${this.id}`
         );
       }
@@ -228,7 +227,7 @@ class Deck {
 
     // main deck constraints
     if (this.main.reduce<number>(this.sumer, 0) < 40) {
-      throw new DeckBuildingError(`Main deck needs at at least 40 cards`);
+      throw new DeckBuildingError(`Main deck needs at least 40 cards`);
     }
 
     // side deck constaints
