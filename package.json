@@ -24,7 +24,6 @@
   "devDependencies": {
     "@testdeck/mocha": "^0.1.0",
     "@types/chai": "^4.2.3",
-    "@types/log4js": "^2.3.5",
     "@types/mocha": "^8.0.0",
     "@types/node": "^14.0.0",
     "@types/request": "^2.48.3",
