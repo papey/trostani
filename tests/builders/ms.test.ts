@@ -77,7 +77,7 @@ class MSTestSuite extends MS {
     // Check if pushed deck is in list
     const res = await this.search(["Bandit", "Mayor"]);
 
-    assert(res.length == 1, "Found multiple or no deck(s)");
+    assert(res.length >= 1, "Found multiple or no deck(s)");
 
     // Purge created deck if requested (usefull for CI)
     if (process.env.MS_PURGE) await this.deleteDeck(bdm.id);
