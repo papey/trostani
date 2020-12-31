@@ -16,7 +16,11 @@ steps:
         from_secret: MS_USER
       MS_PASSWORD:
         from_secret: MS_PASSWORD
-
+      AD_USER:
+        from_secret: AD_USER
+      AD_PASSWORD:
+        from_secret: AD_PASSWORD
+      AD_PURGE: true
     commands:
       - yarn
       - yarn test

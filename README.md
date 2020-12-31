@@ -7,7 +7,10 @@ various [Magic: The Gathering Arena](https://magic.wizards.com/fr/mtgarena)
 related features such as tournament management using Challonge and decklist
 sync to a online builder.
 
-Trostani currently supports one builder only : [ManaStack](https://manastack.com)
+Trostani builder list :
+
+- [Archidekt](https://www.archidekt.com/)
+- [ManaStack](https://manastack.com)
 
 ## Getting Started
 

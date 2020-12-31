@@ -2,6 +2,7 @@
 
 // Imports
 import { Deck, Metadata } from "../scry/mtg";
+import { Archidekt } from "./archidekt";
 import { MS } from "./ms";
 
 // Builder base interface
@@ -39,6 +40,9 @@ export function newBuilder(
     case "manastack":
       return new MS(user, password);
 
+    case "archidekt":
+      return new Archidekt(user, password);
+
     default:
       throw new Error(`Builder ${kind} not supported`);
   }
@@ -72,6 +76,26 @@ export class Cookie {
   // Ensure cookie is valid
   public valid(): boolean {
     return new Date() < this.expiration;
+  }
+}
+
+// Builder JWT class
+export class JWT {
+  // Token value
+  private value!: string;
+  private refresh!: string;
+
+  constructor(v: string, r: string) {
+    this.value = v;
+    this.refresh = r;
+  }
+
+  public getValue() {
+    return this.value;
+  }
+
+  public getRefresh() {
+    return this.refresh;
   }
 }
 
