@@ -13,7 +13,7 @@
   "dependencies": {
     "@types/crypto-js": "^4.0.0",
     "chai-as-promised": "^7.1.1",
-    "challonge-ts": "^0.0.1",
+    "challonge-ts": "^0.0.2",
     "crypto-js": "^4.0.0",
     "discord.js": "^12.2.0",
     "got": "^11.2.0",
