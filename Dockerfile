@@ -45,7 +45,7 @@ RUN mkdir /opt/trostani
 WORKDIR /opt/trostani
 
 COPY --from=builder /opt/trostani/dist ./dist
-COPY --from=builder package.json .
+COPY --from=builder /opt/trostani/package.json .
 RUN npm install --only=production
 
 USER trostani
