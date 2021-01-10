@@ -182,9 +182,7 @@ export class Archidekt implements Builder {
             cardid: content.card.id,
             quantity: content.quantity,
             modifier: "Normal",
-            categories: content.card.oracleCard.types.concat(
-              content.categories
-            ),
+            categories: content.categories,
             label: ",#656565",
           });
           return acc;
