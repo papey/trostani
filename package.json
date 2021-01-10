@@ -1,6 +1,6 @@
 {
   "name": "trostani",
-  "version": "0.3.8",
+  "version": "0.4.0",
   "description": "A Typescript Discord bot knowing stuff about MtG",
   "repository": "git@github.com:papey/trostani.git",
   "author": "papey",
