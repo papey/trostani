@@ -76,6 +76,13 @@ class MTGDeckTestSuite extends Deck {
   }
 
   @test
+  async "[buildDeck+translate+nosb]: Should build and translate a deck with no sideboard"() {
+    await this.buildDeck(nosb, true);
+
+    assert.equal(this.main[0].getName(), "Thrashing Brontodon");
+  }
+
+  @test
   async "[sumer]: Used as a reduce callback, should count number or cards"() {
     await this.buildDeck(base);
 
@@ -217,3 +224,22 @@ Deck
 1 Fin du conte (M20) 77
 1 Bourgeonnement de mort (WAR) 189
 1 Colère de Kaya (RNA) 187`;
+
+const nosb = `Deck
+2 Thrashing Brontodon (M21) 209
+2 Kogla, the Titan Ape (IKO) 162
+3 Feasting Troll King (ELD) 152
+4 Lovestruck Beast (ELD) 165
+4 Kazandu Mammoth (ZNR) 189
+4 Tangled Florahedron (ZNR) 211
+4 Gilded Goose (ELD) 160
+4 Wicked Wolf (ELD) 181
+2 Witch's Oven (ELD) 237
+4 The Great Henge (ELD) 161
+1 Wolfwillow Haven (THB) 205
+3 Trail of Crumbs (ELD) 179
+1 Vivien, Monsters' Advocate (IKO) 175
+2 Crawling Barrens (ZNR) 262
+2 Bonders' Enclave (IKO) 245
+4 Castle Garenbrig (ELD) 240
+14 Forest (KLR) 300`;
