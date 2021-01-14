@@ -271,6 +271,9 @@ class Deck {
 
   // Take an entire deck part and translate it
   protected async translator(...parts: Card[]) {
+    if (parts.length === 0) {
+      return;
+    }
     // prepare collection
     const collection = parts.map((c) =>
       CardIdentifier.bySet(c.getEdition(), c.getID())
