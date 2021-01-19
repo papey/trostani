@@ -401,7 +401,7 @@ async function handleStatus(
   });
 
   // send back response to channel
-  origin.channel.send(resp);
+  origin.channel.send(resp, { split: true });
 }
 
 // handleJoin is used to register a user to a specified challonge tournament
