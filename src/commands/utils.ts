@@ -114,7 +114,7 @@ export async function decklistFromAttachment(
   const file = message.attachments.find((a) => a.name?.includes(".txt"));
   if (file) {
     // return data
-    return await got(file.url);
+    return await got(file.url).then((res) => res.body);
   }
 
   // if no file found, return null
