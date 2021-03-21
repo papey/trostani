@@ -124,7 +124,10 @@ async function handleDecks(origin: Message, builder: any) {
   }
 
   // join message
-  const message = results.reduce((acc, r) => `${acc}${r.title} - ${r.url}`, "");
+  const message = results.reduce(
+    (acc, r) => `${acc}${r.title} - ${r.url}\n`,
+    ""
+  );
 
   // check message length
   if (message.length > 2000) {
