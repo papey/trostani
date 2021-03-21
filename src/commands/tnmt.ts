@@ -693,11 +693,10 @@ async function createTnmtChannel(
   code: string,
   category: string
 ) {
-  let channel = await origin.guild.channels
-    .create(`tnmt-${code}-${name}`, {
-      type: "text",
-      parent: category,
-    });
+  let channel = await origin.guild.channels.create(`tnmt-${code}-${name}`, {
+    type: "text",
+    parent: category,
+  });
 
   return channel;
 }
