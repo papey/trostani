@@ -43,7 +43,10 @@ export class Archidekt implements Builder {
     await got
       .post(`${this.url}/${this.routes["login"]}`, {
         headers: { "content-type": "application/json" },
-        body: `{ "username": "${this.user.name}", "password": "${this.user.password}" }`,
+        body: JSON.stringify({
+          username: this.user.name,
+          password: this.user.password,
+        }),
       })
       .then((res) => {
         const body = JSON.parse(res.body);
@@ -62,7 +65,11 @@ export class Archidekt implements Builder {
         "content-type": "application/json",
         authorization: `JWT ${this.jwt.getValue()}`,
       },
-      body: `{ "name": "${name}", "private": false, "parentFolder": ${this.rootFolder} }`,
+      body: JSON.stringify({
+        name: name,
+        private: false,
+        parentFolder: this.rootFolder,
+      }),
     });
   }
 
@@ -90,7 +97,7 @@ export class Archidekt implements Builder {
         "content-type": "application/json",
         authorization: `JWT ${this.jwt.getValue()}`,
       },
-      body: `{ "items": [{"id": ${id}, "type": "${kind}"}] }`,
+      body: JSON.stringify({ items: [{ id: id, type: kind }] }),
     });
   }
 
@@ -105,11 +112,18 @@ export class Archidekt implements Builder {
           "content-type": "application/json",
           authorization: `JWT ${this.jwt.getValue()}`,
         },
-        body: `{ "jwt": "${this.jwt.getValue()}", "name": "${
-          dm.name
-        }", "deckFormat": 7, "cards": [], "copyId": 0, "private": false, "parent_folder": ${
-          folder ? folder : this.rootFolder
-        }, "description": "${dm.description}", "featured":"", "playmat": "" }`,
+        body: JSON.stringify({
+          jwt: this.jwt.getValue(),
+          name: dm.name,
+          deckFormat: 7,
+          cards: [],
+          copyId: 0,
+          private: false,
+          parent_folder: folder ? folder : this.rootFolder,
+          description: dm.description,
+          featured: "",
+          paymat: "",
+        }),
       })
       .then(
         (res) =>
@@ -159,9 +173,11 @@ export class Archidekt implements Builder {
           origin: `${this.url}`,
           referer: `${this.url}/decks/${base.id}`,
         },
-        body: `{ "parser": "archidekt", "current": "", "edit": "${this.format(
-          d
-        )}" }`,
+        body: JSON.stringify({
+          parser: "archidekt",
+          current: "",
+          edit: this.format(d),
+        }),
       })
       .then((res) => {
         const body = JSON.parse(res.body);
