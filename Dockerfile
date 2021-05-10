@@ -1,6 +1,6 @@
 # Stage 1 : Build
 # From latest node version
-FROM bearstech/node-dev:14 as builder
+FROM bearstech/node-dev:16 as builder
 
 # Declare args
 ARG REVISION
@@ -26,7 +26,7 @@ COPY . .
 RUN yarn build
 
 # Stage 2 : run !
-FROM bearstech/node:14
+FROM bearstech/node:16
 
 # image-spec annotations using labels
 # https://github.com/opencontainers/image-spec/blob/master/annotations.md
