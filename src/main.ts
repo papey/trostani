@@ -16,7 +16,8 @@ let args = yargs
     alias: "c",
     demand: false,
     default: "/etc/trostani/settings.yml",
-  }).argv;
+  })
+  .parseSync();
 
 // Create object, using config file from args
 const bot: Trostani = new Trostani(args.config);
