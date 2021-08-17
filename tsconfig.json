@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "es2017",
+    "module": "commonjs",
     "outDir": "dist",
     "rootDir": "src",
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "typeRoots": ["./node_modules/@types"],
     "sourceMap": true,
