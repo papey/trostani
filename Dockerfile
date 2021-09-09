@@ -2,6 +2,9 @@
 # From latest node version
 FROM bearstech/node-dev:16 as builder
 
+RUN apt-get update -y \
+	&& apt-get upgrade -y
+
 # Declare args
 ARG REVISION
 ARG RELEASE_TAG
@@ -27,6 +30,9 @@ RUN yarn build
 
 # Stage 2 : run !
 FROM bearstech/node:16
+
+RUN apt-get update -y \
+	&& apt-get upgrade -y
 
 # image-spec annotations using labels
 # https://github.com/opencontainers/image-spec/blob/master/annotations.md
