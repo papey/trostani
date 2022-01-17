@@ -51,7 +51,7 @@ export class Archidekt implements Builder {
       .then((res) => {
         const body = JSON.parse(res.body);
         this.ID = body["user"]["id"];
-        this.jwt = new JWT(body["token"], body["refresh_token"]);
+        this.jwt = new JWT(body["access_token"], body["refresh_token"]);
         this.rootFolder = body["user"]["rootFolder"];
       });
 
