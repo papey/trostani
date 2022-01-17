@@ -16,7 +16,6 @@ import {
   decklistFromAttachment,
 } from "./utils";
 import { CmdHelp, SubHelp } from "./help";
-import { lookupService } from "dns";
 
 const HASHLEN = 7;
 
