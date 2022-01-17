@@ -403,7 +403,7 @@ async function handleStatus(
   });
 
   // send back response to channel
-  origin.channel.send(resp, { split: true });
+  origin.channel.send(resp);
 }
 
 // handleJoin is used to register a user to a specified challonge tournament
@@ -696,7 +696,7 @@ async function createTnmtChannel(
   category: string
 ) {
   let channel = await origin.guild.channels.create(`tnmt-${code}-${name}`, {
-    type: "text",
+    type: "GUILD_TEXT",
     parent: category,
   });
 

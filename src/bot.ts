@@ -1,7 +1,7 @@
 // bot.ts file, containing all stuff needed to interact with Discord
 
 // Imports
-import { Client, Message } from "discord.js";
+import { Intents, Client, Message } from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
@@ -32,7 +32,7 @@ export class Trostani {
     // Ensure all needed variables are setup by config file
     this.verifyConfig();
     // Create a Discord client class
-    this.client = new Client();
+    this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
     this.logger = log.getLogger("bot");
     this.logger.level = "info";
