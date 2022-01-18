@@ -3,13 +3,13 @@ name: main
 
 steps:
   - name: build
-    image: bearstech/node-dev:12
+    image: bearstech/node-dev:16
     commands:
       - yarn
       - yarn build
 
   - name: tests
-    image: bearstech/node-dev:12
+    image: bearstech/node-dev:16
     environment:
       MS_PURGE: true
       MS_USER:
