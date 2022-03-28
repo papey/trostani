@@ -32,7 +32,9 @@ export class Trostani {
     // Ensure all needed variables are setup by config file
     this.verifyConfig();
     // Create a Discord client class
-    this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+    this.client = new Client({
+      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+    });
 
     this.logger = log.getLogger("bot");
     this.logger.level = "info";
