@@ -33,7 +33,12 @@ export class Trostani {
     this.verifyConfig();
     // Create a Discord client class
     this.client = new Client({
-      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.DIRECT_MESSAGES,
+      ],
+      partials: ["CHANNEL"],
     });
 
     this.logger = log.getLogger("bot");
@@ -59,7 +64,7 @@ export class Trostani {
   // Setup routes to commands
   private routes() {
     // When a message is received
-    this.client.on("message", (message: Message) => {
+    this.client.on("messageCreate", (message: Message) => {
       if (
         // it's not the bot who sends the original message
         message.author.id != this.client.user.id &&
