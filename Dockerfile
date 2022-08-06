@@ -1,6 +1,6 @@
 # Stage 1 : Build
 # From latest node version
-FROM bearstech/node-dev:16 as builder
+FROM node:lts-buster as builder
 
 RUN apt-get update -y \
 	&& apt-get upgrade -y
@@ -29,7 +29,7 @@ COPY . .
 RUN yarn build
 
 # Stage 2 : run !
-FROM bearstech/node:16
+FROM node:lts-buster
 
 RUN apt-get update -y \
 	&& apt-get upgrade -y

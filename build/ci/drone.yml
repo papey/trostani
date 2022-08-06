@@ -3,13 +3,13 @@ name: main
 
 steps:
   - name: build
-    image: bearstech/node-dev:16
+    image: node:lts-buster
     commands:
       - yarn
       - yarn build
 
   - name: tests
-    image: bearstech/node-dev:16
+    image: node:lts-buster
     environment:
       MS_PURGE: true
       MS_USER:
