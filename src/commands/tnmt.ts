@@ -1,7 +1,7 @@
 // tnmt.ts contains code to handle the tnmt command and tnmt subcommands
 
 // Imports
-import { Message, Guild } from "discord.js";
+import { ChannelType, Message, Guild } from "discord.js";
 import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
 import { MD5 } from "crypto-js";
 import { Deck } from "../scry/mtg";
@@ -695,8 +695,9 @@ async function createTnmtChannel(
   code: string,
   category: string
 ) {
-  let channel = await origin.guild.channels.create(`tnmt-${code}-${name}`, {
-    type: "GUILD_TEXT",
+  let channel = await origin.guild.channels.create({
+    name: `tnmt-${code}-${name}`,
+    type: ChannelType.GuildText,
     parent: category,
   });
 
