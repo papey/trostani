@@ -37,6 +37,7 @@ export class Trostani {
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMessages,
         IntentsBitField.Flags.DirectMessages,
+        IntentsBitField.Flags.MessageContent,
       ],
       partials: [Partials.Channel],
     });
