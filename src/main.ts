@@ -10,7 +10,7 @@ import * as yargs from "yargs";
 // Args and cli setup
 let args = yargs
   .scriptName("Trostani")
-  .version("0.4.17")
+  .version("0.4.18")
   .help()
   .option("config", {
     alias: "c",
