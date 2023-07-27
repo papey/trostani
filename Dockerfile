@@ -1,6 +1,6 @@
 # Stage 1 : Build
 # From latest node version
-FROM node:lts-buster as builder
+FROM node:lts-bullseye as builder
 
 RUN apt-get update -y \
 	&& apt-get upgrade -y
@@ -29,7 +29,7 @@ COPY . .
 RUN yarn build
 
 # Stage 2 : run !
-FROM node:lts-buster
+FROM node:lts-bullseye
 
 RUN apt-get update -y \
 	&& apt-get upgrade -y
