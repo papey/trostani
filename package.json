@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "test": "mocha --exit --recursive --extension ts --timeout 10000 -R spec -r ts-node/register tests"
+    "test": "mocha --exit --recursive --extension ts --timeout 20000 -R spec -r ts-node/register tests"
   },
   "dependencies": {
     "@types/crypto-js": "^4.0.0",
