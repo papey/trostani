@@ -8,8 +8,8 @@ import {
   BuilderDeckMetadata,
   DeckResult,
 } from "./builder";
-import { Deck, Metadata } from "../scry/mtg";
-const got = require("got");
+import {Deck, Metadata} from "../scry/mtg";
+import axios from "axios";
 
 // ManaStack builder interface implementation
 class MS implements Builder {
@@ -44,24 +44,22 @@ class MS implements Builder {
         "PHPSESSID=(\\w+); expires=(.*); Max-Age=(\\d+); path=(.*)"
       );
 
-      await got
-        .post(`${this.url}/${this.routes["login"]}`, {
-          headers: { "content-type": "application/json" },
-          body: `{ "username": "${this.user.name}", "password": "${this.user.password}" }`,
-        })
-        .then((resp) => {
-          if (resp.headers["set-cookie"]) {
-            try {
-              let res = resp.headers["set-cookie"][0].match(regex);
-              this.cookie = new Cookie(res[1], res[2]);
-            } catch (error) {
-              console.error(error);
-              throw new ManastackError(
-                "Error when logging into remote builder"
-              );
-            }
+      await axios.post(`${this.url}/${this.routes["login"]}`, {
+        username: this.user.name,
+        password: this.user.password
+      }, {
+        headers: {'Content-Type': 'application/json'}
+      }).then((resp) => {
+        if (resp.headers["set-cookie"]) {
+          try {
+            let res = resp.headers["set-cookie"][0].match(regex);
+            this.cookie = new Cookie(res[1], res[2]);
+          } catch (error) {
+            console.error(error);
+            throw new ManastackError("Error when logging into remote builder");
           }
-        });
+        }
+      });
     }
 
     return true;
@@ -69,14 +67,12 @@ class MS implements Builder {
 
   // Remove a deck from the remote builder
   async deleteDeck(identifier: string): Promise<string> {
-    return got
-      .delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
-        headers: {
-          "content-type": "application/json",
-          Cookie: `PHPSESSID=${this.cookie.value}`,
-        },
-      })
-      .then(() => identifier);
+    return axios.delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': `PHPSESSID=${this.cookie.value}`
+      }
+    }).then(() => identifier);
   }
 
   // Push a deck to the remote builder
@@ -89,7 +85,7 @@ class MS implements Builder {
       .then((bdm) => this.importDeck(d, bdm))
       .catch(async (err) => {
         // if something fails, try delete the non complete deck
-        this.deleteDeck(bdm.id);
+        await this.deleteDeck(bdm.id);
         // Return the error
         return Promise.reject(err);
       });
@@ -98,28 +94,23 @@ class MS implements Builder {
   // Get all the decks from remote builder
   async getDecks(): Promise<DeckResult[]> {
     // get all the deck
-    return (
-      got
-        .get(`${this.url}/${this.routes["decks_list"]}`, {
-          headers: {
-            "content-type": "application/json",
-            Cookie: `PHPSESSID=${this.cookie.value}`,
-          },
-        })
-        // then map them all to a DeckResult object
-        .then((res) => {
-          const data = JSON.parse(res.body);
-          return data[0]["decks"].map(
-            (d) =>
-              new DeckResult(
-                `${this.url}/deck/${d.slug}`,
-                d.owner.username,
-                d.name
-              )
-          );
-        })
-        .catch((error) => Promise.reject(new ManastackError(error)))
-    );
+    return axios.get(`${this.url}/${this.routes["decks_list"]}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': `PHPSESSID=${this.cookie.value}`
+      }
+    }) // then map them all to a DeckResult object
+      .then(({data}) => {
+        return data[0]["decks"].map(
+          (d: { slug: any; owner: { username: string; }; name: string; }) =>
+            new DeckResult(
+              `${this.url}/deck/${d.slug}`,
+              d.owner.username,
+              d.name
+            )
+        );
+      })
+      .catch((error) => Promise.reject(new ManastackError(error)));
   }
 
   // Search for a specific deck
@@ -168,18 +159,18 @@ class MS implements Builder {
 
   // Create a new deck
   protected async newDeck(dm: Metadata): Promise<BuilderDeckMetadata> {
-    return got
-      .post(`${this.url}/${this.routes["deck_create"]}`, {
-        headers: { Cookie: `PHPSESSID=${this.cookie.value}` },
-      })
-      .then((resp) => {
-        const res = JSON.parse(resp.body);
-        return new BuilderDeckMetadata(
-          res["id"],
-          `${this.url}/${this.routes["preview"]}/${res["id"]}}`,
-          dm
-        );
-      })
+    // @ts-ignore
+    return axios.post(`${this.url}/${this.routes["deck_create"]}`, null, {
+      headers: {
+        'Cookie': `PHPSESSID=${this.cookie.value}`
+      }
+    }).then(({data}) => {
+      return new BuilderDeckMetadata(
+        data["id"],
+        `${this.url}/${this.routes["preview"]}/${data["id"]}}`,
+        dm
+      );
+    })
       .catch((err) => {
         Promise.reject(new ManastackError(err));
       });
@@ -189,42 +180,40 @@ class MS implements Builder {
   protected async editMedataData(
     bdm: BuilderDeckMetadata
   ): Promise<BuilderDeckMetadata> {
-    return got
-      .put(`${this.url}/${this.routes["deck_edit"]}/${bdm.id}`, {
-        headers: {
-          "content-type": "application/json",
-          Cookie: `PHPSESSID=${this.cookie.value}`,
-        },
-        body: JSON.stringify({
-          name: bdm.dm.name,
-          description: bdm.dm.description,
-          private: false,
-          format: { id: Formats[bdm.dm.format] },
-          cards: [],
-          groups: [],
-        }),
-      })
+
+    return axios.put(`${this.url}/${this.routes["deck_edit"]}/${bdm.id}`, {
+      name: bdm.dm.name,
+      description: bdm.dm.description,
+      private: false,
+      format: {id: Formats[bdm.dm.format]},
+      cards: [],
+      groups: []
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': `PHPSESSID=${this.cookie.value}`
+      }
+    })
       .then(() => bdm)
-      .catch((err) => Promise.reject(new ManastackError(err)));
+      .catch(err => Promise.reject(new ManastackError(err)));
   }
 
   protected async importDeck(
     d: Deck,
     bdm: BuilderDeckMetadata
   ): Promise<BuilderDeckMetadata> {
-    return got
-      .put(`${this.url}/${this.routes["deck_import"]}`, {
-        headers: {
-          "content-type": "application/json",
-          Cookie: `PHPSESSID=${this.cookie.value}`,
-        },
-        body: JSON.stringify({
-          deck: bdm.id,
-          list: this.format(d),
-        }),
-      })
+
+    return axios.put(`${this.url}/${this.routes["deck_import"]}`, {
+      deck: bdm.id,
+      list: this.format(d),
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': `PHPSESSID=${this.cookie.value}`
+      }
+    })
       .then(() => bdm)
-      .catch((err) => Promise.reject(new ManastackError(err)));
+      .catch(err => Promise.reject(new ManastackError(err)));
   }
 }
 
@@ -251,4 +240,4 @@ class ManastackError extends Error {
 }
 
 // List of exported elements from this module
-export { MS };
+export {MS};

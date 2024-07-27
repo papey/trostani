@@ -1,7 +1,8 @@
 // archidekt.ts contains the Archidekt Builder Interface implementation
 
 // Imports
-const got = require("got");
+import axios from "axios";
+
 import {
   Builder,
   BuilderDeckMetadata,
@@ -10,7 +11,7 @@ import {
   JWT,
   User,
 } from "./builder";
-import { Deck, Metadata } from "../scry/mtg";
+import {Deck, Metadata} from "../scry/mtg";
 
 // Archidekt builder interface implementation
 export class Archidekt implements Builder {
@@ -40,19 +41,16 @@ export class Archidekt implements Builder {
 
   // User login
   async login(): Promise<boolean> {
-    await got
-      .post(`${this.url}/${this.routes["login"]}`, {
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          username: this.user.name,
-          password: this.user.password,
-        }),
-      })
-      .then((res) => {
-        const body = JSON.parse(res.body);
-        this.ID = body["user"]["id"];
-        this.jwt = new JWT(body["access_token"], body["refresh_token"]);
-        this.rootFolder = body["user"]["rootFolder"];
+    await axios.post(`${this.url}/${this.routes["login"]}`, {
+      username: this.user.name,
+      password: this.user.password
+    }, {
+      headers: {'Content-Type': 'application/json'}
+    })
+      .then(({data: body}) => {
+        this.ID = body.user.id;
+        this.jwt = new JWT(body.access_token, body.refresh_token);
+        this.rootFolder = body.user.rootFolder;
       });
 
     return true;
@@ -60,29 +58,27 @@ export class Archidekt implements Builder {
 
   // Create folder into the remote builder
   async mkdir(name: string) {
-    return got.post(`${this.url}/${this.routes["folders"]}/`, {
+    return axios.post(`${this.url}/${this.routes["folders"]}/`, {
+      name: name,
+      private: false,
+      parentFolder: this.rootFolder
+    }, {
       headers: {
-        "content-type": "application/json",
-        authorization: `JWT ${this.jwt.getValue()}`,
-      },
-      body: JSON.stringify({
-        name: name,
-        private: false,
-        parentFolder: this.rootFolder,
-      }),
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${this.jwt.getValue()}`
+      }
     });
   }
 
   // List dirs
   async ls() {
-    return got
-      .get(`${this.url}/${this.routes["folders"]}/${this.rootFolder}/`, {
-        headers: {
-          "content-type": "application/json",
-          authorization: `JWT ${this.jwt.getValue()}`,
-        },
-      })
-      .then((res) => JSON.parse(res.body)["subfolders"]);
+    return axios.get(`${this.url}/${this.routes["folders"]}/${this.rootFolder}/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${this.jwt.getValue()}`
+      }
+    })
+      .then((response) => response.data.subfolders);
   }
 
   // Find a dir by it's name
@@ -92,12 +88,13 @@ export class Archidekt implements Builder {
 
   // Remove an item by it's id (deck or folder)
   async rm(id: string, kind: string = "deck") {
-    return got.post(`${this.url}/${this.routes["folders"]}/deleteItems/`, {
+    return axios.post(`${this.url}/${this.routes["folders"]}/deleteItems/`, {
+      items: [{id: id, type: kind}]
+    }, {
       headers: {
-        "content-type": "application/json",
-        authorization: `JWT ${this.jwt.getValue()}`,
-      },
-      body: JSON.stringify({ items: [{ id: id, type: kind }] }),
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${this.jwt.getValue()}`
+      }
     });
   }
 
@@ -106,33 +103,32 @@ export class Archidekt implements Builder {
     dm: Metadata,
     folder: number = null
   ): Promise<BuilderDeckMetadata> {
-    return got
-      .post(`${this.url}/${this.routes["decks"]}/`, {
-        headers: {
-          "content-type": "application/json",
-          authorization: `JWT ${this.jwt.getValue()}`,
-        },
-        body: JSON.stringify({
-          jwt: this.jwt.getValue(),
-          name: dm.name,
-          deckFormat: 7,
-          cards: [],
-          copyId: 0,
-          private: false,
-          parent_folder: folder ? folder : this.rootFolder,
-          description: dm.description,
-          featured: "",
-          paymat: "",
-        }),
-      })
-      .then(
-        (res) =>
-          new BuilderDeckMetadata(
-            JSON.parse(res.body)["id"],
-            `${this.url}/decks/${JSON.parse(res.body)["id"]}`,
-            dm
-          )
-      );
+
+    return axios.post(`${this.url}/${this.routes["decks"]}/`, {
+      jwt: this.jwt.getValue(),
+      name: dm.name,
+      deckFormat: 7,
+      cards: [],
+      copyId: 0,
+      private: false,
+      parent_folder: folder ? folder : this.rootFolder,
+      description: dm.description,
+      featured: "",
+      paymat: ""
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${this.jwt.getValue()}`
+      }
+    })
+      .then((response) => {
+        const body = response.data;
+        return new BuilderDeckMetadata(
+          body.id,
+          `${this.url}/decks/${body.id}`,
+          dm
+        );
+      });
   }
 
   // Format a deck into an importable builder string
@@ -165,32 +161,29 @@ export class Archidekt implements Builder {
     const base = await this.newDeck(d.metadata);
 
     // Create empty deck
-    return got
-      .post(`${this.url}/api/cards/massDeckEdit/`, {
-        headers: {
-          "content-type": "application/json",
-          authorization: `JWT ${this.jwt.getValue()}`,
-          origin: `${this.url}`,
-          referer: `${this.url}/decks/${base.id}`,
-        },
-        body: JSON.stringify({
-          parser: "archidekt",
-          current: "",
-          edit: this.format(d),
-        }),
-      })
-      .then((res) => {
-        const body = JSON.parse(res.body);
+    return axios.post(`${this.url}/api/cards/massDeckEdit/`, {
+      parser: "archidekt",
+      current: "",
+      edit: this.format(d)
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${this.jwt.getValue()}`,
+        'Origin': `${this.url}`,
+        'Referer': `${this.url}/decks/${base.id}`
+      }
+    })
+      .then(({data}) => {
         // check for errors
         // in cards
-        if (body["cardErrors"].length > 0) {
-          Promise.reject(new ArchidektError(body["cardErrors"][0]));
+        if (data["cardErrors"].length > 0) {
+          Promise.reject(new ArchidektError(data["cardErrors"][0]));
         }
         // in syntax
-        if (body["syntaxErrors"].length > 0) {
-          Promise.reject(new ArchidektError(body["syntaxErrors"][0]));
+        if (data["syntaxErrors"].length > 0) {
+          Promise.reject(new ArchidektError(data["syntaxErrors"][0]));
         }
-        return { cards: body["toAdd"], categories: body["categories"] };
+        return {cards: data["toAdd"], categories: data["categories"]};
       })
       .then((data) => {
         const cardsPayload = data.cards.reduce((acc, content) => {
@@ -218,46 +211,43 @@ export class Archidekt implements Builder {
           new Array()
         );
 
-        return got.post(`${this.url}/${this.routes["decks"]}/${base.id}/add/`, {
+        return axios.post(`${this.url}/${this.routes["decks"]}/${base.id}/add/`, {
+          cards: cardsPayload,
+          categories: categoriesPayload
+        }, {
           headers: {
-            "content-type": "application/json",
-            authorization: `JWT ${this.jwt.getValue()}`,
-            origin: `${this.url}`,
-            referer: `${this.url}/decks/${base.id}`,
-          },
-          body: JSON.stringify({
-            cards: cardsPayload,
-            categories: categoriesPayload,
-          }),
+            'Content-Type': 'application/json',
+            'Authorization': `JWT ${this.jwt.getValue()}`,
+            'Origin': `${this.url}`,
+            'Referer': `${this.url}/decks/${base.id}`
+          }
         });
       })
       .then(() => base);
   }
 
   async getDecks(): Promise<DeckResult[]> {
-    return got
-      .get(`${this.url}/${this.routes["user"]}/${this.ID}/decks/`, {
-        headers: {
-          "content-type": "application/json",
-          authorization: `JWT ${this.jwt.getValue()}`,
-        },
-      })
-      .then((res) => {
-        const body = JSON.parse(res.body);
+    return axios.get(`${this.url}/${this.routes["user"]}/${this.ID}/decks/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${this.jwt.getValue()}`
+      }
+    })
+      .then((response) => {
+        const body = response.data;
 
-        return body["decks"].map(
-          (d) =>
-            new DeckResult(
-              `${this.url}/decks/${d["id"]}`,
-              this.user.name,
-              d["name"]
-            )
+        return body.decks.map((d) =>
+          new DeckResult(
+            `${this.url}/decks/${d.id}`,
+            this.user.name,
+            d.name
+          )
         );
       });
   }
 
   async deleteDeck(identifier: string): Promise<string> {
-    return this.rm(identifier);
+    return this.rm(identifier).then(() => "deleted");
   }
 
   async search(keywords: string[]): Promise<DeckResult[]> {
