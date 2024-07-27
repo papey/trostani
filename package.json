@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 20000 -r ts-node/register 'tests/**/*.ts'"
+    "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 20000 --exit -r ts-node/register 'tests/**/*.ts'"
   },
   "dependencies": {
     "@types/crypto-js": "^4.0.0",
