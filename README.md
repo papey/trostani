@@ -79,7 +79,6 @@ An asciidoctor user documentation is also available in the `docs` directory
 
 - [discord.js](https://discordjs.guide) - A Discord bot library
 - [scryfall-sdk](https://github.com/Yuudaari/scryfall-sdk) - A Scryfall TypeScript library
-- [got](https://github.com/sindresorhus/got) - An HTTP client
 - [challonge-ts](https://github.com/EdwardJFox/challonge-ts) - A Typescript wrapper for the Challonge API
 
 ## Contributing
