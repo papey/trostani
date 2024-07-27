@@ -2,7 +2,7 @@
 
 // Imports
 import { Message, Role, Collection } from "discord.js";
-const got = require("got");
+import axios from "axios";
 
 // Command class containing all parts of a command
 export class Command {
@@ -91,7 +91,7 @@ export function parseArgs(args: string, toLower: boolean = false): string[] {
 
   // ensure a trim on each arg
   for (let i = 0; i < sanitize.length; i++) {
-    sanitize[i] = sanitize[i].trimLeft().trimRight();
+    sanitize[i] = sanitize[i].trim();
     if (toLower) {
       sanitize[i] = sanitize[i].toLocaleLowerCase();
     }
@@ -114,7 +114,7 @@ export async function decklistFromAttachment(
   const file = message.attachments.find((a) => a.name?.includes(".txt"));
   if (file) {
     // return data
-    return await got(file.url).then((res) => res.body);
+    return await axios(file.url).then((res) => res.data);
   }
 
   // if no file found, return null
