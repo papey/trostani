@@ -1,13 +1,10 @@
 # Stage 1 : Build
 # From latest node version
-FROM node:lts-bullseye as builder
+FROM node:lts-bullseye AS builder
 
 RUN apt-get update -y \
 	&& apt-get upgrade -y
 
-# Declare args
-ARG REVISION
-ARG RELEASE_TAG
 ENV YARN_VERSION=1.22.4
 
 # Create src dir
@@ -34,15 +31,6 @@ FROM node:lts-bullseye
 RUN apt-get update -y \
 	&& apt-get upgrade -y
 
-# image-spec annotations using labels
-# https://github.com/opencontainers/image-spec/blob/master/annotations.md
-LABEL org.opencontainers.image.source="https://github.com/papey/trostani"
-LABEL org.opencontainers.image.revision=${GIT_COMMIT_SHA}
-LABEL org.opencontainers.image.version=${RELEASE_TAG}
-LABEL org.opencontainers.image.authors="Wilfried OLLIVIER"
-LABEL org.opencontainers.image.title="trostani"
-LABEL org.opencontainers.image.description="trostani runtime"
-LABEL org.opencontainers.image.licences="Unlicense"
 
 RUN useradd -ms /bin/bash trostani
 
