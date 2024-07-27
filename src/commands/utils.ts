@@ -91,7 +91,7 @@ export function parseArgs(args: string, toLower: boolean = false): string[] {
 
   // ensure a trim on each arg
   for (let i = 0; i < sanitize.length; i++) {
-    sanitize[i] = sanitize[i].trimLeft().trimRight();
+    sanitize[i] = sanitize[i].trim();
     if (toLower) {
       sanitize[i] = sanitize[i].toLocaleLowerCase();
     }
