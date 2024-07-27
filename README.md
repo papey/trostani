@@ -1,6 +1,6 @@
 # Trostani, The Discordant
 
-[![Build Status](https://drone.github.papey.fr/api/badges/papey/trostani/status.svg)](https://drone.github.papey.fr/papey/trostani)
+[![Build & Test](https://github.com/papey/trostani/actions/workflows/main.yml/badge.svg)](https://github.com/papey/trostani/actions/workflows/main.yml)
 
 Trostani is a [TypeScript](http://www.typescriptlang.org/) Discord bot with
 various [Magic: The Gathering Arena](https://magic.wizards.com/fr/mtgarena)
