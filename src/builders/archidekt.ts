@@ -83,7 +83,7 @@ export class Archidekt implements Builder {
 
   // Find a dir by it's name
   async find(name: string) {
-    return this.ls().then((res) => res.find((value) => value.name == name));
+    return this.ls().then((res) => res.find((value: { name: string; }) => value.name == name));
   }
 
   // Remove an item by it's id (deck or folder)
@@ -186,7 +186,13 @@ export class Archidekt implements Builder {
         return {cards: data["toAdd"], categories: data["categories"]};
       })
       .then((data) => {
-        const cardsPayload = data.cards.reduce((acc, content) => {
+        const cardsPayload = data.cards.reduce((acc: {
+          cardid: any;
+          quantity: any;
+          modifier: string;
+          categories: any;
+          label: string;
+        }[], content: { card: { id: any; }; quantity: any; categories: any; }) => {
           acc.push({
             cardid: content.card.id,
             quantity: content.quantity,
@@ -195,7 +201,7 @@ export class Archidekt implements Builder {
             label: ",#656565",
           });
           return acc;
-        }, new Array());
+        }, []);
 
         const categoriesPayload = Object.keys(data.categories).reduce(
           (acc, key) => {
@@ -208,7 +214,7 @@ export class Archidekt implements Builder {
             });
             return acc;
           },
-          new Array()
+          []
         );
 
         return axios.post(`${this.url}/${this.routes["decks"]}/${base.id}/add/`, {
@@ -236,7 +242,7 @@ export class Archidekt implements Builder {
       .then((response) => {
         const body = response.data;
 
-        return body.decks.map((d) =>
+        return body.decks.map((d: { id: any; name: string; }) =>
           new DeckResult(
             `${this.url}/decks/${d.id}`,
             this.user.name,
