@@ -75,7 +75,7 @@ jobs:
       - name: Resolve image tag
         id: tag
         run: |
-          if [ "${{ github.ref }}" == "refs/tags/"* ]; then
+          if [[ "${{ github.ref }}" =~ "refs/tags/" ]]; then
             TAG=${{ github.ref_name }}
           else
             TAG="latest"
@@ -91,7 +91,7 @@ jobs:
             org.opencontainers.image.source=${{ github.event.repository.clone_url }} 
             org.opencontainers.image.url=${{ github.event.repository.html_url }}            
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${TAG}
+            org.opencontainers.image.version=${env.TAG}
             org.opencontainers.image.authors="Wilfried OLLIVIER"
             org.opencontainers.image.title="trostani"
             org.opencontainers.image.description=${{ github.event.repository.description }} 
