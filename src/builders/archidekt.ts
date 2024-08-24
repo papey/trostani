@@ -42,7 +42,7 @@ export class Archidekt implements Builder {
   // User login
   async login(): Promise<boolean> {
     await axios.post(`${this.url}/${this.routes["login"]}`, {
-      username: this.user.name,
+      email: this.user.name,
       password: this.user.password
     }, {
       headers: {'Content-Type': 'application/json'}
