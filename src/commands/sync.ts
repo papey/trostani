@@ -1,7 +1,7 @@
 // sync.ts contains code to handle the sync command and sync subcommands
 
 // Imports
-import { Message } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 import { Deck } from "../scry/mtg";
 import { newBuilder } from "../builders/builder";
 import { SubHelp, CmdHelp } from "./help";
@@ -23,11 +23,11 @@ async function handleSync(cmd: Command, origin: Message, config: any) {
           origin,
           config.settings.push.channels,
           config.settings.translate,
-          config.settings.builder
+          config.settings.builder,
         );
       } else {
         throw new SyncError(
-          "`push` subcommand of command `sync` is not enabled on this bot instance"
+          "`push` subcommand of command `sync` is not enabled on this bot instance",
         );
       }
       break;
@@ -38,7 +38,7 @@ async function handleSync(cmd: Command, origin: Message, config: any) {
 
     default:
       throw new SyncError(
-        `\`${cmd.sub}\` is not a valid subcommand of the \`sync\` command (if you need help try \`${cmd.prefix}help\`)`
+        `\`${cmd.sub}\` is not a valid subcommand of the \`sync\` command (if you need help try \`${cmd.prefix}help\`)`,
       );
   }
 }
@@ -54,14 +54,16 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
 
   // ensure there is results
   if (results.length == 0) {
-    origin.channel.send("There is no decks matching this query");
+    (origin.channel as TextChannel).send(
+      "There is no decks matching this query",
+    );
     return;
   }
 
   // join results into one message
   let message = results.reduce(
     (acc, r) => (acc += `${r.title} - (${r.creator}) - ${r.url}\n`),
-    ""
+    "",
   );
 
   // Final word, with result sumary
@@ -74,12 +76,12 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
   // throw error if message is too long
   if (message.length >= 2000) {
     throw new SearchResultTooLong(
-      `This search result is too long for Discord, please add keywords to filter your research`
+      `This search result is too long for Discord, please add keywords to filter your research`,
     );
   }
 
   // Send message including lists of decks
-  origin.channel.send(message);
+  (origin.channel as TextChannel).send(message);
 }
 
 // handlePush handles the subcommand push of the sync command
@@ -88,12 +90,12 @@ async function handlePush(
   origin: Message,
   channels: string[],
   translate: boolean,
-  builder: any
+  builder: any,
 ) {
   // check if the message is comming from an authorized channel
   if (!isAuthorized(origin.channel.id, channels)) {
-    origin.channel.send(
-      "`push` subcommand of command `sync` is not authorized on this channel"
+    (origin.channel as TextChannel).send(
+      "`push` subcommand of command `sync` is not authorized on this channel",
     );
     return;
   }
@@ -101,7 +103,9 @@ async function handlePush(
   // get meta data
   const meta = parseArgs(cmd.args);
   if (meta[0] == "") {
-    origin.channel.send("Error, this deck needs at least a name");
+    (origin.channel as TextChannel).send(
+      "Error, this deck needs at least a name",
+    );
     return;
   }
 
@@ -121,8 +125,8 @@ async function handlePush(
 
   // Push the deck
   const bdm = await bldr.login().then(() => bldr.pushDeck(deck));
-  origin.channel.send(
-    `A new deck named **${bdm.dm.name}** is available ! Go check it at ${bdm.url}`
+  (origin.channel as TextChannel).send(
+    `A new deck named **${bdm.dm.name}** is available ! Go check it at ${bdm.url}`,
   );
 }
 
@@ -139,7 +143,7 @@ class SyncHelp implements CmdHelp {
       "search",
       "<keywords>",
       "search for a deck containing <keywords> in their name",
-      "temur aggro"
+      "temur aggro",
     );
     this.sub["push"] = new SubHelp(
       "push",
@@ -173,7 +177,7 @@ Réserve
 3 Rafale d'Éther (M20) 42
 4 Cercueil de verre (ELD) 15
 3 Véto de Dovin (WAR) 193
-`
+`,
     );
 
     this.request = cmd;

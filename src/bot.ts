@@ -1,7 +1,13 @@
 // bot.ts file, containing all stuff needed to interact with Discord
 
 // Imports
-import { Partials, IntentsBitField, Client, Message } from "discord.js";
+import {
+  Partials,
+  IntentsBitField,
+  Client,
+  Message,
+  TextChannel,
+} from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
@@ -75,7 +81,7 @@ export class Trostani {
         // Extract command
         const command = new Command(
           message.content,
-          this.config.settings.prefix
+          this.config.settings.prefix,
         );
         // Execute extracted command
         switch (command.main) {
@@ -108,7 +114,7 @@ export class Trostani {
     // error goes in stdout as well as Discord channel
     this.logger.error(error);
     // send error to Discord channel
-    message.channel.send(`**${error.message}**`);
+    (message.channel as TextChannel).send(`**${error.message}**`);
   }
 
   // Setup client
@@ -133,7 +139,7 @@ export class Trostani {
     // settings field
     if (this.config.settings == undefined) {
       console.error(
-        "Error validating config file, `settings` field is missing"
+        "Error validating config file, `settings` field is missing",
       );
       process.exit(1);
     }
@@ -157,7 +163,7 @@ export class Trostani {
       if (this.config.settings.translate.typeof() != Boolean) {
         this.config.settings.translate = false;
         console.warn(
-          "Translate function not found or not set to `True` or `False`, defaulted to `False`"
+          "Translate function not found or not set to `True` or `False`, defaulted to `False`",
         );
       }
     }
