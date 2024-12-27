@@ -158,7 +158,7 @@ export class Trostani {
     }
     // check translate config
     if (this.config.settings.translate == undefined) {
-      if (this.config.settings.translate.typeof() != Boolean) {
+      if (this.config.settings?.translate.typeof() != Boolean) {
         this.config.settings.translate = false;
         console.warn(
           "Translate function not found or not set to `True` or `False`, defaulted to `False`"
