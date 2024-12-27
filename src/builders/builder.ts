@@ -2,7 +2,6 @@
 
 // Imports
 import { Deck, Metadata } from "../scry/mtg";
-import { Archidekt } from "./archidekt";
 import { MS } from "./ms";
 
 // Builder base interface
@@ -39,9 +38,6 @@ export function newBuilder(
   switch (kind) {
     case "manastack":
       return new MS(user, password);
-
-    case "archidekt":
-      return new Archidekt(user, password);
 
     default:
       throw new Error(`Builder ${kind} not supported`);

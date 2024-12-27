@@ -1,21 +1,21 @@
 // tnmt.ts contains code to handle the tnmt command and tnmt subcommands
 
 // Imports
-import { ChannelType, Message, Guild } from "discord.js";
-import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
-import { MD5 } from "crypto-js";
-import { Deck } from "../scry/mtg";
-import { newBuilder } from "../builders/builder";
+import {ChannelType, Guild, Message, TextChannel} from "discord.js";
+import {Challonge, Tournament, TournamentInterfaces} from "challonge-ts";
+import {MD5} from "crypto-js";
+import {Deck} from "../scry/mtg";
+import {newBuilder} from "../builders/builder";
 import {
   Command,
-  parseArgs,
-  isAuthorized,
-  hasPermission,
-  generateArgsErrorMsg,
-  SearchResultTooLong,
   decklistFromAttachment,
+  generateArgsErrorMsg,
+  hasPermission,
+  isAuthorized,
+  parseArgs,
+  SearchResultTooLong,
 } from "./utils";
-import { CmdHelp, SubHelp } from "./help";
+import {CmdHelp, SubHelp} from "./help";
 
 const HASHLEN = 7;
 
@@ -77,9 +77,11 @@ async function handleTnmt(cmd: Command, origin: Message, config: any) {
 
 // handleStart handle the start tournament subcommand
 async function handleStart(origin: Message, client: Challonge, config: any) {
+  const chan  = origin.channel as TextChannel
+
   // check is user requesting command have required permissions
   if (!hasPermission(origin.member.roles.cache, config.roles)) {
-    origin.channel.send(
+    chan.send(
       `You don't have the required permissions to use this command`
     );
     return;
@@ -96,16 +98,18 @@ async function handleStart(origin: Message, client: Challonge, config: any) {
   // ensure a random roll of match ups
   await tnmt.randomizeParticipants();
 
-  origin.channel.send(`Random rolling tournament **${tnmt["name"]}**`);
+  chan.send(`Random rolling tournament **${tnmt["name"]}**`);
 
   // start tournament
   await tnmt.startTournament();
 
-  origin.channel.send(`Tournament **${tnmt["name"]}** started ! 🃏 GLHF 🃏 !`);
+  chan.send(`Tournament **${tnmt["name"]}** started ! 🃏 GLHF 🃏 !`);
 }
 
 // handleDecks is used to list all deck associated with this tournament
 async function handleDecks(origin: Message, builder: any) {
+  const chan = origin.channel as TextChannel
+
   // get tournament id from current channel
   const id = tnmtIDFromChannel(origin);
 
@@ -118,7 +122,7 @@ async function handleDecks(origin: Message, builder: any) {
     .then(() => bldr.search([`Tournament: ${id}`]));
 
   if (results.length == 0) {
-    origin.channel.send(`No decks found for this tournament`);
+    chan.send(`No decks found for this tournament`);
     return;
   }
 
@@ -136,14 +140,16 @@ async function handleDecks(origin: Message, builder: any) {
   }
 
   // send message if everything is ok
-  origin.channel.send(message);
+  chan.send(message);
 }
 
 // handleFinalize is used to finish and close a tournament
 async function handleFinalize(origin: Message, client: Challonge, config: any) {
+  const chan = origin.channel as TextChannel
+
   // check is user requesting command have required permissions
   if (!hasPermission(origin.member.roles.cache, config.roles)) {
-    origin.channel.send(
+    chan.send(
       `You don't have the required permissions to use this command`
     );
     return;
@@ -168,7 +174,7 @@ async function handleFinalize(origin: Message, client: Challonge, config: any) {
     );
   }
 
-  origin.channel.send(
+  chan.send(
     `Tournament **${tnmt["name"]}** is now finalized ! Thanks everyone ! Standings are available at ${tnmt["full_challonge_url"]}/standings`
   );
 }
@@ -185,7 +191,7 @@ async function handleReport(
 
   // check is number of arguments is ok (fail early)
   if (args.length < Arguments["handleReport"]) {
-    origin.channel.send(
+    (origin.channel as TextChannel).send(
       generateArgsErrorMsg(Arguments["handleReport"], cmd.prefix)
     );
     return;
@@ -256,7 +262,7 @@ async function handleReport(
 
   match.selectWinner(winner["id"], score);
 
-  origin.channel.send(
+  (origin.channel as TextChannel).send(
     `Participant **${winner["display_name"]}** has been set as winner of match **${args[0]}** in tournament **${tnmt["name"]}** _(score : ${p1["display_name"]} ${score} ${p2["display_name"]})_`
   );
 }
@@ -286,12 +292,12 @@ export function forgeScore(score: string, winner: number) {
   }
 
   // check if we have to invert score
-  var inverse = false;
+  var inverse: boolean;
 
   if (winner == 1) {
-    inverse = res[1] > res[2] ? false : true;
+    inverse = res[1] <= res[2];
   } else {
-    inverse = res[1] < res[2] ? false : true;
+    inverse = res[1] >= res[2];
   }
 
   if (inverse) {
@@ -344,6 +350,8 @@ async function handleStatus(
     TournamentInterfaces.tournamentStateEnum.IN_PROGRESS
   );
 
+  const chan = origin.channel as TextChannel
+
   // get all parcitipants for this tournament
   let participants = await tnmt.getParticipants();
 
@@ -364,13 +372,13 @@ async function handleStatus(
     });
     // if a filter is provided, replace matches by filtered matches
     if (matchesFilter && matchesFilter.length >= 1) {
-      origin.channel.send(
+      chan.send(
         `_Here is all the matches associated with round : ${args[0]}_`
       );
       matches = matchesFilter;
     } else {
       // if filter filters nothing, fallback to all
-      origin.channel.send(
+      chan.send(
         `_Nothing found using filter **${args[1]}**, fallback to no filter mode_`
       );
     }
@@ -403,7 +411,7 @@ async function handleStatus(
   });
 
   // send back response to channel
-  origin.channel.send(resp);
+  chan.send(resp);
 }
 
 // handleJoin is used to register a user to a specified challonge tournament
@@ -434,20 +442,22 @@ async function handleJoin(
   // get all participants
   const participants = await tnmt.getParticipants();
 
+  const chan = origin.channel as TextChannel
+
   // if participant already register, throw error
   participants.forEach((p) => {
     if (p["display_name"] == displayName) {
-      origin.channel.send(
+      chan.send(
         `Participant <@${origin.author.id}> is already registered in tournament ${tnmt["name"]}`
       );
       return;
     }
   });
 
-  origin.channel.send(`_Processing ${displayName} decklist_`);
+  chan.send(`_Processing ${displayName} decklist_`);
 
   // create deck
-  let meta = new Array();
+  let meta = [];
   // prepare meta data
   // name
   let title = `[Tournament: ${tnmtIDFromChannel(
@@ -489,7 +499,7 @@ async function handleJoin(
     });
 
   // return decklist, and message
-  origin.channel.send(
+  chan.send(
     `Registration successfull for user <@${origin.author.id}> in tournament ${tnmt["full_challonge_url"]}, deck list is available at ${synced.url}`
   );
 }
@@ -528,12 +538,13 @@ async function handleList(cmd: Command, origin: Message, client: Challonge) {
     parts.push(generateListLine(all[index]));
   }
 
+  const chan = origin.channel as TextChannel
   // check if something was found
   if (parts.length == 0) {
-    origin.channel.send(`Sorry, there is no entry matching the request`);
+    chan.send(`Sorry, there is no entry matching the request`);
   } else {
     // push message to channel by joining outputs parts
-    origin.channel.send(parts.join("\n"));
+    chan.send(parts.join("\n"));
   }
 }
 
@@ -545,25 +556,26 @@ function generateListLine(t: Tournament) {
   )}_ - ${t["data"]["tournament"]["full_challonge_url"]}`;
 
   // date
-  let date = "";
+  let date: string;
+  let started: Date;
 
   // date is specific for each tournament state
   switch (t["data"]["tournament"]["state"]) {
     case "complete":
-      var started = new Date(t["data"]["tournament"]["started_at"]);
-      var completed = new Date(t["data"]["tournament"]["completed_at"]);
+      started = new Date(t["data"]["tournament"]["started_at"]);
+      const completed = new Date(t["data"]["tournament"]["completed_at"]);
       date = `started at **${started.toDateString()}** and completed at **${completed.toDateString()}**`;
       break;
     case "underway":
-      var started = new Date(t["data"]["tournament"]["started_at"]);
+      started = new Date(t["data"]["tournament"]["started_at"]);
       date = `started at **${started.toDateString()}**`;
       break;
     case "pending":
-      var start = new Date(t["data"]["tournament"]["start_at"]);
+      const start = new Date(t["data"]["tournament"]["start_at"]);
       date = `starting at **${start.toDateString()}** | **${start.toTimeString()}**`;
       break;
     default:
-      var started = new Date(t["data"]["tournament"]["created_at"]);
+      started = new Date(t["data"]["tournament"]["created_at"]);
       date = `created at **${started.toDateString()}**`;
       break;
   }
@@ -580,14 +592,16 @@ async function handleCreate(
   config: any,
   parent: string
 ) {
+  const chan = origin.channel as TextChannel
+
   // check authorization and permissions, fail early
   if (!isAuthorized(origin.channel.id, config.channels)) {
-    origin.channel.send(`This command cannot be used on this channel`);
+    chan.send(`This command cannot be used on this channel`);
     return;
   }
 
   if (!hasPermission(origin.member.roles.cache, config.roles)) {
-    origin.channel.send(
+    chan.send(
       `You don't have the required permissions to use this command`
     );
     return;
@@ -597,7 +611,7 @@ async function handleCreate(
   const args = parseArgs(cmd.args);
   // ensure args requirements
   if (args.length < Arguments["handleCreate"]) {
-    origin.channel.send(
+    chan.send(
       generateArgsErrorMsg(Arguments["handleCreate"], cmd.prefix)
     );
     return;
@@ -695,13 +709,11 @@ async function createTnmtChannel(
   code: string,
   category: string
 ) {
-  let channel = await origin.guild.channels.create({
+  return await origin.guild.channels.create({
     name: `tnmt-${code}-${name}`,
     type: ChannelType.GuildText,
     parent: category,
   });
-
-  return channel;
 }
 
 // create is used to trigger a tournament creation on challonge
@@ -734,7 +746,7 @@ async function create(
     // if parsing fail
     if (date == null) {
       // default to now
-      origin.channel.send(
+      (origin.channel as TextChannel).send(
         `Warning, date used is not in a valid format and will not be used`
       );
     } else {
@@ -759,7 +771,7 @@ async function create(
   let channel = await createTnmtChannel(origin, args[0], code, category);
 
   // send message to channel when tournament is created
-  origin.channel.send(
+  (origin.channel as TextChannel).send(
     `Tournament **${args[0]}** created and available at ${tnmt["full_challonge_url"]}, you can now use the dedicated channel <#${channel.id}>, to interact with it`
   );
 }

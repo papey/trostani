@@ -1,7 +1,8 @@
 // bot.ts file, containing all stuff needed to interact with Discord
 
 // Imports
-import { Partials, IntentsBitField, Client, Message } from "discord.js";
+import Scry = require("scryfall-sdk");
+import { Partials, IntentsBitField, Client, Message, TextChannel } from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
@@ -108,11 +109,14 @@ export class Trostani {
     // error goes in stdout as well as Discord channel
     this.logger.error(error);
     // send error to Discord channel
-    message.channel.send(`**${error.message}**`);
+    (message.channel as TextChannel).send(`**${error.message}**`);
   }
 
   // Setup client
   private setup() {
+    // Set header for Scryfall
+    Scry.setAgent('trostani', '0.5.0')
+
     // When client is ready
     this.client.on("ready", () => {
       // Set activity, name and basic stuff
@@ -154,7 +158,7 @@ export class Trostani {
     }
     // check translate config
     if (this.config.settings.translate == undefined) {
-      if (this.config.settings.translate.typeof() != Boolean) {
+      if (this.config.settings?.translate.typeof() != Boolean) {
         this.config.settings.translate = false;
         console.warn(
           "Translate function not found or not set to `True` or `False`, defaulted to `False`"
