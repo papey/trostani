@@ -1,21 +1,21 @@
 // tnmt.ts contains code to handle the tnmt command and tnmt subcommands
 
 // Imports
-import {ChannelType, Message, Guild, TextChannel} from "discord.js";
-import { Challonge, TournamentInterfaces, Tournament } from "challonge-ts";
-import { MD5 } from "crypto-js";
-import { Deck } from "../scry/mtg";
-import { newBuilder } from "../builders/builder";
+import {ChannelType, Guild, Message, TextChannel} from "discord.js";
+import {Challonge, Tournament, TournamentInterfaces} from "challonge-ts";
+import {MD5} from "crypto-js";
+import {Deck} from "../scry/mtg";
+import {newBuilder} from "../builders/builder";
 import {
   Command,
-  parseArgs,
-  isAuthorized,
-  hasPermission,
-  generateArgsErrorMsg,
-  SearchResultTooLong,
   decklistFromAttachment,
+  generateArgsErrorMsg,
+  hasPermission,
+  isAuthorized,
+  parseArgs,
+  SearchResultTooLong,
 } from "./utils";
-import { CmdHelp, SubHelp } from "./help";
+import {CmdHelp, SubHelp} from "./help";
 
 const HASHLEN = 7;
 
@@ -292,12 +292,12 @@ export function forgeScore(score: string, winner: number) {
   }
 
   // check if we have to invert score
-  var inverse = false;
+  var inverse: boolean;
 
   if (winner == 1) {
-    inverse = res[1] > res[2] ? false : true;
+    inverse = res[1] <= res[2];
   } else {
-    inverse = res[1] < res[2] ? false : true;
+    inverse = res[1] >= res[2];
   }
 
   if (inverse) {
@@ -457,7 +457,7 @@ async function handleJoin(
   chan.send(`_Processing ${displayName} decklist_`);
 
   // create deck
-  let meta = new Array();
+  let meta = [];
   // prepare meta data
   // name
   let title = `[Tournament: ${tnmtIDFromChannel(
@@ -556,25 +556,26 @@ function generateListLine(t: Tournament) {
   )}_ - ${t["data"]["tournament"]["full_challonge_url"]}`;
 
   // date
-  let date = "";
+  let date: string;
+  let started: Date;
 
   // date is specific for each tournament state
   switch (t["data"]["tournament"]["state"]) {
     case "complete":
-      var started = new Date(t["data"]["tournament"]["started_at"]);
-      var completed = new Date(t["data"]["tournament"]["completed_at"]);
+      started = new Date(t["data"]["tournament"]["started_at"]);
+      const completed = new Date(t["data"]["tournament"]["completed_at"]);
       date = `started at **${started.toDateString()}** and completed at **${completed.toDateString()}**`;
       break;
     case "underway":
-      var started = new Date(t["data"]["tournament"]["started_at"]);
+      started = new Date(t["data"]["tournament"]["started_at"]);
       date = `started at **${started.toDateString()}**`;
       break;
     case "pending":
-      var start = new Date(t["data"]["tournament"]["start_at"]);
+      const start = new Date(t["data"]["tournament"]["start_at"]);
       date = `starting at **${start.toDateString()}** | **${start.toTimeString()}**`;
       break;
     default:
-      var started = new Date(t["data"]["tournament"]["created_at"]);
+      started = new Date(t["data"]["tournament"]["created_at"]);
       date = `created at **${started.toDateString()}**`;
       break;
   }
@@ -708,13 +709,11 @@ async function createTnmtChannel(
   code: string,
   category: string
 ) {
-  let channel = await origin.guild.channels.create({
+  return await origin.guild.channels.create({
     name: `tnmt-${code}-${name}`,
     type: ChannelType.GuildText,
     parent: category,
   });
-
-  return channel;
 }
 
 // create is used to trigger a tournament creation on challonge
