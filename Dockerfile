@@ -5,7 +5,7 @@ FROM node:lts-bullseye AS builder
 RUN apt-get update -y \
 	&& apt-get upgrade -y
 
-ENV YARN_VERSION=1.22.4
+ENV YARN_VERSION=1.22.22
 
 # Create src dir
 RUN mkdir /opt/trostani
