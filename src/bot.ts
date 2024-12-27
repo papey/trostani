@@ -1,7 +1,8 @@
 // bot.ts file, containing all stuff needed to interact with Discord
 
 // Imports
-import {Partials, IntentsBitField, Client, Message, TextChannel} from "discord.js";
+import Scry = require("scryfall-sdk");
+import { Partials, IntentsBitField, Client, Message, TextChannel } from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
@@ -113,6 +114,9 @@ export class Trostani {
 
   // Setup client
   private setup() {
+    // Set header for Scryfall
+    Scry.setAgent('trostani', '0.5.0')
+
     // When client is ready
     this.client.on("ready", () => {
       // Set activity, name and basic stuff
