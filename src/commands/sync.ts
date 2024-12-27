@@ -1,7 +1,7 @@
 // sync.ts contains code to handle the sync command and sync subcommands
 
 // Imports
-import { Message } from "discord.js";
+import {Message, TextChannel} from "discord.js";
 import { Deck } from "../scry/mtg";
 import { newBuilder } from "../builders/builder";
 import { SubHelp, CmdHelp } from "./help";
@@ -54,7 +54,7 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
 
   // ensure there is results
   if (results.length == 0) {
-    origin.channel.send("There is no decks matching this query");
+    (origin.channel as TextChannel).send("There is no decks matching this query");
     return;
   }
 
@@ -79,7 +79,7 @@ async function handleSearch(cmd: Command, origin: Message, builder: any) {
   }
 
   // Send message including lists of decks
-  origin.channel.send(message);
+  (origin.channel as TextChannel).send(message);
 }
 
 // handlePush handles the subcommand push of the sync command
@@ -90,9 +90,11 @@ async function handlePush(
   translate: boolean,
   builder: any
 ) {
+  const chan = origin.channel as TextChannel
+
   // check if the message is comming from an authorized channel
   if (!isAuthorized(origin.channel.id, channels)) {
-    origin.channel.send(
+    chan.send(
       "`push` subcommand of command `sync` is not authorized on this channel"
     );
     return;
@@ -101,7 +103,7 @@ async function handlePush(
   // get meta data
   const meta = parseArgs(cmd.args);
   if (meta[0] == "") {
-    origin.channel.send("Error, this deck needs at least a name");
+    chan.send("Error, this deck needs at least a name");
     return;
   }
 
@@ -121,7 +123,7 @@ async function handlePush(
 
   // Push the deck
   const bdm = await bldr.login().then(() => bldr.pushDeck(deck));
-  origin.channel.send(
+  chan.send(
     `A new deck named **${bdm.dm.name}** is available ! Go check it at ${bdm.url}`
   );
 }

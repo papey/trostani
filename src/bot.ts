@@ -1,7 +1,7 @@
 // bot.ts file, containing all stuff needed to interact with Discord
 
 // Imports
-import { Partials, IntentsBitField, Client, Message } from "discord.js";
+import {Partials, IntentsBitField, Client, Message, TextChannel} from "discord.js";
 import { Command, handleNotSupported } from "./commands/utils";
 import { handleProfile } from "./commands/profile";
 import { handleHelp } from "./commands/help";
@@ -108,7 +108,7 @@ export class Trostani {
     // error goes in stdout as well as Discord channel
     this.logger.error(error);
     // send error to Discord channel
-    message.channel.send(`**${error.message}**`);
+    (message.channel as TextChannel).send(`**${error.message}**`);
   }
 
   // Setup client

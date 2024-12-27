@@ -1,7 +1,7 @@
 // profile.ts contains code handling the profile command
 
 // Imports
-import { Message } from "discord.js";
+import {Message, TextChannel} from "discord.js";
 import { Command } from "./utils";
 import { SyncHelp } from "./sync";
 import { TnmtHelp } from "./tnmt";
@@ -22,16 +22,18 @@ export function handleHelp(cmd: Command, origin: Message, config: any) {
     cmd.prefix
   }help <subcommand>\` to get specific subcommand instructions`;
 
+  const chan = origin.channel as TextChannel
+
   switch (cmd.sub) {
     case "sync":
-      origin.channel.send(new SyncHelp(cmd).handle());
+      chan.send(new SyncHelp(cmd).handle());
       return;
     case "tnmt":
-      origin.channel.send(new TnmtHelp(cmd).handle());
+      chan.send(new TnmtHelp(cmd).handle());
       return;
   }
 
-  origin.channel.send(message);
+  chan.send(message);
 }
 
 // Represent a subcommand helper with associated example
