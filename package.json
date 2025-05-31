@@ -19,7 +19,7 @@
     "log4js": "^6.4.0",
     "scryfall-sdk": "^5.0.2",
     "yamljs": "^0.3.0",
-    "yargs": "^17.0.0"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@testdeck/mocha": "^0.3.0",
