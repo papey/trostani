@@ -40,7 +40,7 @@ WORKDIR /opt/trostani
 
 COPY --from=builder /opt/trostani/dist ./dist
 COPY --from=builder /opt/trostani/package.json .
-RUN npm install --only=production
+RUN npm install --only=production --legacy-peer-deps
 
 USER trostani
 
