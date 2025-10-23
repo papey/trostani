@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 20000 --exit -r ts-node/register 'tests/**/*.ts'"
+    "test": "mocha --exit -r ts-node/register --timeout 20000 'tests/**/*.ts'"
   },
   "dependencies": {
     "@types/crypto-js": "^4.0.0",
@@ -23,20 +23,19 @@
   },
   "devDependencies": {
     "@testdeck/mocha": "^0.3.0",
-    "@types/chai": "^5.0.1",
-    "@types/mocha": "^10.0.1",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.2",
     "@types/request": "^2.48.3",
     "@types/request-promise": "^4.1.44",
     "@types/ws": "^8.0.0",
     "@types/yamljs": "^0.2.30",
     "@types/yargs": "^17.0",
-    "chai": "^5.1.2",
+    "chai": "^6.2.0",
     "chai-as-promised": "^7.1.1",
-    "cross-env": "^7.0.3",
-    "mocha": "^11.0.1",
+    "mocha": "^11.7.4",
     "source-map-support": "^0.5.13",
     "ts-node": "^10.9.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.9.3"
   }
 }
