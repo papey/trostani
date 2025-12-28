@@ -5,17 +5,19 @@
 import { Trostani } from "./bot";
 
 // Argument parsing
-import * as yargs from "yargs";
+import yargs = require("yargs");
+import { hideBin } from "yargs/helpers";
 
 // Args and cli setup
-let args = yargs
+let args = yargs(hideBin(process.argv))
   .scriptName("Trostani")
   .version("0.5.1")
   .help()
   .option("config", {
     alias: "c",
-    demand: false,
+    demandOption: false,
     default: "/etc/trostani/settings.yml",
+    type: "string",
   })
   .parseSync();
 
