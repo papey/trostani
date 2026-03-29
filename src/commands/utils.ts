@@ -69,9 +69,13 @@ export function isAuthorized(oid: string, aids: string[]): boolean {
 
 // hasPermission check if a user is in an array of roles names
 export function hasPermission(
-  or: Collection<string, Role>,
+  or: Collection<string, Role> | undefined,
   ar: string[]
 ): boolean {
+  if (or == undefined) {
+    return false
+  }
+
   return or.some((r) => {
     return ar.includes(r.name);
   });

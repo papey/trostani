@@ -53,26 +53,19 @@ class Card {
   }
 
   // Try to get a translation for card from scryfall
-  public async translate() {
-    try {
-      const translate: any = await ScryCards.bySet(
-        this.edition,
-        parseInt(this.id)
+  public async translate(): Promise<void> {
+    const translate: any = await ScryCards.bySet(this.edition, parseInt(this.id))
+      .catch((err) => { throw new TranslateError(String(err)); });
+
+    await new Promise(resolve => setTimeout(resolve, 60));
+
+    if (!translate?.name) {
+      throw new TranslateError(
+        `Error translating: ${this.name} (${this.getEdition()}) ${this.id}`
       );
-
-      // https://scryfall.com/docs/api, see Rate Limits and Good Citizenship section
-      setTimeout(() => { }, 60);
-
-      if (translate.name == null) {
-        throw new TranslateError(
-          `Error translating the following card ${this.name
-          } (${this.edition.toUpperCase()}) ${this.id}`
-        );
-      }
-      this.name = translate.name;
-    } catch (error) {
-      throw new TranslateError(error);
     }
+
+    this.name = translate.name;
   }
 }
 
@@ -94,11 +87,9 @@ class Metadata {
     // meta[0] == Name,
     this.name = metadatas[0];
 
-    // meta[1] == Format
-    // If defined
-    if (Formats[metadatas[1]] != undefined) {
-      // Go for it
-      this.format = Formats[metadatas[1]];
+    const formatKey = metadatas[1] as keyof typeof Formats;
+    if (metadatas[1] && Formats[formatKey] !== undefined) {
+      this.format = Formats[formatKey];
     }
 
     // meta[3] == small text description
@@ -113,9 +104,9 @@ class Deck {
   public metadata: Metadata;
 
   // Companion card
-  protected companion: Card = null;
+  protected companion: Card | null = null;
   // Commander card
-  protected commander: Card = null;
+  protected commander: Card | null = null;
 
   // Main cards
   protected main: Card[] = [];
@@ -274,26 +265,23 @@ class Deck {
     if (parts.length === 0) {
       return;
     }
-    // prepare collection
     const collection = parts.map((c) =>
       CardIdentifier.bySet(c.getEdition(), c.getID())
     );
 
-    // get translated data collection
     const translated = await ScryCards.collection(...collection).waitForAll();
 
     if (translated.not_found.length != 0) {
       const notFound = this.getCard(
-        translated.not_found[0].collector_number,
-        translated.not_found[0].set,
+        translated.not_found[0].collector_number ?? '',
+        translated.not_found[0].set ?? '',
         parts
       );
       throw new DeckBuildingError(
-        `Card "${notFound.getName()}" as number ${notFound.getID()} of set ${notFound.getEdition()} not found`
+        `Card "${notFound?.getName()}" as number ${notFound?.getID()} of set ${notFound?.getEdition()} not found`
       );
     }
 
-    // for each card replace original name with it's en translation
     for (let i = 0; i < parts.length; i++) {
       parts[i].setName(translated[i].name);
     }

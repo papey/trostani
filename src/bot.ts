@@ -69,7 +69,7 @@ export class Trostani {
     this.client.on("messageCreate", (message: Message) => {
       if (
         // it's not the bot who sends the original message
-        message.author.id != this.client.user.id &&
+        message.author.id != this.client?.user?.id &&
         // and if the message starts with prefix
         message.content.startsWith(this.config.settings.prefix)
       ) {
@@ -121,10 +121,10 @@ export class Trostani {
     this.client.on("ready", () => {
       // Set activity, name and basic stuff
       if (this.config.settings.activity != undefined) {
-        this.client.user.setActivity(this.config.settings.activity);
+        this.client?.user?.setActivity(this.config.settings.activity);
       }
       if (this.config.settings.name != undefined) {
-        this.client.user.setUsername(this.config.settings.name);
+        this.client?.user?.setUsername(this.config.settings.name);
       }
       // Ensure a return in logs when everything looks good
       this.logger.info("Ready to go using the following settings : ");
