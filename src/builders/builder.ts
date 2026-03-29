@@ -12,7 +12,7 @@ export interface Builder {
   user: User;
 
   // Auth cookie
-  cookie: Cookie;
+  cookie: Cookie | null;
 
   // Base url
   url: string;

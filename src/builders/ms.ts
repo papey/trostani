@@ -16,7 +16,7 @@ class MS implements Builder {
   name = "ManaStack";
   user: User;
 
-  cookie: Cookie = null;
+  cookie: Cookie | null = null;
 
   url = "https://manastack.com";
 
@@ -51,13 +51,11 @@ class MS implements Builder {
         headers: {'Content-Type': 'application/json'}
       }).then((resp) => {
         if (resp.headers["set-cookie"]) {
-          try {
             let res = resp.headers["set-cookie"][0].match(regex);
+            if (res == undefined || res.length < 2) {
+              throw new ManastackError("not cookie found in login response")
+            }
             this.cookie = new Cookie(res[1], res[2]);
-          } catch (error) {
-            console.error(error);
-            throw new ManastackError("Error when logging into remote builder");
-          }
         }
       });
     }
@@ -70,7 +68,7 @@ class MS implements Builder {
     return axios.delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie.value}`
+        'Cookie': `PHPSESSID=${this.cookie?.value}`
       }
     }).then(() => identifier);
   }
@@ -84,7 +82,7 @@ class MS implements Builder {
     return this.editMedataData(bdm)
       .then((bdm) => this.importDeck(d, bdm))
       .catch(async (err) => {
-        // if something fails, try delete the non complete deck
+        // if something fails, try to delete the non-complete deck
         await this.deleteDeck(bdm.id);
         // Return the error
         return Promise.reject(err);
@@ -97,7 +95,7 @@ class MS implements Builder {
     return axios.get(`${this.url}/${this.routes["decks_list"]}`, {
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie.value}`
+        'Cookie': `PHPSESSID=${this.cookie?.value}`
       }
     }) // then map them all to a DeckResult object
       .then(({data}) => {
@@ -119,9 +117,9 @@ class MS implements Builder {
     return this.getDecks().then((res) => {
       // Then filter
       return res.filter((d) => {
-        // Search over each keywords
+        // Search over each keyword
         for (const kw of keywords) {
-          // If a keyword if found, return true, deck is filtered
+          // If a keyword is found, return true, deck is filtered
           if (d.title.toLowerCase().includes(kw.toLowerCase())) return true;
         }
         // If deck title contains no kw, return false
@@ -140,11 +138,11 @@ class MS implements Builder {
       formated += "Sideboard:\n";
       // Companion is in the sideboard
       if (d.getCompanion()) {
-        formated += `${d.getCompanion().export()}\n`;
+        formated += `${d.getCompanion()?.export()}\n`;
       }
       // Since ManaStack can't display commander properly in Brawl Decks, it goes into the sideboard
       if (d.getCommander()) {
-        formated += `${d.getCommander().export()}\n`;
+        formated += `${d.getCommander()?.export()}\n`;
       }
       // Regular Sideboard
       if (d.getSide().length > 0) {
@@ -162,7 +160,7 @@ class MS implements Builder {
     // @ts-ignore
     return axios.post(`${this.url}/${this.routes["deck_create"]}`, null, {
       headers: {
-        'Cookie': `PHPSESSID=${this.cookie.value}`
+        'Cookie': `PHPSESSID=${this.cookie?.value}`
       }
     }).then(({data}) => {
       return new BuilderDeckMetadata(
@@ -191,7 +189,7 @@ class MS implements Builder {
     }, {
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie.value}`
+        'Cookie': `PHPSESSID=${this.cookie?.value}`
       }
     })
       .then(() => bdm)
@@ -209,7 +207,7 @@ class MS implements Builder {
     }, {
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie.value}`
+        'Cookie': `PHPSESSID=${this.cookie?.value}`
       }
     })
       .then(() => bdm)
