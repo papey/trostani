@@ -11,7 +11,7 @@ import { hideBin } from "yargs/helpers";
 // Args and cli setup
 let args = yargs(hideBin(process.argv))
   .scriptName("Trostani")
-  .version("0.5.3")
+  .version("0.5.4")
   .help()
   .option("config", {
     alias: "c",
