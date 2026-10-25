@@ -4,11 +4,11 @@
 import {
   Builder,
   User,
-  Cookie,
+  Session,
   BuilderDeckMetadata,
   DeckResult,
 } from "./builder";
-import {Deck, Metadata} from "../scry/mtg";
+import { Deck, Metadata } from "../scry/mtg";
 import axios from "axios";
 
 // ManaStack builder interface implementation
@@ -16,7 +16,7 @@ class MS implements Builder {
   name = "ManaStack";
   user: User;
 
-  cookie: Cookie | null = null;
+  session: Session | null = null;
 
   url = "https://manastack.com";
 
@@ -37,27 +37,58 @@ class MS implements Builder {
 
   // User login
   async login(): Promise<boolean> {
-    // if there is no cookie or if cookie is invalid
-    if (!this.cookie || !this.cookie.valid()) {
-      // 'PHPSESSID=jhe7o5b5pi2d1dh211714sbrk6; expires=Mon, 14-Oct-2019 16:30:18 GMT; Max-Age=604800; path=/'
-      const regex = new RegExp(
-        "PHPSESSID=(\\w+); expires=(.*); Max-Age=(\\d+); path=(.*)"
+    if (!this.session || !this.session.valid()) {
+      const response = await axios.post(
+        `${this.url}/${this.routes["login"]}`,
+        {
+          username: this.user.name,
+          password: this.user.password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        },
       );
 
-      await axios.post(`${this.url}/${this.routes["login"]}`, {
-        username: this.user.name,
-        password: this.user.password
-      }, {
-        headers: {'Content-Type': 'application/json'}
-      }).then((resp) => {
-        if (resp.headers["set-cookie"]) {
-            let res = resp.headers["set-cookie"][0].match(regex);
-            if (res == undefined || res.length < 2) {
-              throw new ManastackError("not cookie found in login response")
-            }
-            this.cookie = new Cookie(res[1], res[2]);
+      const setCookieArray = response.headers["set-cookie"];
+      if (!setCookieArray || setCookieArray.length === 0) {
+        throw new ManastackError("No cookies found in login response");
+      }
+
+      // 1. Get valid cookies and build the header string
+      const validCookies = setCookieArray.filter(
+        (c) => !c.toLowerCase().includes("max-age=0"),
+      );
+      const cookieHeader = validCookies
+        .map((cookieStr) => cookieStr.split(";")[0])
+        .join("; ");
+
+      // 2. Extract XSRF token
+      let xsrfToken: string | undefined = undefined;
+      const xsrfCookie = validCookies.find((c) => c.startsWith("XSRF-TOKEN="));
+      if (xsrfCookie) {
+        const xsrfMatch = xsrfCookie.match(/XSRF-TOKEN=([^;]+)/);
+        if (xsrfMatch) {
+          xsrfToken = decodeURIComponent(xsrfMatch[1]);
         }
-      });
+      }
+
+      // 3. Extract the session expiration date
+      const sessionStr = validCookies.find((c) =>
+        c.startsWith("manastack_session="),
+      );
+      if (!sessionStr)
+        throw new ManastackError("manastack_session cookie not found");
+
+      const expiresMatch = sessionStr.match(/expires=([^;]+)/i);
+      if (!expiresMatch)
+        throw new ManastackError("Could not extract expiration date");
+      const expirationDateStr = expiresMatch[1];
+
+      // 4. Store everything in your newly expanded class
+      this.session = new Session(cookieHeader, expirationDateStr, xsrfToken);
     }
 
     return true;
@@ -65,12 +96,11 @@ class MS implements Builder {
 
   // Remove a deck from the remote builder
   async deleteDeck(identifier: string): Promise<string> {
-    return axios.delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie?.value}`
-      }
-    }).then(() => identifier);
+    return axios
+      .delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
+        headers: { ...this.session.getHeaders() },
+      })
+      .then(() => identifier);
   }
 
   // Push a deck to the remote builder
@@ -92,20 +122,18 @@ class MS implements Builder {
   // Get all the decks from remote builder
   async getDecks(): Promise<DeckResult[]> {
     // get all the deck
-    return axios.get(`${this.url}/${this.routes["decks_list"]}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie?.value}`
-      }
-    }) // then map them all to a DeckResult object
-      .then(({data}) => {
+    return axios
+      .get(`${this.url}/${this.routes["decks_list"]}`, {
+        headers: { ...this.session.getHeaders() },
+      }) // then map them all to a DeckResult object
+      .then(({ data }) => {
         return data[0]["decks"].map(
-          (d: { slug: any; owner: { username: string; }; name: string; }) =>
+          (d: { slug: any; owner: { username: string }; name: string }) =>
             new DeckResult(
               `${this.url}/deck/${d.slug}`,
               d.owner.username,
-              d.name
-            )
+              d.name,
+            ),
         );
       })
       .catch((error) => Promise.reject(new ManastackError(error)));
@@ -158,17 +186,17 @@ class MS implements Builder {
   // Create a new deck
   protected async newDeck(dm: Metadata): Promise<BuilderDeckMetadata> {
     // @ts-ignore
-    return axios.post(`${this.url}/${this.routes["deck_create"]}`, null, {
-      headers: {
-        'Cookie': `PHPSESSID=${this.cookie?.value}`
-      }
-    }).then(({data}) => {
-      return new BuilderDeckMetadata(
-        data["id"],
-        `${this.url}/${this.routes["preview"]}/${data["id"]}}`,
-        dm
-      );
-    })
+    return axios
+      .post(`${this.url}/${this.routes["deck_create"]}`, null, {
+        headers: { ...this.session.getHeaders() },
+      })
+      .then(({ data }) => {
+        return new BuilderDeckMetadata(
+          data["id"],
+          `${this.url}/${this.routes["preview"]}/${data["id"]}}`,
+          dm,
+        );
+      })
       .catch((err) => {
         Promise.reject(new ManastackError(err));
       });
@@ -176,42 +204,44 @@ class MS implements Builder {
 
   // Edit created deck Metadata
   protected async editMedataData(
-    bdm: BuilderDeckMetadata
+    bdm: BuilderDeckMetadata,
   ): Promise<BuilderDeckMetadata> {
-
-    return axios.put(`${this.url}/${this.routes["deck_edit"]}/${bdm.id}`, {
-      name: bdm.dm.name,
-      description: bdm.dm.description,
-      private: false,
-      format: {id: Formats[bdm.dm.format]},
-      cards: [],
-      groups: []
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie?.value}`
-      }
-    })
+    return axios
+      .put(
+        `${this.url}/${this.routes["deck_edit"]}/${bdm.id}`,
+        {
+          name: bdm.dm.name,
+          description: bdm.dm.description,
+          private: false,
+          format: { id: Formats[bdm.dm.format] },
+          cards: [],
+          groups: [],
+        },
+        {
+          headers: { ...this.session.getHeaders() },
+        },
+      )
       .then(() => bdm)
-      .catch(err => Promise.reject(new ManastackError(err)));
+      .catch((err) => Promise.reject(new ManastackError(err)));
   }
 
   protected async importDeck(
     d: Deck,
-    bdm: BuilderDeckMetadata
+    bdm: BuilderDeckMetadata,
   ): Promise<BuilderDeckMetadata> {
-
-    return axios.put(`${this.url}/${this.routes["deck_import"]}`, {
-      deck: bdm.id,
-      list: this.format(d),
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `PHPSESSID=${this.cookie?.value}`
-      }
-    })
+    return axios
+      .put(
+        `${this.url}/${this.routes["deck_import"]}`,
+        {
+          deck: bdm.id,
+          list: this.format(d),
+        },
+        {
+          headers: { ...this.session.getHeaders() },
+        },
+      )
       .then(() => bdm)
-      .catch(err => Promise.reject(new ManastackError(err)));
+      .catch((err) => Promise.reject(new ManastackError(err)));
   }
 }
 
@@ -238,4 +268,4 @@ class ManastackError extends Error {
 }
 
 // List of exported elements from this module
-export {MS};
+export { MS };
