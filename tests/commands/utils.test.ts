@@ -2,18 +2,13 @@
 
 // Imports
 import { Command } from "../../src/commands/utils";
-import { suite, test } from "@testdeck/mocha";
 import { assert } from "chai";
 
 // Command class test suite
-@suite("Commands, Utils Test Suite")
-class CommandTestSuite extends Command {
-  constructor() {
-    super("!profile", "!");
-  }
-
-  @test "[constructor]: Command constructor, should parse a command message"() {
-    assert.equal(this.main, "profile");
+describe("Commands, Utils Test Suite", function() {
+  it("[constructor]: Command constructor, should parse a command message", function() {
+    let command = new Command("!profile", "!");
+    assert.equal(command.main, "profile");
 
     // try other commands
     // help command
@@ -31,5 +26,5 @@ class CommandTestSuite extends Command {
     ...`;
     let extra = new Command(cmd, "!");
     assert(extra.extra, "...");
-  }
-}
+  });
+});
