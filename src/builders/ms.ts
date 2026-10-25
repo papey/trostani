@@ -35,6 +35,12 @@ class MS implements Builder {
     this.user = new User(u, p);
   }
 
+  private async ensureSession(): Promise<void> {
+    if (!this.session || !this.session.valid()) {
+      await this.login();
+    }
+  }
+
   // User login
   async login(): Promise<boolean> {
     if (!this.session || !this.session.valid()) {
@@ -96,9 +102,11 @@ class MS implements Builder {
 
   // Remove a deck from the remote builder
   async deleteDeck(identifier: string): Promise<string> {
+    await this.ensureSession();
+
     return axios
       .delete(`${this.url}/${this.routes["deck_delete"]}/${identifier}`, {
-        headers: { ...this.session.getHeaders() },
+        headers: { ...this.session!.getHeaders() },
       })
       .then(() => identifier);
   }
@@ -121,10 +129,12 @@ class MS implements Builder {
 
   // Get all the decks from remote builder
   async getDecks(): Promise<DeckResult[]> {
+    await this.ensureSession();
+
     // get all the deck
     return axios
       .get(`${this.url}/${this.routes["decks_list"]}`, {
-        headers: { ...this.session.getHeaders() },
+        headers: { ...this.session!.getHeaders() },
       }) // then map them all to a DeckResult object
       .then(({ data }) => {
         return data[0]["decks"].map(
@@ -185,10 +195,12 @@ class MS implements Builder {
 
   // Create a new deck
   protected async newDeck(dm: Metadata): Promise<BuilderDeckMetadata> {
+    await this.ensureSession();
+
     // @ts-ignore
     return axios
       .post(`${this.url}/${this.routes["deck_create"]}`, null, {
-        headers: { ...this.session.getHeaders() },
+        headers: { ...this.session!.getHeaders() },
       })
       .then(({ data }) => {
         return new BuilderDeckMetadata(
@@ -206,6 +218,8 @@ class MS implements Builder {
   protected async editMedataData(
     bdm: BuilderDeckMetadata,
   ): Promise<BuilderDeckMetadata> {
+    await this.ensureSession();
+
     return axios
       .put(
         `${this.url}/${this.routes["deck_edit"]}/${bdm.id}`,
@@ -218,7 +232,7 @@ class MS implements Builder {
           groups: [],
         },
         {
-          headers: { ...this.session.getHeaders() },
+          headers: { ...this.session!.getHeaders() },
         },
       )
       .then(() => bdm)
@@ -229,6 +243,8 @@ class MS implements Builder {
     d: Deck,
     bdm: BuilderDeckMetadata,
   ): Promise<BuilderDeckMetadata> {
+    await this.ensureSession();
+
     return axios
       .put(
         `${this.url}/${this.routes["deck_import"]}`,
@@ -237,7 +253,7 @@ class MS implements Builder {
           list: this.format(d),
         },
         {
-          headers: { ...this.session.getHeaders() },
+          headers: { ...this.session!.getHeaders() },
         },
       )
       .then(() => bdm)
