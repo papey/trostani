@@ -3,7 +3,6 @@
     "ignoreDeprecations": "6.0",
     "target": "ES2022",
     "module": "CommonJS",
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": "src",
@@ -13,12 +12,7 @@
     "allowJs": true,
     "skipLibCheck": true,
   },
-  "ts-node": {
-    "transpileOnly": true,
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  },
+
   "include": ["./src/**/*.ts"],
   "exclude": ["./dist", "./node_modules"]
 }

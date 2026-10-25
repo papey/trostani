@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "test": "mocha --exit -r ts-node/register --timeout 20000 'tests/**/*.ts'"
+    "test": "mocha --exit --timeout 20000 'tests/**/*.ts'"
   },
   "dependencies": {
     "@types/crypto-js": "^4.0.0",
@@ -22,7 +22,6 @@
     "yargs": "^18.2.0"
   },
   "devDependencies": {
-    "@testdeck/mocha": "^0.3.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.6.5",
@@ -35,7 +34,7 @@
     "chai-as-promised": "^8.0.2",
     "mocha": "^12.0.3",
     "source-map-support": "^0.5.13",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
 }
