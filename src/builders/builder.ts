@@ -11,8 +11,7 @@ export interface Builder {
   // User
   user: User;
 
-  // Auth cookie
-  cookie: Cookie | null;
+  session: Session | null;
 
   // Base url
   url: string;
@@ -33,7 +32,7 @@ export interface Builder {
 export function newBuilder(
   kind: string,
   user: string,
-  password: string
+  password: string,
 ): Builder {
   switch (kind) {
     case "manastack":
@@ -57,41 +56,34 @@ export class User {
   }
 }
 
-// Builder cookie class
-export class Cookie {
-  // Token used to auth
-  public value!: string;
-  // Expiration date of the current session
-  private expiration!: Date;
+export class Session {
+  public cookieHeader: string;
+  public xsrfToken?: string;
+  private expiration: Date;
 
-  constructor(v: string, d: string) {
-    this.value = v;
-    this.expiration = new Date(d);
+  constructor(cookieHeader: string, expirationStr: string, xsrfToken?: string) {
+    this.cookieHeader = cookieHeader;
+    this.expiration = new Date(expirationStr);
+    this.xsrfToken = xsrfToken;
   }
 
-  // Ensure cookie is valid
   public valid(): boolean {
+    if (isNaN(this.expiration.getTime())) return false;
     return new Date() < this.expiration;
   }
-}
 
-// Builder JWT class
-export class JWT {
-  // Token value
-  private value!: string;
-  private refresh!: string;
+  public getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      Cookie: this.cookieHeader,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
 
-  constructor(v: string, r: string) {
-    this.value = v;
-    this.refresh = r;
-  }
+    if (this.xsrfToken) {
+      headers["X-XSRF-TOKEN"] = this.xsrfToken;
+    }
 
-  public getValue() {
-    return this.value;
-  }
-
-  public getRefresh() {
-    return this.refresh;
+    return headers;
   }
 }
 
