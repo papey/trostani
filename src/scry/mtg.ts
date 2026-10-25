@@ -1,7 +1,9 @@
 // mtg.ts file, containing all stuff to represent cards ands decks
 
 // Imports
-import { Cards as ScryCards, CardIdentifier } from "scryfall-sdk";
+import { Cards as ScryCards, CardIdentifier, setAgent } from "scryfall-sdk";
+
+setAgent("trostani", "0.5.4");
 
 // Class used to represent a card
 class Card {

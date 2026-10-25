@@ -2,55 +2,44 @@
 
 // Imports
 import { Deck, Card } from "../src/scry/mtg";
-import { suite, test } from "@testdeck/mocha";
-// Chai setup, mandatory for promised based tests
-const chai = require("chai");
+import * as chai from "chai";
+import chaiAsPromised from "chai-as-promised";
 const expect = chai.expect;
 const assert = chai.assert;
-chai.use(require("chai-as-promised"));
+chai.use(chaiAsPromised);
 
 // MTG, Card class test suite
-@suite("MTG, Card Test Suite")
-class MTGCardTestSuite extends Card {
-  constructor() {
-    super("Géant craque-os // Piétineur", "eld", "115", "1");
-  }
-
-  @test async "[translate]: Sould translate a card"() {
-    var card = new MTGCardTestSuite();
+describe("MTG, Card Test Suite", function() {
+  it("[translate]: Sould translate a card", async function() {
+    var card = new Card("Géant craque-os // Piétineur", "eld", "115", "1");
 
     await card.translate();
 
     assert.equal(card.getName(), "Bonecrusher Giant // Stomp");
     assert.equal(card.getFirstPartName(), "Bonecrusher Giant");
-  }
-}
+  });
+});
 
 // MTG, Deck test suite
-@suite("MTG, Deck Test Suite")
-class MTGDeckTestSuite extends Deck {
-  constructor(data: string = base) {
-    super(["Test"]);
-  }
+describe("MTG, Deck Test Suite", function() {
+  it("[buildDeck]: Should parse an entire deck", async function() {
+    let deck = new Deck(["Test"]);
+    await deck.buildDeck(base);
 
-  @test
-  async "[buildDeck]: Should parse an entire deck"() {
-    await this.buildDeck(base);
+    assert.equal(deck.main.length, 24);
+    assert.equal(deck.main[0].getName(), "Steam Vents");
+    assert.equal(deck.main[23].getName(), "Fabled Passage");
+    assert.equal(deck.main[23].getTimes(), "3");
+  });
 
-    assert.equal(this.main.length, 24);
-    assert.equal(this.main[0].getName(), "Steam Vents");
-    assert.equal(this.main[23].getName(), "Fabled Passage");
-    assert.equal(this.main[23].getTimes(), "3");
-  }
+  it("[buildDeck]: Should failed at constraints validation", async function() {
+    let deck = new Deck(["Test"]);
+    await expect(deck.buildDeck(partial)).to.be.rejectedWith(Error);
+  });
 
-  @test
-  async "[buildDeck]: Should failed at constraints validation"() {
-    await expect(this.buildDeck(partial)).to.be.rejectedWith(Error);
-  }
-
-  @test
-  async "[parseCard]: Should return a card object based on an exported line"() {
-    let card = this.parseCard("2 Cavalier of Thorns (M20) 162");
+  it("[parseCard]: Should return a card object based on an exported line", function() {
+    let deck = new Deck(["Test"]);
+    let card = deck.parseCard("2 Cavalier of Thorns (M20) 162");
 
     if (card != null) {
       assert.equal(card.getName(), "Cavalier of Thorns");
@@ -58,38 +47,38 @@ class MTGDeckTestSuite extends Deck {
     } else {
       throw Error("Outch, card is null");
     }
-  }
+  });
 
-  @test
-  async "[buildDeck+brawl]: Should build a brawl deck"() {
-    let deck = new MTGDeckTestSuite();
+  it("[buildDeck+brawl]: Should build a brawl deck", async function() {
+    let deck = new Deck(["Test"]);
 
     await deck.buildDeck(brawl, false);
 
     assert.equal(deck.commander.getName(), "Niv-Mizzet revenu à la vie");
-  }
+  });
 
-  @test async "[buildDeck+translate]: Should build and translate a deck"() {
-    await this.buildDeck(translate, true);
+  it("[buildDeck+translate]: Should build and translate a deck", async function() {
+    let deck = new Deck(["Test"]);
+    await deck.buildDeck(translate, true);
 
-    assert.equal(this.main[0].getName(), "Island");
-  }
+    assert.equal(deck.main[0].getName(), "Island");
+  });
 
-  @test
-  async "[buildDeck+translate+nosb]: Should build and translate a deck with no sideboard"() {
-    await this.buildDeck(nosb, true);
+  it("[buildDeck+translate+nosb]: Should build and translate a deck with no sideboard", async function() {
+    let deck = new Deck(["Test"]);
+    await deck.buildDeck(nosb, true);
 
-    assert.equal(this.main[0].getName(), "Thrashing Brontodon");
-  }
+    assert.equal(deck.main[0].getName(), "Thrashing Brontodon");
+  });
 
-  @test
-  async "[sumer]: Used as a reduce callback, should count number or cards"() {
-    await this.buildDeck(base);
+  it("[sumer]: Used as a reduce callback, should count number or cards", async function() {
+    let deck = new Deck(["Test"]);
+    await deck.buildDeck(base);
 
-    assert.equal(this.main.reduce(this.sumer, 0), 60);
-    assert.equal(this.side.reduce(this.sumer, 0), 8);
-  }
-}
+    assert.equal(deck.main.reduce(deck.sumer, 0), 60);
+    assert.equal(deck.side.reduce(deck.sumer, 0), 8);
+  });
+});
 
 export const base = `Deck
 4 Steam Vents (GRN) 257
